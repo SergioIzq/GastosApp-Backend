@@ -58,23 +58,6 @@
                 }
             }
         }
-
-        private string? _DirectorioExcel;
-        public virtual string? DirectorioExcel
-        {
-            get
-            {
-                return this._DirectorioExcel;
-            }
-            set
-            {
-                if (this._DirectorioExcel != value)
-                {
-                    this._DirectorioExcel = value;
-                }
-            }
-        }
-
     }
 
 }

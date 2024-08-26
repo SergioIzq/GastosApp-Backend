@@ -12,9 +12,6 @@
 		<property name="Contrasena" type="string" length="100" not-null="true">
 			<column name="contrasena" sql-type="varchar" />
 		</property>
-		<property name="DirectorioExcel" type="string" length="300" not-null="false">
-			<column name="directorio_excel" sql-type="varchar" />
-		</property>
 
 	</class>
 
