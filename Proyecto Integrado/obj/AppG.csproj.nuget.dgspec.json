@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\AppG.csproj": {}
+    "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\AppG.csproj": {}
   },
   "projects": {
-    "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\AppG.csproj": {
+    "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\AppG.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\AppG.csproj",
+        "projectUniqueName": "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\AppG.csproj",
         "projectName": "AppG",
-        "projectPath": "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\AppG.csproj",
+        "projectPath": "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\AppG.csproj",
         "packagesPath": "C:\\Users\\sizquierdo\\.nuget\\packages\\",
-        "outputPath": "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\obj\\",
+        "outputPath": "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sizquierdo\\AppData\\Roaming\\NuGet\\NuGet.Config",

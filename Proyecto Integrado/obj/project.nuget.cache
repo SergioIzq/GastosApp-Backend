@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KIfVSAA7bkMK1z/mefojBKeDpR8mMEIyigMYxkKweAYG8Gwml3w2mHKuONf8yPSsXyO8kM+CUpL2DRmkyeroXA==",
+  "dgSpecHash": "k4QXL+fLg44=",
   "success": true,
-  "projectFilePath": "C:\\PRUEBAS\\GastosApp\\Backend\\Proyecto Integrado\\AppG.csproj",
+  "projectFilePath": "C:\\PRUEBAS\\back\\GastosApp-Backend\\Proyecto Integrado\\AppG.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sizquierdo\\.nuget\\packages\\antlr3.runtime\\3.5.1\\antlr3.runtime.3.5.1.nupkg.sha512",
     "C:\\Users\\sizquierdo\\.nuget\\packages\\blazored.fluentvalidation\\2.0.3\\blazored.fluentvalidation.2.0.3.nupkg.sha512",
