@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Entidades\**" />
+    <Content Remove="Entidades\**" />
+    <EmbeddedResource Remove="Entidades\**" />
+    <None Remove="Entidades\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="BBDD\Categoria.hbm.xml" />
+    <None Remove="BBDD\Cliente.hbm.xml" />
+    <None Remove="BBDD\Concepto.hbm.xml" />
+    <None Remove="BBDD\Cuenta.hbm.xml" />
+    <None Remove="BBDD\FormaPago.hbm.xml" />
+    <None Remove="BBDD\Gasto.hbm.xml" />
+    <None Remove="BBDD\Ingreso.hbm.xml" />
+    <None Remove="BBDD\Persona.hbm.xml" />
+    <None Remove="BBDD\Proveedor.hbm.xml" />
+    <None Remove="BBDD\Traspaso.hbm.xml" />
+    <None Remove="BBDD\Usuario.hbm.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="BBDD\Usuario.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\FormaPago.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Cuenta.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Traspaso.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Persona.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Proveedor.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Cliente.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Concepto.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Categoria.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Gasto.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\Ingreso.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CG.Blazor.Forms._FluentValidations" Version="2023.1.4" />
+    <PackageReference Include="EPPlus" Version="7.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
+    <PackageReference Include="NHibernate" Version="5.5.1" />
+    <PackageReference Include="NHibernate.AspNet.Identity" Version="5.0.2" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NHibernate\hibernate.cfg.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

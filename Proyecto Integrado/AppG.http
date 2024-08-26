@@ -1,0 +1,4 @@
+@AppG_HostAddress = http://localhost:7115
+
+GET {{AppG_HostAddress}}/
+Accept: application/json
