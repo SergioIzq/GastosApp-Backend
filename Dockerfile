@@ -6,12 +6,17 @@ EXPOSE 80
 # Usa la imagen de SDK para construir la aplicación
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["AppG/AppG.csproj", "AppG/"]
-RUN dotnet restore "AppG/AppG.csproj"
+
+# Copia el archivo .csproj y restaura las dependencias
+COPY ["Proyecto Integrado/AppG.csproj", "Proyecto Integrado/"]
+RUN dotnet restore "Proyecto Integrado/AppG.csproj"
+
+# Copia el resto del código y construye la aplicación
 COPY . .
-WORKDIR "/src/AppG"
+WORKDIR "/src/Proyecto Integrado"
 RUN dotnet build "AppG.csproj" -c Release -o /app/build
 
+# Publica la aplicación
 FROM build AS publish
 RUN dotnet publish "AppG.csproj" -c Release -o /app/publish
 
