@@ -58,8 +58,7 @@ namespace AppG.Servicio
                 {                    
                     entidadExistente.Contrasena = hasher.HashPassword(entity, entity.Contrasena);
                 }
-                entidadExistente.Correo = entity.Correo;
-                entidadExistente.DirectorioExcel = entity.DirectorioExcel;
+                entidadExistente.Correo = entity.Correo;                
 
                 // Guardar los cambios en la base de datos
                 session.Update(entidadExistente);
