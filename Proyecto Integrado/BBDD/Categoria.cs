@@ -43,8 +43,8 @@
             }
         }
 
-        private string _Descripcion;
-        public virtual string Descripcion
+        private string? _Descripcion;
+        public virtual string? Descripcion
         {
             get
             {
