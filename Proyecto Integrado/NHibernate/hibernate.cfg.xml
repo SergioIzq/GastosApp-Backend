@@ -10,7 +10,7 @@
 		<!-- Driver de conexión adecuado para PostgreSQL en .NET -->
 		<property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
 
-		<property name="connection.connection_string"></property>
+        <property name="connection.connection_string">${DB_CONNECTION_STRING}</property>
 
 		<!-- Nivel de aislamiento de la conexión -->
 		<property name="connection.isolation">ReadCommitted</property>
