@@ -115,8 +115,20 @@ public class Startup
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
         var cfg = new Configuration();
-        cfg.Configure("NHibernate/hibernate.cfg.xml");
+        cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
+
+        // Obtener la cadena de conexión desde la configuración
+        var connectionString = configuration.GetConnectionString("DB_CONNECTION_STRING");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("La cadena de conexión no está configurada.");
+        }
+
+        // Establecer la cadena de conexión programáticamente
+        cfg.SetProperty("connection.connection_string", connectionString);
+
         return cfg.BuildSessionFactory();
     }
+
 }

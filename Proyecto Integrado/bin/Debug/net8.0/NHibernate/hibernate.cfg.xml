@@ -10,8 +10,6 @@
 		<!-- Driver de conexión adecuado para PostgreSQL en .NET -->
 		<property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
 
-		<property name="connection.connection_string">User Id=postgres.yqnqyolroyqrhacagmzr;Password=BayronNala2004;Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;</property>
-
 		<!-- Nivel de aislamiento de la conexión -->
 		<property name="connection.isolation">ReadCommitted</property>
 
