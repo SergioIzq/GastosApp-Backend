@@ -119,14 +119,14 @@ public class Startup
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 
         // Obtener la cadena de conexión desde la configuración
-        var connectionString = configuration.GetConnectionString("DB_CONNECTION_STRING");
-        if (string.IsNullOrEmpty(connectionString))
+        string DB_CONNECTION_STRING = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        if (string.IsNullOrEmpty(DB_CONNECTION_STRING))
         {
             throw new InvalidOperationException("La cadena de conexión no está configurada.");
         }
 
         // Establecer la cadena de conexión programáticamente
-        cfg.SetProperty("connection.connection_string", connectionString);
+        cfg.SetProperty("connection.connection_string", DB_CONNECTION_STRING);
 
         return cfg.BuildSessionFactory();
     }
