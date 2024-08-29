@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
 using static AppG.Servicio.TraspasoServicio;
 using Microsoft.AspNetCore.Authorization;
