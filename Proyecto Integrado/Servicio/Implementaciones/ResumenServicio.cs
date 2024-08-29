@@ -46,19 +46,18 @@ namespace AppG.Servicio
                         .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
-                    // Consultas QueryOver para contar el total de gastos dentro del rango de fechas
                     int gastosTotalCount = await session.QueryOver<Gasto>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .Where(g => g.Fecha >= inicio && g.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
                         .And(Restrictions.Eq("IdUsuario", idUsuario))
                         .RowCountAsync();
 
-                    // Consultas QueryOver para obtener los gastos con paginado
                     var gastosDetalles = await session.QueryOver<Gasto>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .Where(g => g.Fecha >= inicio && g.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
                         .And(Restrictions.Eq("IdUsuario", idUsuario))
-                        .Skip((page - 1) * size) // Calcular el offset
-                        .Take(size) // Limitar la cantidad de resultados
+                        .Skip((page - 1) * size)
+                        .Take(size)
                         .ListAsync();
+
 
                     // Crear la respuesta con el total de registros y los elementos obtenidos
                     var response = new ResumenGastosResponse(
@@ -101,19 +100,18 @@ namespace AppG.Servicio
                         .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
-                    // Consultas QueryOver para contar el total de ingresos dentro del rango de fechas
                     int ingresosTotalCount = await session.QueryOver<Ingreso>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .Where(i => i.Fecha >= inicio && i.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
                         .And(Restrictions.Eq("IdUsuario", idUsuario))
                         .RowCountAsync();
 
-                    // Consultas QueryOver para obtener los ingresos con paginado
                     var ingresosDetalles = await session.QueryOver<Ingreso>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .Where(i => i.Fecha >= inicio && i.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
                         .And(Restrictions.Eq("IdUsuario", idUsuario))
-                        .Skip((page - 1) * size) // Calcular el offset
-                        .Take(size) // Limitar la cantidad de resultados
+                        .Skip((page - 1) * size)
+                        .Take(size)
                         .ListAsync();
+
 
                     // Crear la respuesta con el total de registros y los elementos obtenidos
                     var response = new ResumenIngresosResponse(
