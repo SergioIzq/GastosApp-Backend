@@ -89,10 +89,15 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Usuario usuario)
     {
+        var expirationTime = DateTime.UtcNow.AddMinutes(120);
+        var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds(); 
+
         var claims = new[]
         {
         new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(JwtRegisteredClaimNames.Exp, expirationUnix.ToString()),
+
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AgV1jvtBvoC5ixIFwU85Id8SLT6tSzV2"));
@@ -102,7 +107,7 @@ public class AuthController : ControllerBase
             issuer: "GastosApp",
             audience: "GastosApp",
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: expirationTime,
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
