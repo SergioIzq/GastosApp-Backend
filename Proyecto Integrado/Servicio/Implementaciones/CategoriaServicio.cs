@@ -25,7 +25,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingCategoria = await session.Query<Categoria>()
-                    .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario)
+                    .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingCategoria != null && existingCategoria.Nombre.ToLower() == entity.Nombre.ToLower())

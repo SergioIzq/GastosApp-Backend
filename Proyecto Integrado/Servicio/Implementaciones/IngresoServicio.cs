@@ -32,7 +32,7 @@ namespace AppG.Servicio
                     {
                         // Verificar si la categoría existe en la base de datos
                         var existingCategoria = await session.Query<Categoria>()
-                            .Where(c => c.Nombre == entityCategoria.Nombre)
+                            .Where(c => c.Nombre == entityCategoria.Nombre && c.IdUsuario == entity.IdUsuario)
                             .SingleOrDefaultAsync();
 
                         if (existingCategoria != null)
@@ -48,7 +48,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre)
+                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
@@ -107,7 +107,7 @@ namespace AppG.Servicio
                     {
                         // Verificar si la categoría existe en la base de datos
                         var existingCategoria = await session.Query<Categoria>()
-                            .Where(c => c.Nombre == entityCategoria.Nombre)
+                            .Where(c => c.Nombre == entityCategoria.Nombre && c.IdUsuario == entity.IdUsuario)
                             .SingleOrDefaultAsync();
 
                         if (existingCategoria != null)
@@ -123,7 +123,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre)
+                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
@@ -175,7 +175,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre)
+                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)

@@ -23,7 +23,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingPersona = await session.Query<Persona>()
-                    .Where(c => c.Nombre == entity.Nombre)
+                    .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingPersona != null && existingPersona.Nombre.ToLower() == entity.Nombre.ToLower())
@@ -66,7 +66,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingPersona = await session.Query<Persona>()
-                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id)
+                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingPersona != null && existingPersona.Nombre.ToLower() == entity.Nombre.ToLower())
