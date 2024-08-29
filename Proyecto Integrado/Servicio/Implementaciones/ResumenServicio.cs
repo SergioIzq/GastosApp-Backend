@@ -83,8 +83,8 @@ namespace AppG.Servicio
                 using (var session = _sessionFactory.OpenSession())
                 {
                     // Convertir los periodos de string a DateTime
-                    DateTime inicio = DateTime.Parse(periodoInicio);
-                    DateTime fin = DateTime.Parse(periodoFin);
+                    DateTime inicio = DateTime.Parse(periodoInicio).Date; // Esto establece la hora a 00:00:00
+                    DateTime fin = DateTime.Parse(periodoFin).Date.AddDays(1).AddSeconds(-1); // Esto establece la hora a 23:59:59 del mismo día
 
                     // Consultas SQL directas para sumar los montos en la tabla Ingreso
                     string ingresosSql = @"
