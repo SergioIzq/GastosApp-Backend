@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
 using static AppG.Servicio.FormaPagoServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/formapago")]
+    [Authorize]
     public class FormaPagoController : BaseController<FormaPago>
     {
         private readonly IFormaPagoServicio _formaPagoService;

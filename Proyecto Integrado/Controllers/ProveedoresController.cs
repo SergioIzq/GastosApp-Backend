@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.ProveedorServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/proveedor")]
+    [Authorize]
     public class ProveedorController : BaseController<Proveedor>
     {
         private readonly IProveedorServicio _proveedorService;

@@ -3,11 +3,13 @@ using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using AppG.Servicio;
 using static AppG.Servicio.TraspasoServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/traspaso")]
+    [Authorize]
     public class TraspasoController : BaseController<Traspaso>
     {
         private readonly ITraspasoServicio _traspasoService;

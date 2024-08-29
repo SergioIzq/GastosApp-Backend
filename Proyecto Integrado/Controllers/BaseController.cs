@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Collections.Generic;
-using System;
-using System.Linq.Expressions;
-using System.Reflection;
 using AppG.Servicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {

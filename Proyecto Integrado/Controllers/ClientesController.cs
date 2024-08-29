@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.ClienteServicio;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/cliente")]
+    [Authorize]
     public class ClienteController : BaseController<Cliente>
     {
         private readonly IClienteServicio _clienteService;
