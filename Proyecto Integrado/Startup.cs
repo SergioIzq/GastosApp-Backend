@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
+using Microsoft.AspNetCore.Authorization;
 
 public class Startup
 {
@@ -49,8 +50,12 @@ public class Startup
                 };
             });
 
-        services.AddAuthorization();
-
+        services.AddAuthorization(auth =>
+        {
+            auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme‌​)
+                .RequireAuthenticatedUser().Build());
+        });
         // Configuración de CORS
         services.AddCors(options =>
         {
