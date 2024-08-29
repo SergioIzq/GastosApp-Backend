@@ -44,8 +44,8 @@ public class Startup
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ValidateLifetime = false,
-                    ValidateIssuerSigningKey = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });

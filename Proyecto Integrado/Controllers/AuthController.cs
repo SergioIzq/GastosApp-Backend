@@ -100,7 +100,7 @@ public class AuthController : ControllerBase
 
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AgV1jvtBvoC5ixIFwU85Id8SLT6tSzV2"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("F7o/dfNfO5AqZbHkLXM6z5Zm8DZpX0m6v7KD0tJr0uI="));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
