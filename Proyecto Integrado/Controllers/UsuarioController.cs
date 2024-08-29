@@ -8,7 +8,6 @@ namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/usuario")]
-    [Authorize]
     public class UsuarioController : BaseController<Usuario>
     {
         private readonly IUsuarioServicio _usuarioService;
