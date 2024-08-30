@@ -1,62 +1,44 @@
-# Archivos y carpetas de build
+# Ignorar carpetas de build y compilación para todos los proyectos
 bin/
 obj/
-/bin/Debug
-# Archivos de configuración de usuario
-*.user
-*.suo
-*.userosscache
-*.suo
-*.vscode/
 
-# Configuración específica de Visual Studio
-.vs/
-.idea/
+# Ignorar carpetas específicas de configuración de build
+**/bin/
+**/obj/
 
-# Archivos de depuración
+# Ignorar archivos temporales y de depuración
 *.log
+*.tmp
+*.temp
 
-# Paquetes y dependencias
-packages/
-*.nupkg
-*.snupkg
-
-# Configuración de pruebas
-TestResults/
-
-# Configuración del compilador
-*.pdb
-*.dll
-*.exe
-*.config
-
-# Configuración de entorno
+# Ignorar archivos de configuración de entorno
 .env
 .env.local
 .env.*.local
 
-# Carpetas y archivos generados por herramientas de terceros
-node_modules/
-bower_components/
-jspm_packages/
-
-# Archivos de caché de herramientas de construcción
-.build/
-
-# Archivos de caché de estilo y linters
-.eslintcache
-.stylelintcache
-
-# Archivos generados por herramientas de construcción
-*.cache
-*.tmp
-*.temp
+# Ignorar carpetas de resultados de build para configuraciones específicas
+**/Debug/
+**/Release/
 
 # Archivos de cobertura de pruebas
 coverage/
 *.lcov
 
-# Archivos de base de datos local
-*.db
-*.sqlite
+# Ignorar otros archivos generados por herramientas de terceros
+*.pid
+*.seed
+*.pid.lock
 
+# Configuración específica de Visual Studio
+**/.vs/
+**/.idea/
+*.suo
+*.user
+*.userosscache
+*.suo
+*.ncb
+
+# Configuración de dependencias (ejemplo para proyectos Node.js dentro del repositorio)
+node_modules/
+jspm_packages/
+bower_components/
