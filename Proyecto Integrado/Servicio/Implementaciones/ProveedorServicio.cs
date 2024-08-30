@@ -22,11 +22,11 @@ namespace AppG.Servicio
             {
 
                 // Verificar si la categoría existe en la base de datos
-                var existingCliente = await session.Query<Proveedor>()
+                var existingProveedor = await session.Query<Proveedor>()
                     .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
-                if (existingCliente != null && existingCliente.Nombre.ToLower() == entity.Nombre.ToLower())
+                if (existingProveedor != null && existingProveedor.Nombre.ToLower() == entity.Nombre.ToLower())
                 {
                     // Asignar el ID de la categoría existente a la entidad
                     errorMessages.Add($"El proveedor '{entity.Nombre}' ya existe en la base de datos.");
@@ -72,7 +72,7 @@ namespace AppG.Servicio
                 if (existingCliente != null && existingCliente.Nombre.ToLower() == entity.Nombre.ToLower())
                 {
                     // Asignar el ID de la categoría existente a la entidad
-                    errorMessages.Add($"El cliente '{entity.Nombre}' ya existe en la base de datos.");
+                    errorMessages.Add($"El proveedor '{entity.Nombre}' ya existe en la base de datos.");
                     throw new ValidationException(errorMessages);
                 }
 
