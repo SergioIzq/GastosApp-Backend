@@ -97,7 +97,7 @@ namespace AppG.Servicio
                     // Cargar la entidad existente
                     var existingEntity = await session.GetAsync<Ingreso>(id);
                     if (existingEntity == null)
-                    {                        
+                    {
                         throw new KeyNotFoundException($"Entidad con ID {id} no encontrada");
                     }
 
@@ -121,12 +121,22 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Buscar la cuenta correspondiente por nombre
-                    var cuenta = await session.Query<Cuenta>()
+                    // Buscar la cuenta original del ingreso (cuenta del ingreso existente)
+                    var originalCuenta = await session.Query<Cuenta>()
+                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                        .SingleOrDefaultAsync();
+
+                    if (originalCuenta == null)
+                    {
+                        errorMessages.Add($"La cuenta original '{existingEntity.Cuenta.Nombre}' no existe.");
+                    }
+
+                    // Buscar la nueva cuenta (cuenta del nuevo entity)
+                    var nuevaCuenta = await session.Query<Cuenta>()
                         .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
-                    if (cuenta == null)
+                    if (nuevaCuenta == null)
                     {
                         errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
                     }
@@ -136,14 +146,19 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    // Revertir el saldo de la cuenta basado en el ingreso anterior
-                    cuenta.Saldo -= existingEntity.Monto;
+                    // Revertir el saldo de la cuenta original basado en el ingreso anterior
+                    if (originalCuenta != null)
+                    {
+                        originalCuenta.Saldo -= existingEntity.Monto;
+                        session.Update(originalCuenta);
+                    }
 
-                    // Actualizar el saldo de la cuenta basado en el nuevo monto
-                    cuenta.Saldo += entity.Monto;
-
-                    // Guardar la cuenta actualizada
-                    session.Update(cuenta);
+                    // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
+                    if (nuevaCuenta != null)
+                    {
+                        nuevaCuenta.Saldo += entity.Monto;
+                        session.Update(nuevaCuenta);
+                    }
 
                     // Fusionar y guardar la entidad actualizada
                     session.Merge(entity);
