@@ -4,11 +4,13 @@ using AppG.Exceptions;
 using AppG.Servicio;
 using static AppG.Servicio.GastoServicio;
 using static AppG.Servicio.CategoriaServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/categoria")]
+    [Authorize]
     public class CategoriaController : BaseController<Categoria>
     {
         private readonly ICategoriaServicio _categoriaService;

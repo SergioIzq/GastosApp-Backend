@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
-using static AppG.Servicio.ResumenServicio;
 using AppG.BBDD;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/resumen")]
+    [Authorize]
     public class ResumenController : BaseController<Resumen>
     {
         private readonly IResumenServicio _resumenService;

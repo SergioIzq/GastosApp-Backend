@@ -22,7 +22,7 @@ namespace AppG.Servicio
             using (var transaction = session.BeginTransaction())
             {
                 var existingCuenta = await session.Query<Cuenta>()
-                    .Where(c => c.Nombre == entity.Nombre)
+                    .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingCuenta != null && existingCuenta.Nombre.ToLower() == entity.Nombre.ToLower())
@@ -52,7 +52,7 @@ namespace AppG.Servicio
             {
 
                 var existingCuenta = await session.Query<Cuenta>()
-                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id)
+                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingCuenta != null && existingCuenta.Nombre.ToLower() == entity.Nombre.ToLower())

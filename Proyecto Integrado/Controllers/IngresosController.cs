@@ -1,15 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
-using AppG.BBDD;
-using System.Text.Json;
 using static AppG.Servicio.IngresoServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/ingreso")]
+    [Authorize]
     public class IngresoController : BaseController<Ingreso>
     {
         private readonly IIngresoServicio _ingresoService;

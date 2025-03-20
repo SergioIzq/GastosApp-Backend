@@ -37,7 +37,7 @@ namespace AppG.Servicio
                     {
                         // Verificar si la categoría existe en la base de datos
                         var existingCategoria = await session.Query<Categoria>()
-                            .Where(c => c.Nombre == entityCategoria.Nombre)
+                            .Where(c => c.Nombre == entityCategoria.Nombre && c.IdUsuario == entityCategoria.IdUsuario)
                             .SingleOrDefaultAsync();
 
                         if (existingCategoria != null)
@@ -53,7 +53,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre)
+                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
@@ -113,7 +113,7 @@ namespace AppG.Servicio
                     {
                         // Verificar si la categoría existe en la base de datos
                         var existingCategoria = await session.Query<Categoria>()
-                            .Where(c => c.Nombre == entityCategoria.Nombre)
+                            .Where(c => c.Nombre == entityCategoria.Nombre && c.IdUsuario == entityCategoria.IdUsuario)
                             .SingleOrDefaultAsync();
 
                         if (existingCategoria != null)
@@ -127,12 +127,22 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Buscar la cuenta correspondiente por nombre
-                    var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre)
+                    // Buscar la cuenta original del gasto (cuenta del gasto existente)
+                    var originalCuenta = await session.Query<Cuenta>()
+                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
-                    if (cuenta == null)
+                    if (originalCuenta == null)
+                    {
+                        errorMessages.Add($"La cuenta original '{existingEntity.Cuenta.Nombre}' no existe.");
+                    }
+
+                    // Buscar la nueva cuenta (cuenta del nuevo entity)
+                    var nuevaCuenta = await session.Query<Cuenta>()
+                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
+                        .SingleOrDefaultAsync();
+
+                    if (nuevaCuenta == null)
                     {
                         errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
                     }
@@ -142,14 +152,19 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    // Revertir el saldo de la cuenta basado en el gasto anterior
-                    cuenta.Saldo += existingEntity.Monto;
+                    // Revertir el saldo de la cuenta original basado en el gasto anterior
+                    if (originalCuenta != null)
+                    {
+                        originalCuenta.Saldo += existingEntity.Monto;
+                        session.Update(originalCuenta);
+                    }
 
-                    // Actualizar el saldo de la cuenta basado en el nuevo monto
-                    cuenta.Saldo -= entity.Monto;
-
-                    // Guardar la cuenta actualizada
-                    session.Update(cuenta);
+                    // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
+                    if (nuevaCuenta != null)
+                    {
+                        nuevaCuenta.Saldo -= entity.Monto;
+                        session.Update(nuevaCuenta);
+                    }
 
                     // Fusionar y guardar la entidad actualizada
                     session.Merge(entity);
@@ -182,7 +197,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre)
+                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)

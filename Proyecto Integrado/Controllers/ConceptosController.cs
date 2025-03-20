@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
-using static AppG.Servicio.CategoriaServicio;
 using static AppG.Servicio.ConceptoServicio;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/concepto")]
+    [Authorize]
     public class ConceptoController : BaseController<Concepto>
     {
         private readonly IConceptoServicio _conceptoService;

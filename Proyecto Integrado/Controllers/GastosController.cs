@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
-using static AppG.Servicio.IngresoServicio;
 using static AppG.Servicio.GastoServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/gasto")]
+    [Authorize]
     public class GastoController : BaseController<Gasto>
     {
         private readonly IGastoServicio _gastoService;

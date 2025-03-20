@@ -30,7 +30,7 @@ namespace AppG.Servicio
                 {
                     // Buscar la cuenta de origen por nombre
                     var cuentaOrigen = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.CuentaOrigen.Nombre)
+                        .Where(c => c.Nombre == entity.CuentaOrigen.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuentaOrigen == null)
@@ -40,7 +40,7 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta de destino por nombre
                     var cuentaDestino = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.CuentaDestino.Nombre)
+                        .Where(c => c.Nombre == entity.CuentaDestino.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuentaDestino == null)
@@ -130,7 +130,7 @@ namespace AppG.Servicio
 
                     // Obtener las cuentas de origen y destino por nombre
                     var cuentaOrigen = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.CuentaOrigen.Nombre)
+                        .Where(c => c.Nombre == entity.CuentaOrigen.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuentaOrigen == null)
@@ -139,7 +139,7 @@ namespace AppG.Servicio
                     }
 
                     var cuentaDestino = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.CuentaDestino.Nombre)
+                        .Where(c => c.Nombre == entity.CuentaDestino.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuentaDestino == null)

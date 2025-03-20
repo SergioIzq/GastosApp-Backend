@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.PersonaServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/persona")]
+    [Authorize]
     public class PersonaController : BaseController<Persona>
     {
         private readonly IPersonaServicio _personaService;

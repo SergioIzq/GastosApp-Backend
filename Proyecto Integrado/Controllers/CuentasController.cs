@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.CuentaServicio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/cuenta")]
+    [Authorize]
+
     public class CuentaController : BaseController<Cuenta>
     {
         private readonly ICuentaServicio _cuentaService;

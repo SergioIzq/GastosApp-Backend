@@ -1,4 +1,5 @@
 ﻿using AppG.Entidades.BBDD;
+using Microsoft.AspNet.Identity;
 using NHibernate;
 
 public class NHibernateHelper
@@ -9,8 +10,10 @@ public class NHibernateHelper
     {
         if (_sessionFactory == null)
         {
-            // Crear una nueva configuración de NHibernate
-            NHibernate.Cfg.Configuration configuration = new NHibernate.Cfg.Configuration();
+            var configuration = new NHibernate.Cfg.Configuration();
+
+            // Configuración de NHibernate desde el archivo XML
+            configuration.Configure(); // Asegúrate de que este archivo esté correctamente configurado
 
             configuration.Configure();
 
@@ -23,6 +26,7 @@ public class NHibernateHelper
 
             configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, connectionString);
 
+            // Añadir ensamblaje
             configuration.AddAssembly(typeof(Categoria).Assembly);
 
             _sessionFactory = configuration.BuildSessionFactory();

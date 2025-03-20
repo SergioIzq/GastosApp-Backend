@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace AppG.Controllers

@@ -36,7 +36,7 @@ namespace AppG.Servicio
                     string gastosSql = @"
                         SELECT COALESCE(SUM(Monto), 0) 
                         FROM gasto 
-                        WHERE fecha BETWEEN :Inicio AND :Fin AND id_usuario = :idUsuario";
+                        WHERE Fecha BETWEEN :Inicio AND :Fin AND id_Usuario = :IdUsuario";
 
                     // Ejecutar la consulta para gastos
                     decimal gastosTotales = await session
@@ -46,19 +46,18 @@ namespace AppG.Servicio
                         .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
-                    // Consultas QueryOver para contar el total de gastos dentro del rango de fechas
                     int gastosTotalCount = await session.QueryOver<Gasto>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
-                        .And(g => g.IdUsuario == idUsuario)
+                        .Where(g => g.Fecha >= inicio && g.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
+                        .And(Restrictions.Eq("IdUsuario", idUsuario))
                         .RowCountAsync();
 
-                    // Consultas QueryOver para obtener los gastos con paginado
                     var gastosDetalles = await session.QueryOver<Gasto>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
-                        .And(g => g.IdUsuario == idUsuario)  
-                        .Skip((page - 1) * size) // Calcular el offset
-                        .Take(size) // Limitar la cantidad de resultados
+                        .Where(g => g.Fecha >= inicio && g.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
+                        .And(Restrictions.Eq("IdUsuario", idUsuario))
+                        .Skip((page - 1) * size)
+                        .Take(size)
                         .ListAsync();
+
 
                     // Crear la respuesta con el total de registros y los elementos obtenidos
                     var response = new ResumenGastosResponse(
@@ -84,14 +83,14 @@ namespace AppG.Servicio
                 using (var session = _sessionFactory.OpenSession())
                 {
                     // Convertir los periodos de string a DateTime
-                    DateTime inicio = DateTime.Parse(periodoInicio);
-                    DateTime fin = DateTime.Parse(periodoFin);
+                    DateTime inicio = DateTime.Parse(periodoInicio).Date; // Esto establece la hora a 00:00:00
+                    DateTime fin = DateTime.Parse(periodoFin).Date.AddDays(1).AddSeconds(-1); // Esto establece la hora a 23:59:59 del mismo día
 
                     // Consultas SQL directas para sumar los montos en la tabla Ingreso
                     string ingresosSql = @"
                         SELECT COALESCE(SUM(Monto), 0) 
                         FROM ingreso 
-                        WHERE fecha BETWEEN :Inicio AND :Fin AND id_usuario = :idUsuario";
+                        WHERE Fecha BETWEEN :Inicio AND :Fin AND id_usuario = :IdUsuario";
 
                     // Ejecutar la consulta para ingresos
                     decimal ingresosTotales = await session
@@ -101,19 +100,18 @@ namespace AppG.Servicio
                         .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
-                    // Consultas QueryOver para contar el total de ingresos dentro del rango de fechas
                     int ingresosTotalCount = await session.QueryOver<Ingreso>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
-                        .And(g => g.IdUsuario == idUsuario)
+                        .Where(i => i.Fecha >= inicio && i.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
+                        .And(Restrictions.Eq("IdUsuario", idUsuario))
                         .RowCountAsync();
 
-                    // Consultas QueryOver para obtener los ingresos con paginado
                     var ingresosDetalles = await session.QueryOver<Ingreso>()
-                        .Where(Restrictions.Between("Fecha", inicio, fin))
-                        .And(g => g.IdUsuario == idUsuario)
-                        .Skip((page - 1) * size) // Calcular el offset
-                        .Take(size) // Limitar la cantidad de resultados
+                        .Where(i => i.Fecha >= inicio && i.Fecha <= fin)  // Asegurarse que las fechas son inclusivas
+                        .And(Restrictions.Eq("IdUsuario", idUsuario))
+                        .Skip((page - 1) * size)
+                        .Take(size)
                         .ListAsync();
+
 
                     // Crear la respuesta con el total de registros y los elementos obtenidos
                     var response = new ResumenIngresosResponse(

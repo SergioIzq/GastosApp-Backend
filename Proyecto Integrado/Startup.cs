@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
+using Microsoft.AspNetCore.Authorization;
 
 public class Startup
 {
@@ -36,20 +37,25 @@ public class Startup
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+
+                var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
 
-        services.AddAuthorization();
-
+        services.AddAuthorization(auth =>
+        {
+            auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme‌​)
+                .RequireAuthenticatedUser().Build());
+        });
         // Configuración de CORS
         services.AddCors(options =>
         {
@@ -115,8 +121,20 @@ public class Startup
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
         var cfg = new Configuration();
-        cfg.Configure("NHibernate/hibernate.cfg.xml");
+        cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
+
+        // Obtener la cadena de conexión desde la configuración
+        string DB_CONNECTION_STRING = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        if (string.IsNullOrEmpty(DB_CONNECTION_STRING))
+        {
+            throw new InvalidOperationException("La cadena de conexión no está configurada.");
+        }
+
+        // Establecer la cadena de conexión programáticamente
+        cfg.SetProperty("connection.connection_string", DB_CONNECTION_STRING);
+
         return cfg.BuildSessionFactory();
     }
+
 }

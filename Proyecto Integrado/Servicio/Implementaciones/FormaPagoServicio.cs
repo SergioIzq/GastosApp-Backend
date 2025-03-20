@@ -23,7 +23,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingFormaPago = await session.Query<FormaPago>()
-                    .Where(c => c.Nombre == entity.Nombre)
+                    .Where(c => c.Nombre == entity.Nombre && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingFormaPago != null && existingFormaPago.Nombre.ToLower() == entity.Nombre.ToLower())
@@ -58,7 +58,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingFormaPago = await session.Query<FormaPago>()
-                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id)
+                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingFormaPago != null && existingFormaPago.Nombre.ToLower() == entity.Nombre.ToLower())

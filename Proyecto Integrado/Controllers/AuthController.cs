@@ -89,20 +89,25 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Usuario usuario)
     {
+        var expirationTime = DateTime.UtcNow.AddMinutes(120);
+        var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds(); 
+
         var claims = new[]
         {
         new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(JwtRegisteredClaimNames.Exp, expirationUnix.ToString()),
+
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AgV1jvtBvoC5ixIFwU85Id8SLT6tSzV2"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("F7o/dfNfO5AqZbHkLXM6z5Zm8DZpX0m6v7KD0tJr0uI="));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: "GastosApp",
             audience: "GastosApp",
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: expirationTime,
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

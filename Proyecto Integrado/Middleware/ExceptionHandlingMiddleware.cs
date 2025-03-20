@@ -68,7 +68,7 @@
                         };
                         break;
                     case CustomUnauthorizedAccessException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        response.StatusCode = (int)HttpStatusCode.Conflict;
                         responseModel = new
                         {
                             Succeeded = false,
@@ -77,7 +77,7 @@
                         };
                         break;
                     case FileNotFoundException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        response.StatusCode = (int)HttpStatusCode.Conflict;
                         responseModel = new
                         {
                             Succeeded = false,
@@ -86,7 +86,7 @@
                         };
                         break;
                     case FileLoadException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        response.StatusCode = (int)HttpStatusCode.Conflict;
                         responseModel = new
                         {
                             Succeeded = false,
@@ -95,7 +95,7 @@
                         };
                         break;
                     case IOException e:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        response.StatusCode = (int)HttpStatusCode.Conflict;
                         responseModel = new
                         {
                             Succeeded = false,

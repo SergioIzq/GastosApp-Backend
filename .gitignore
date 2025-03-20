@@ -1,0 +1,44 @@
+# Ignorar carpetas de build y compilación para todos los proyectos
+bin/
+obj/
+
+# Ignorar carpetas específicas de configuración de build
+**/bin/
+**/obj/
+
+# Ignorar archivos temporales y de depuración
+*.log
+*.tmp
+*.temp
+
+# Ignorar archivos de configuración de entorno
+.env
+.env.local
+.env.*.local
+
+# Ignorar carpetas de resultados de build para configuraciones específicas
+**/Debug/
+**/Release/
+
+# Archivos de cobertura de pruebas
+coverage/
+*.lcov
+
+# Ignorar otros archivos generados por herramientas de terceros
+*.pid
+*.seed
+*.pid.lock
+
+# Configuración específica de Visual Studio
+**/.vs/
+**/.idea/
+*.suo
+*.user
+*.userosscache
+*.suo
+*.ncb
+
+# Configuración de dependencias (ejemplo para proyectos Node.js dentro del repositorio)
+node_modules/
+jspm_packages/
+bower_components/
