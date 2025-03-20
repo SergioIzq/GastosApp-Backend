@@ -18,9 +18,9 @@ namespace AppG.Controllers
         }
 
         [HttpGet("getCantidadIngresos")]
-        public async Task<IActionResult> GetIngresosAsync(int page, int size, string periodoInicio, string periodoFin)
+        public async Task<IActionResult> GetIngresosAsync(int page, int size, string periodoInicio, string periodoFin, int idUsuario)
         {
-            var result = await _resumenService.GetIngresosAsync(page, size, periodoInicio, periodoFin);
+            var result = await _resumenService.GetIngresosAsync(page, size, periodoInicio, periodoFin, idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {
@@ -31,9 +31,9 @@ namespace AppG.Controllers
         }
 
         [HttpGet("getCantidadGastos")]
-        public async Task<IActionResult> GetGastosAsync(int page, int size, string periodoInicio, string periodoFin)
+        public async Task<IActionResult> GetGastosAsync(int page, int size, string periodoInicio, string periodoFin, int idUsuario)
         {
-            var result = await _resumenService.GetGastosAsync(page, size, periodoInicio, periodoFin);
+            var result = await _resumenService.GetGastosAsync(page, size, periodoInicio, periodoFin, idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {

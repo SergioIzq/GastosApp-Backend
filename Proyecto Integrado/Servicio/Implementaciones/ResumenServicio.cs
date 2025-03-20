@@ -22,7 +22,7 @@ namespace AppG.Servicio
 
         }
 
-        public virtual async Task<ResumenGastosResponse> GetGastosAsync(int page, int size, string periodoInicio, string periodoFin)
+        public virtual async Task<ResumenGastosResponse> GetGastosAsync(int page, int size, string periodoInicio, string periodoFin, int idUsuario)
         {
             try
             {
@@ -36,23 +36,26 @@ namespace AppG.Servicio
                     string gastosSql = @"
                         SELECT COALESCE(SUM(Monto), 0) 
                         FROM gasto 
-                        WHERE Fecha BETWEEN :Inicio AND :Fin";
+                        WHERE fecha BETWEEN :Inicio AND :Fin AND id_usuario = :idUsuario";
 
                     // Ejecutar la consulta para gastos
                     decimal gastosTotales = await session
                         .CreateSQLQuery(gastosSql)
                         .SetParameter("Inicio", inicio)
                         .SetParameter("Fin", fin)
+                        .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
                     // Consultas QueryOver para contar el total de gastos dentro del rango de fechas
                     int gastosTotalCount = await session.QueryOver<Gasto>()
                         .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .And(g => g.IdUsuario == idUsuario)
                         .RowCountAsync();
 
                     // Consultas QueryOver para obtener los gastos con paginado
                     var gastosDetalles = await session.QueryOver<Gasto>()
                         .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .And(g => g.IdUsuario == idUsuario)  
                         .Skip((page - 1) * size) // Calcular el offset
                         .Take(size) // Limitar la cantidad de resultados
                         .ListAsync();
@@ -74,7 +77,7 @@ namespace AppG.Servicio
             }
         }
 
-        public virtual async Task<ResumenIngresosResponse> GetIngresosAsync(int page, int size, string periodoInicio, string periodoFin)
+        public virtual async Task<ResumenIngresosResponse> GetIngresosAsync(int page, int size, string periodoInicio, string periodoFin, int idUsuario)
         {
             try
             {
@@ -88,23 +91,26 @@ namespace AppG.Servicio
                     string ingresosSql = @"
                         SELECT COALESCE(SUM(Monto), 0) 
                         FROM ingreso 
-                        WHERE Fecha BETWEEN :Inicio AND :Fin";
+                        WHERE fecha BETWEEN :Inicio AND :Fin AND id_usuario = :idUsuario";
 
                     // Ejecutar la consulta para ingresos
                     decimal ingresosTotales = await session
                         .CreateSQLQuery(ingresosSql)
                         .SetParameter("Inicio", inicio)
                         .SetParameter("Fin", fin)
+                        .SetParameter("IdUsuario", idUsuario)
                         .UniqueResultAsync<decimal>();
 
                     // Consultas QueryOver para contar el total de ingresos dentro del rango de fechas
                     int ingresosTotalCount = await session.QueryOver<Ingreso>()
                         .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .And(g => g.IdUsuario == idUsuario)
                         .RowCountAsync();
 
                     // Consultas QueryOver para obtener los ingresos con paginado
                     var ingresosDetalles = await session.QueryOver<Ingreso>()
                         .Where(Restrictions.Between("Fecha", inicio, fin))
+                        .And(g => g.IdUsuario == idUsuario)
                         .Skip((page - 1) * size) // Calcular el offset
                         .Take(size) // Limitar la cantidad de resultados
                         .ListAsync();

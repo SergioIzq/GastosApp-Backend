@@ -92,6 +92,7 @@ namespace AppG.Servicio
                 {
                     // Contar el número total de registros usando Criteria
                     var totalCountCriteria = session.CreateCriteria<T>()
+                                                     .Add(Restrictions.Eq("idUsuario", idUsuario))
                                                      .SetProjection(Projections.RowCount());
                     int totalCount = (int)totalCountCriteria.UniqueResult();
 
@@ -100,6 +101,7 @@ namespace AppG.Servicio
 
                     // Obtener los resultados paginados
                     var pagedResultsCriteria = session.CreateCriteria<T>()
+                                                       .Add(Restrictions.Eq("idUsuario", idUsuario))
                                                        .SetFirstResult(offset)
                                                        .SetMaxResults(size)
                                                        .AddOrder(Order.Asc("id")); // Asegúrate de tener una columna para ordenar

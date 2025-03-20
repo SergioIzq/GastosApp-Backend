@@ -12,7 +12,7 @@
 
 		<!-- Cadena de conexión a Supabase -->
 		<property name="connection.connection_string">
-			User Id=postgres.yqnqyolroyqrhacagmzr;Password=BayronNala2004;Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;
+			User Id=postgres.yzerwuixdlcuukqnydov;Password=BayronNala2004;Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;
 		</property>
 
 		<!-- Nivel de aislamiento de la conexión -->

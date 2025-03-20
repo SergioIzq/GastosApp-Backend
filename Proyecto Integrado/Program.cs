@@ -12,6 +12,12 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
+                var httpClientHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) => true
+                };
+
+                var httpClient = new HttpClient(httpClientHandler);
                 webBuilder.UseStartup<Startup>(); // Usar Startup.cs para la configuración
             });
 }
