@@ -124,15 +124,23 @@ public class Startup
         cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 
-        // Obtener la cadena de conexión desde la configuración
-        string DB_CONNECTION_STRING = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-        if (string.IsNullOrEmpty(DB_CONNECTION_STRING))
+        // Obtener la cadena de conexión desde appsettings.json o variable de entorno
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        if (connectionString.Contains("${DB_CONNECTION_STRING}"))
         {
-            throw new InvalidOperationException("La cadena de conexión no está configurada.");
+            string? dbConnectionString = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+            if (string.IsNullOrEmpty(dbConnectionString))
+            {
+                throw new InvalidOperationException("La variable de entorno DB_CONNECTION_STRING no está configurada.");
+            }
+
+            connectionString = connectionString.Replace("${DB_CONNECTION_STRING}", dbConnectionString);
         }
 
         // Establecer la cadena de conexión programáticamente
-        cfg.SetProperty("connection.connection_string", DB_CONNECTION_STRING);
+        cfg.SetProperty("connection.connection_string", connectionString);
 
         return cfg.BuildSessionFactory();
     }
