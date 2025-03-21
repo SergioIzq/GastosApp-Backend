@@ -1,13 +1,20 @@
 ﻿namespace AppG.Entidades.BBDD
 
 {
-    public interface IEntidad
+    public class Entidad
     {
+        public Entidad()
+        {
+            Id = 0;
+            IdUsuario = 0;
+            FechaCreacion = DateTime.Now;
+        }
 
-        int Id { get; set; }
+        public virtual int Id { get; set; }
 
-        int IdUsuario { get; set; }
+        public virtual int IdUsuario { get; set; }
 
+        public virtual DateTime FechaCreacion { get; set; }
 
 
     }

@@ -26,26 +26,6 @@ namespace AppG.Servicio
             {
                 try
                 {
-                    // Obtener la categoría del entity
-                    var entityCategoria = entity?.Concepto.Categoria;
-                    if (entityCategoria != null)
-                    {
-                        // Verificar si la categoría existe en la base de datos
-                        var existingCategoria = await session.Query<Categoria>()
-                            .Where(c => c.Nombre == entityCategoria.Nombre && c.IdUsuario == entity.IdUsuario)
-                            .SingleOrDefaultAsync();
-
-                        if (existingCategoria != null)
-                        {
-                            // Asignar el ID de la categoría existente a la entidad
-                            entity.Concepto.Categoria = existingCategoria;
-                        }
-                        else
-                        {
-                            errorMessages.Add($"La categoría '{entityCategoria.Nombre}' no existe.");
-                        }
-                    }
-
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
                         .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)

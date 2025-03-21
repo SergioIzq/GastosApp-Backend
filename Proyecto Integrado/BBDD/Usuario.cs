@@ -58,6 +58,8 @@
                 }
             }
         }
+        public virtual DateTime FechaCreacion { get; set; }
+
     }
 
 }

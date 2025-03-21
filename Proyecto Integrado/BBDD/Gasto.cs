@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AppG.Entidades.BBDD
 {
-    public class Gasto : IEntidad
+    public class Gasto : Entidad
     {
         public Gasto()
         {
@@ -76,22 +76,6 @@ namespace AppG.Entidades.BBDD
                 if (this._Descripcion != value)
                 {
                     this._Descripcion = value;
-                }
-            }
-        }
-
-        private int _IdUsuario;
-        public virtual int IdUsuario
-        {
-            get
-            {
-                return this._IdUsuario;
-            }
-            set
-            {
-                if (this._IdUsuario != value)
-                {
-                    this._IdUsuario = value;
                 }
             }
         }

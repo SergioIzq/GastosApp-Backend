@@ -13,6 +13,7 @@
 		<property name="IdUsuario" type="int" not-null="true">
 			<column name="id_usuario" sql-type="int" />
 		</property>
+		<property name="FechaCreacion" column="fecha_creacion" not-null="true" insert="true" update="false" />
 
 	</class>
 

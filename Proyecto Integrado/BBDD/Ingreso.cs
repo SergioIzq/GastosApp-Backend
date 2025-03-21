@@ -1,29 +1,12 @@
 ﻿namespace AppG.Entidades.BBDD
 
 {
-    public class Ingreso : IEntidad
+    public class Ingreso : Entidad
     {
         public Ingreso()
         {
 
           
-        }
-
-
-        private int _Id;
-        public virtual int Id
-        {
-            get
-            {
-                return this._Id;
-            }
-            set
-            {
-                if (this._Id != value)
-                {
-                    this._Id = value;
-                }
-            }
         }
 
         private decimal _Monto;
@@ -77,22 +60,6 @@
                 if (this._Descripcion != value)
                 {
                     this._Descripcion = value;
-                }
-            }
-        }
-
-        private int _IdUsuario;
-        public virtual int IdUsuario
-        {
-            get
-            {
-                return this._IdUsuario;
-            }
-            set
-            {
-                if (this._IdUsuario != value)
-                {
-                    this._IdUsuario = value;
                 }
             }
         }

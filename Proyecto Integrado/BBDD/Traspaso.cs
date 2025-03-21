@@ -1,29 +1,13 @@
 ﻿namespace AppG.Entidades.BBDD
 
 {
-    public class Traspaso : IEntidad
+    public class Traspaso : Entidad
     {
         public Traspaso()
         {
 
 
         }
-        private int _Id;
-        public virtual int Id
-        {
-            get
-            {
-                return this._Id;
-            }
-            set
-            {
-                if (this._Id != value)
-                {
-                    this._Id = value;
-                }
-            }
-        }
-
         private Cuenta _CuentaOrigen;
         public virtual Cuenta CuentaOrigen
         {
@@ -129,22 +113,6 @@
                 if (this._SaldoCuentaDestino != value)
                 {
                     this._SaldoCuentaDestino = value;
-                }
-            }
-        }
-
-        private int _IdUsuario;
-        public virtual int IdUsuario
-        {
-            get
-            {
-                return this._IdUsuario;
-            }
-            set
-            {
-                if (this._IdUsuario != value)
-                {
-                    this._IdUsuario = value;
                 }
             }
         }

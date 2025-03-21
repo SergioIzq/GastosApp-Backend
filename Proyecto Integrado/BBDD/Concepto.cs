@@ -1,29 +1,12 @@
 ﻿namespace AppG.Entidades.BBDD
 
 {
-    public class Concepto : IEntidad
+    public class Concepto : Entidad
     {
         public Concepto()
         {
 
           
-        }
-
-
-        private int _Id;
-        public virtual int Id
-        {
-            get
-            {
-                return this._Id;
-            }
-            set
-            {
-                if (this._Id != value)
-                {
-                    this._Id = value;
-                }
-            }
         }
 
 
@@ -55,22 +38,6 @@
                 if (this._Categoria != value)
                 {
                     this._Categoria = value;
-                }
-            }
-        }
-
-        private int _IdUsuario;
-        public virtual int IdUsuario
-        {
-            get
-            {
-                return this._IdUsuario;
-            }
-            set
-            {
-                if (this._IdUsuario != value)
-                {
-                    this._IdUsuario = value;
                 }
             }
         }

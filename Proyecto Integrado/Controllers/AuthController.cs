@@ -89,7 +89,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(Usuario usuario)
     {
-        var expirationTime = DateTime.UtcNow.AddMinutes(120);
+        var expirationTime = DateTime.UtcNow.AddMinutes(720);
         var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds(); 
 
         var claims = new[]

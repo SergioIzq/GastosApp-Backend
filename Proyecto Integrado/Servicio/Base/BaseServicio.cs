@@ -16,7 +16,7 @@ namespace AppG.Servicio
             _sessionFactory = sessionFactory;
         }
 
-        public virtual async Task<ResponseList<T>> GetAllAsync<T>(int idUsuario) where T : class, IEntidad
+        public virtual async Task<ResponseList<T>> GetAllAsync<T>(int idUsuario) where T : Entidad
         {
             using (var session = _sessionFactory.OpenSession())
             {
@@ -84,7 +84,7 @@ namespace AppG.Servicio
             }
         }
 
-        public virtual async Task<ResponseList<T>> GetCantidadAsync<T>(int page, int size, int idUsuario) where T : class, IEntidad
+        public virtual async Task<ResponseList<T>> GetCantidadAsync<T>(int page, int size, int idUsuario) where T : Entidad
         {
             try
             {

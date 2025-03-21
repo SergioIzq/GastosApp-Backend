@@ -68,6 +68,7 @@
     <PackageReference Include="CG.Blazor.Forms._FluentValidations" Version="2023.1.4" />
     <PackageReference Include="EPPlus" Version="7.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
     <PackageReference Include="NHibernate" Version="5.5.1" />
     <PackageReference Include="NHibernate.AspNet.Identity" Version="5.0.2" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
