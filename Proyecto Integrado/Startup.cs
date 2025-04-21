@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
 using Microsoft.AspNetCore.Authorization;
+using AppG.Entidades.BBDD;
 
 public class Startup
 {
@@ -120,7 +121,7 @@ public class Startup
 
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
-        var cfg = new Configuration();
+        var cfg = new Configuration();        
         cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 

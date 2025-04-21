@@ -2,8 +2,10 @@
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="AppG" namespace="AppG.Entidades.BBDD">
 
 	<class name="Ingreso" table="ingreso">
-		<id name="Id">
-			<generator class="native" />
+		<id name="Id" column="id">
+			<generator class="sequence">
+				<param name="sequence">ingreso_id_seq</param>
+			</generator>
 		</id>
 
 		<property name="Monto" type="decimal" precision="10" scale="2" not-null="true">

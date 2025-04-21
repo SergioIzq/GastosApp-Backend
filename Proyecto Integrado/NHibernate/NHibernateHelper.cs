@@ -1,6 +1,7 @@
 ﻿using AppG.Entidades.BBDD;
 using Microsoft.AspNet.Identity;
 using NHibernate;
+using NHibernate.Persister.Entity;
 
 public class NHibernateHelper
 {
@@ -24,7 +25,7 @@ public class NHibernateHelper
                 throw new InvalidOperationException("La cadena de conexión no está configurada en las variables de entorno.");
             }
 
-            configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, connectionString);
+            configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, connectionString);            
 
             // Añadir ensamblaje
             configuration.AddAssembly(typeof(Categoria).Assembly);

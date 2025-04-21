@@ -2,10 +2,11 @@
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="AppG" namespace="AppG.Entidades.BBDD">
 
 	<class name="Concepto" table="concepto">
-		<id name="Id">
-			<generator class="native" />
+		<id name="Id" column="id">
+			<generator class="sequence">
+				<param name="sequence">concepto_id_seq</param>
+			</generator>
 		</id>
-
 		<property name="Nombre" type="string" length="100" not-null="true">
 			<column name="nombre" sql-type="varchar" />
 		</property>
