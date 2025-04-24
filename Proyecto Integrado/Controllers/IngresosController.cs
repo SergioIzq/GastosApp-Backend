@@ -62,5 +62,21 @@ namespace AppG.Controllers
 
             return Ok();
         }
+
+        [HttpGet("getNewIngreso/{idUsuario}")]
+        public async Task<IActionResult> GetNewIngreso(int idUsuario)
+        {
+            var newIngreso = await _ingresoService.GetNewIngresoAsync(idUsuario);
+
+            return Ok(newIngreso);
+        }
+
+        [HttpGet("getById/{id}")]
+        public async Task<IActionResult> GetIngresoById(int id)
+        {
+            var ingresoById = await _ingresoService.GetIngresoByIdAsync(id);
+
+            return Ok(ingresoById);
+        }
     }
 }

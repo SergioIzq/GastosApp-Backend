@@ -1,16 +1,10 @@
 ﻿using AppG.Entidades.BBDD;
 using AppG.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 using NHibernate;
-using NHibernate.Criterion;
 using NHibernate.Linq;
-using System.Linq.Expressions;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using Expression = System.Linq.Expressions.Expression;
-using AppG.Controllers;
 using OfficeOpenXml;
 using System.Diagnostics;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Servicio
 {
@@ -22,7 +16,7 @@ namespace AppG.Servicio
         }
 
 
-        public override async Task<Gasto> CreateAsync(Gasto entity)
+        public async Task<Gasto> CreateAsync(Gasto entity)
         {
             var errorMessages = new List<string>();
 
@@ -218,7 +212,7 @@ namespace AppG.Servicio
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();                    
+                    await transaction.RollbackAsync();
                     throw new Exception(ex.Message);
                 }
             }
@@ -346,6 +340,77 @@ namespace AppG.Servicio
                     UseShellExecute = true
                 });
             }
+        }
+
+        // Monta objeto para crear un nuevo gasto
+        public async Task<GastoRespuesta> GetNewGastoAsync(int idUsuario)
+        {
+            var errorMessages = new List<string>();
+            GastoRespuesta newGasto = new GastoRespuesta();
+
+            using (var session = _sessionFactory.OpenSession())
+            {
+                try
+                {
+                    var listaCategorias = await session.Query<Categoria>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaConceptos = await session.Query<Concepto>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaCuentas = await session.Query<Cuenta>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaProveedores = await session.Query<Proveedor>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaPersonas = await session.Query<Persona>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaFormasPago = await session.Query<FormaPago>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    // Crear objeto respuesta al frontend para nuevos gastos
+                    newGasto.ListaProveedores = listaProveedores;
+                    newGasto.ListaCuentas = listaCuentas;
+                    newGasto.ListaConceptos = listaConceptos;
+                    newGasto.ListaCategorias = listaCategorias;
+                    newGasto.ListaPersonas = listaPersonas;
+                    newGasto.ListaFormasPago = listaFormasPago;
+
+                    return newGasto;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+
+        public async Task<GastoByIdRespuesta> GetGastoByIdAsync(int id)
+        {
+            GastoByIdRespuesta response = new GastoByIdRespuesta();
+            
+            response.GastoById = await base.GetByIdAsync(id);
+
+            if (response.GastoById?.Cuenta?.IdUsuario != null)
+            {
+                response.GastoRespuesta = await GetNewGastoAsync(response.GastoById.Cuenta.IdUsuario);
+            }
+
+            return response;
         }
 
 

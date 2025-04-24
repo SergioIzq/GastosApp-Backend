@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.GastoServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -60,6 +61,22 @@ namespace AppG.Controllers
             _gastoService.ExportarDatosExcelAsync(res);
 
             return Ok();
+        }
+
+        [HttpGet("getNewGasto/{idUsuario}")]
+        public async Task<IActionResult> GetNewGasto(int idUsuario)
+        {
+            var newGasto = await _gastoService.GetNewGastoAsync(idUsuario);            
+
+            return Ok(newGasto);
+        }
+
+        [HttpGet("getById/{id}")]
+        public async Task<IActionResult> GetGastoById(int id)
+        {
+            var gastoById = await _gastoService.GetGastoByIdAsync(id);
+
+            return Ok(gastoById);
         }
     }
 }

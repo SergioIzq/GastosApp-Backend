@@ -1,4 +1,5 @@
 ﻿using AppG.BBDD;
+using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
@@ -325,6 +326,74 @@ namespace AppG.Servicio
             }
         }
 
+        public async Task<IngresoRespuesta> GetNewIngresoAsync(int idUsuario)
+        {
+            IngresoRespuesta newIngreso = new IngresoRespuesta();
+
+            using (var session = _sessionFactory.OpenSession())
+            {
+                try
+                {
+                    var listaCategorias = await session.Query<Categoria>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaConceptos = await session.Query<Concepto>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaCuentas = await session.Query<Cuenta>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaClientes = await session.Query<Cliente>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaPersonas = await session.Query<Persona>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    var listaFormasPago = await session.Query<FormaPago>()
+                            .Where(c => c.IdUsuario == idUsuario)
+                            .OrderBy(c => c.Nombre)
+                            .ToListAsync();
+
+                    // Crear objeto respuesta al frontend para nuevos gastos
+                    newIngreso.ListaClientes = listaClientes;
+                    newIngreso.ListaCuentas = listaCuentas;
+                    newIngreso.ListaConceptos = listaConceptos;
+                    newIngreso.ListaCategorias = listaCategorias;
+                    newIngreso.ListaPersonas = listaPersonas;
+                    newIngreso.ListaFormasPago = listaFormasPago;
+
+                    return newIngreso;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+        }
+
+        public async Task<IngresoByIdRespuesta> GetIngresoByIdAsync(int id)
+        {
+            IngresoByIdRespuesta response = new IngresoByIdRespuesta();
+
+            response.IngresoById = await base.GetByIdAsync(id);
+
+            if (response.IngresoById?.Cuenta?.IdUsuario != null)
+            {
+                response.IngresoRespuesta = await GetNewIngresoAsync(response.IngresoById.Cuenta.IdUsuario);
+            }
+
+            return response;
+        }
 
         public class IngresoDto
         {

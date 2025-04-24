@@ -1,13 +1,14 @@
-﻿using AppG.Controllers;
+﻿using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
-using System.Text.Json;
 using static AppG.Servicio.IngresoServicio;
 
 namespace AppG.Servicio
 {
-    public interface IIngresoServicio : IBaseServicio<Ingreso> {
-
+    public interface IIngresoServicio : IBaseServicio<Ingreso>
+    {
         void ExportarDatosExcelAsync(Excel<IngresoDto> res);
+        Task<IngresoRespuesta> GetNewIngresoAsync(int idUsuario);
+        Task<IngresoByIdRespuesta> GetIngresoByIdAsync(int id);
     }
 
 }
