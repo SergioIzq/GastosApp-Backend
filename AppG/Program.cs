@@ -14,10 +14,14 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
-                // Agregar configuración desde appsettings.json y variables de entorno
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                config.AddEnvironmentVariables();
+                var env = hostingContext.HostingEnvironment;
+
+                config.SetBasePath(Directory.GetCurrentDirectory());
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                      .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                      .AddEnvironmentVariables();
             })
+
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 var httpClientHandler = new HttpClientHandler

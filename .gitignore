@@ -17,7 +17,7 @@ obj/
 .env.*.local
 
 # Ignorar archivos de configuración locales sensibles
-appsettings.Development.json
+AppG/appsettings.Development.json
 
 # Ignorar carpetas de resultados de build para configuraciones específicas
 **/Debug/
