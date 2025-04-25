@@ -1,5 +1,4 @@
-﻿using AppG.BBDD.Respuestas;
-using AppG.Controllers;
+﻿using AppG.BBDD.Respuestas.Gastos;
 using AppG.Entidades.BBDD;
 using static AppG.Servicio.GastoServicio;
 

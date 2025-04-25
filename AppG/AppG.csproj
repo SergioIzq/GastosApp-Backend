@@ -21,6 +21,7 @@
     <None Remove="BBDD\Cuenta.hbm.xml" />
     <None Remove="BBDD\FormaPago.hbm.xml" />
     <None Remove="BBDD\Gasto.hbm.xml" />
+    <None Remove="BBDD\GastoProgramado.hbm.xml" />
     <None Remove="BBDD\Ingreso.hbm.xml" />
     <None Remove="BBDD\Persona.hbm.xml" />
     <None Remove="BBDD\Proveedor.hbm.xml" />
@@ -29,6 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="BBDD\GastoProgramado.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="BBDD\Usuario.hbm.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

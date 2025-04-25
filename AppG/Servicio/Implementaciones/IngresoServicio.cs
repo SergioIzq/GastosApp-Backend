@@ -1,12 +1,10 @@
-﻿using AppG.BBDD;
-using AppG.BBDD.Respuestas;
+﻿using AppG.BBDD.Respuestas.Ingresos;
 using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
 using OfficeOpenXml;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace AppG.Servicio
 {

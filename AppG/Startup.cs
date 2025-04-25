@@ -21,19 +21,19 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        var assembly = typeof(Startup).Assembly;
 
-        services.AddScoped<IGastoServicio, GastoServicio>();
-        services.AddScoped<IIngresoServicio, IngresoServicio>();
-        services.AddScoped<ICategoriaServicio, CategoriaServicio>();
-        services.AddScoped<IConceptoServicio, ConceptoServicio>();
-        services.AddScoped<IResumenServicio, ResumenServicio>();
-        services.AddScoped<IPersonaServicio, PersonaServicio>();
-        services.AddScoped<IClienteServicio, ClienteServicio>();
-        services.AddScoped<IProveedorServicio, ProveedorServicio>();
-        services.AddScoped<ICuentaServicio, CuentaServicio>();
-        services.AddScoped<ITraspasoServicio, TraspasoServicio>();
-        services.AddScoped<IFormaPagoServicio, FormaPagoServicio>();
-        services.AddScoped<IUsuarioServicio, UsuarioServicio>();
+        var tipos = assembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Servicio"));
+
+        foreach (var impl in tipos)
+        {
+            var interfaz = impl.GetInterfaces().FirstOrDefault(i => i.Name == $"I{impl.Name}");
+            if (interfaz != null)
+            {
+                services.AddScoped(interfaz, impl);
+            }
+        }
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
