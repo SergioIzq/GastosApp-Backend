@@ -16,8 +16,6 @@
 			<column name="descripcion" sql-type="varchar" />
 		</property>
 
-		<property name="Fecha" type="DateTime" column="fecha" not-null="true" />
-
 		<many-to-one name="Concepto" class="Concepto" not-found="ignore" lazy ="false">
 			<column name="id_concepto" sql-type="int" not-null="true" />
 		</many-to-one>
@@ -40,13 +38,12 @@
 			<column name="id_usuario" />
 		</property>
 		<property name="FechaCreacion" column="fecha_creacion" not-null="true" insert="true" update="false" />
-		<property name="Frecuencia" type="string" not-null="false" length="200">
-			<column name="frecuencia" sql-type="varchar" />
-		</property>
-		<property name="FechaInicio" column="fecha_inicio" not-null="true" />
-		<property name="FechaFin" column="fecha_fin" not-null="true" />
+		<property name="DiaEjecucion" column="dia_ejecucion" not-null="true" />		
 		<property name="Activo" type="bool" not-null="true">
 			<column name="activo" sql-type="boolean" />
+		</property>
+		<property name="AjustarAUltimoDia" type="bool" not-null="false">
+			<column name="ajustar_a_ultimo_dia" sql-type="boolean" />
 		</property>
 	</class>
 
