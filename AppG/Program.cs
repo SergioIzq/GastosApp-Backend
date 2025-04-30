@@ -24,6 +24,14 @@ public class Program
 
             .ConfigureWebHostDefaults(webBuilder =>
             {
+                webBuilder.ConfigureKestrel(serverOptions =>
+                {
+                    serverOptions.ListenAnyIP(80); // HTTP opcional
+                    serverOptions.ListenAnyIP(443, listenOptions =>
+                    {
+                        listenOptions.UseHttps("/etc/letsencrypt/live/gbackend.sergioizq.es/certificate.pfx", "Bayron2004");
+                    });
+                });
                 var httpClientHandler = new HttpClientHandler
                 {
                     ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) => true
