@@ -1,14 +1,11 @@
 ﻿using NHibernate;
 using NHibernate.Cfg;
 using System.Reflection;
-using AppG.Exceptions;
-using AppG.Servicio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
 using Microsoft.AspNetCore.Authorization;
-using AppG.Entidades.BBDD;
 
 public class Startup
 {
@@ -116,19 +113,19 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-        });
+        });        
     }
 
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
-        var cfg = new Configuration();        
+        var cfg = new Configuration();
         cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 
         // Obtener la cadena de conexión desde appsettings.json o variable de entorno
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        if (connectionString.Contains("${DB_CONNECTION_STRING}"))
+        if (connectionString != null && connectionString.Contains("${DB_CONNECTION_STRING}"))
         {
             string? dbConnectionString = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 

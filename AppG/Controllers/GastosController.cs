@@ -32,7 +32,7 @@ namespace AppG.Controllers
             return Ok(result);
         }
 
-
+        
         [HttpPost]
         public override async Task<IActionResult> Create([FromBody] Gasto entity)
         {

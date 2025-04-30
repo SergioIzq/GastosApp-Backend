@@ -3,6 +3,7 @@ using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
 using AppG.BBDD.Respuestas.Gastos;
+using Hangfire;
 
 namespace AppG.Servicio
 {
@@ -14,7 +15,7 @@ namespace AppG.Servicio
         }
 
 
-        public async Task<Gasto> CreateAsync(GastoProgramado entity)
+        public async override Task<GastoProgramado> CreateAsync(GastoProgramado entity)
         {
             var errorMessages = new List<string>();
 
@@ -35,7 +36,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -43,33 +44,24 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Buscar la cuenta correspondiente por nombre
-                    var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
-                        .SingleOrDefaultAsync();
-
-                    if (cuenta == null)
-                    {
-                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
-                    }
-
-                    if (errorMessages.Count > 0)
-                    {
-                        throw new ValidationException(errorMessages);
-                    }
-
-                    // Actualizar el saldo de la cuenta
-                    cuenta.Saldo -= entity.Monto;
-
-                    // Guardar la cuenta actualizada
-                    session.Update(cuenta);
-
-                    // Guardar el ingreso
+                    // Guardar el gasto programado
                     session.Save(entity);
                     await transaction.CommitAsync();
 
                     var id = session.GetIdentifier(entity);
-                    var createdEntity = await session.GetAsync<Gasto>(id);
+                    var createdEntity = await session.GetAsync<GastoProgramado>(id);
+
+                    //var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(entity.DiaEjecucion, entity.AjustarAUltimoDia);
+                    //if (fechaEjecucion != null)
+                    //{
+                    //    var delay = fechaEjecucion.Value - DateTime.Now;
+                    //    delay = TimeSpan.Zero;
+
+                    //    BackgroundJob.Schedule<IGastoProgramadoServicio>(
+                    //        x => x.AplicarGasto(createdEntity.Id),
+                    //        delay
+                    //    );
+                    //}
 
                     return createdEntity;
                 }
@@ -285,6 +277,45 @@ namespace AppG.Servicio
             }
 
             return response;
+        }
+
+        public async Task AplicarGasto(int gastoProgramadoId)
+        {
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                try
+                {
+                    var gasto = await session.GetAsync<GastoProgramado>(gastoProgramadoId);
+                    if (gasto == null)
+                    {
+                        throw new Exception($"No se encontró el gasto programado con ID {gastoProgramadoId}");
+                    }
+
+                    if (!gasto.Activo)
+                        return;
+
+                    var cuenta = await session.Query<Cuenta>()
+                        .Where(c => c.Id == gasto.Cuenta.Id && c.IdUsuario == gasto.IdUsuario)
+                        .SingleOrDefaultAsync();
+
+                    if (cuenta == null)
+                    {
+                        throw new Exception($"No se encontró la cuenta con ID {gasto.Cuenta.Id}");
+                    }
+
+                    cuenta.Saldo -= Math.Abs(gasto.Monto);
+
+                    session.Update(cuenta);                    
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
     }
 }

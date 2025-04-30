@@ -7,6 +7,7 @@ namespace AppG.Servicio
     {        
         Task<GastoRespuesta> GetNewGastoAsync(int idUsuario);
         Task<GastoProgramadoByIdRespuesta> GetGastoByIdAsync(int id);
+        Task AplicarGasto(int gastoProgramadoId);
     }
 
 }

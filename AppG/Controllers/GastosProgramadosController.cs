@@ -36,7 +36,7 @@ namespace AppG.Controllers
         {
 
             var createdEntity = await _gastoProgramadoService.CreateAsync(entity);
-
+            var success = await EnviarGastoAlCronJob(createdEntity);
             var message = $"Gasto programado creado correctamente";
 
             var response = new ResponseOne<GastoProgramado>(createdEntity, message);
@@ -66,6 +66,30 @@ namespace AppG.Controllers
             var gastoById = await _gastoProgramadoService.GetGastoByIdAsync(id);
 
             return Ok(gastoById);
+        }
+
+        private async Task<bool> EnviarGastoAlCronJob(GastoProgramado createdEntity)
+        {
+            try
+            {
+                // Crear la instancia de HttpClient
+                using (var client = new HttpClient())
+                {
+                    // URL del endpoint del cron job
+                    var url = "http://localhost:5001/api/cronjob/programar";
+
+                    // Enviar el GastoProgramado al proyecto del cron job
+                    var response = await client.PostAsJsonAsync(url, createdEntity);
+
+                    return response.IsSuccessStatusCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                Console.WriteLine($"Error al enviar al cron job: {ex.Message}");
+                return false;
+            }
         }
     }
 }
