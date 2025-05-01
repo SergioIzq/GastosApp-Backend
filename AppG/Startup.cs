@@ -62,7 +62,7 @@ public class Startup
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAppG", builder =>
-                builder.WithOrigins("https://appg.sergioizq.es", "http://localhost:4200")
+                builder.WithOrigins("https://ahorroland.sergioizq.es", "http://localhost:4200")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials());
