@@ -1,14 +1,14 @@
 ﻿using NHibernate;
 using NHibernate.Cfg;
 using System.Reflection;
-using AppG.Exceptions;
 using AppG.Servicio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
 using Microsoft.AspNetCore.Authorization;
-using AppG.Entidades.BBDD;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 public class Startup
 {
@@ -58,15 +58,14 @@ public class Startup
                 .RequireAuthenticatedUser().Build());
         });
         // Configuración de CORS
+
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
-                });
+            options.AddPolicy("AllowAppG", builder =>
+                builder.WithOrigins("https://appg.sergioizq.es", "http://localhost:4200")
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials());
         });
 
         // Configuración de NHibernate
@@ -82,11 +81,13 @@ public class Startup
             // Configura la política de nombres de propiedad (cambiar a 'camelCase' si es necesario)
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
         });
-
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        // Configuración de CORS
+        app.UseCors("AllowAppG");
+
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -103,9 +104,6 @@ public class Startup
         app.UseSwagger();
         app.UseSwaggerUI();
 
-        // Configuración de CORS
-        app.UseCors("AllowAll");
-
         // Configuración de enrutamiento
         app.UseRouting();
 
@@ -121,7 +119,7 @@ public class Startup
 
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
-        var cfg = new Configuration();        
+        var cfg = new Configuration();
         cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 
