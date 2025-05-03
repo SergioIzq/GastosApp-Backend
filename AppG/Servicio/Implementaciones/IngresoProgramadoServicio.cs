@@ -2,21 +2,20 @@
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
-using AppG.BBDD.Respuestas.Gastos;
 using Hangfire;
 using AppG.BBDD.Respuestas.Ingresos;
 
 namespace AppG.Servicio
 {
-    public class GastoProgramadoServicio : BaseServicio<GastoProgramado>, IGastoProgramadoServicio
+    public class IngresoProgramadoServicio : BaseServicio<IngresoProgramado>, IIngresoProgramadoServicio
     {
-        public GastoProgramadoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
+        public IngresoProgramadoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
         {
 
         }
 
 
-        public async override Task<GastoProgramado> CreateAsync(GastoProgramado entity)
+        public async override Task<IngresoProgramado> CreateAsync(IngresoProgramado entity)
         {
             var errorMessages = new List<string>();
 
@@ -53,7 +52,7 @@ namespace AppG.Servicio
                     var id = session.GetIdentifier(entity);
 
                     // Recuperar la entidad completa (por si se llenan otros campos en base de datos)
-                    var createdEntity = await session.GetAsync<GastoProgramado>(id);
+                    var createdEntity = await session.GetAsync<IngresoProgramado>(id);
 
                     // Programar el trabajo recurrente en Hangfire
                     ProgramarTrabajoRecurrente(createdEntity);
@@ -76,7 +75,7 @@ namespace AppG.Servicio
         }
 
 
-        public override async Task UpdateAsync(int id, GastoProgramado entity)
+        public override async Task UpdateAsync(int id, IngresoProgramado entity)
         {
             var errorMessages = new List<string>();
 
@@ -174,7 +173,7 @@ namespace AppG.Servicio
                 try
                 {
                     // Cargar la entidad existente
-                    var existingEntity = await session.GetAsync<GastoProgramado>(id);
+                    var existingEntity = await session.GetAsync<IngresoProgramado>(id);
                     if (existingEntity == null)
                     {
                         errorMessages.Add($"Entidad con ID {id} no encontrada");
@@ -198,8 +197,6 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    cuenta.Saldo += existingEntity.Monto;
-
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
 
@@ -217,10 +214,10 @@ namespace AppG.Servicio
         }
 
         // Monta objeto para crear un nuevo gasto
-        public async Task<GastoRespuesta> GetNewGastoAsync(int idUsuario)
+        public async Task<IngresoRespuesta> GetNewIngresoAsync(int idUsuario)
         {
             var errorMessages = new List<string>();
-            GastoRespuesta newGasto = new GastoRespuesta();
+            IngresoRespuesta newIngreso = new IngresoRespuesta();
 
             using (var session = _sessionFactory.OpenSession())
             {
@@ -241,7 +238,7 @@ namespace AppG.Servicio
                             .OrderBy(c => c.Nombre)
                             .ToListAsync();
 
-                    var listaProveedores = await session.Query<Proveedor>()
+                    var listaClientes = await session.Query<Cliente>()
                             .Where(c => c.IdUsuario == idUsuario)
                             .OrderBy(c => c.Nombre)
                             .ToListAsync();
@@ -256,15 +253,14 @@ namespace AppG.Servicio
                             .OrderBy(c => c.Nombre)
                             .ToListAsync();
 
-                    // Crear objeto respuesta al frontend para nuevos gastos
-                    newGasto.ListaProveedores = listaProveedores;
-                    newGasto.ListaCuentas = listaCuentas;
-                    newGasto.ListaConceptos = listaConceptos;
-                    newGasto.ListaCategorias = listaCategorias;
-                    newGasto.ListaPersonas = listaPersonas;
-                    newGasto.ListaFormasPago = listaFormasPago;
+                    newIngreso.ListaClientes = listaClientes;
+                    newIngreso.ListaCuentas = listaCuentas;
+                    newIngreso.ListaConceptos = listaConceptos;
+                    newIngreso.ListaCategorias = listaCategorias;
+                    newIngreso.ListaPersonas = listaPersonas;
+                    newIngreso.ListaFormasPago = listaFormasPago;
 
-                    return newGasto;
+                    return newIngreso;
                 }
                 catch (Exception ex)
                 {
@@ -273,46 +269,46 @@ namespace AppG.Servicio
             }
         }
 
-        public async Task<GastoProgramadoByIdRespuesta> GetGastoByIdAsync(int id)
+        public async Task<IngresoProgramadoByIdRespuesta> GetIngresoByIdAsync(int id)
         {
-            GastoProgramadoByIdRespuesta response = new GastoProgramadoByIdRespuesta();
+            IngresoProgramadoByIdRespuesta response = new IngresoProgramadoByIdRespuesta();
 
-            response.GastoProgramadoById = await base.GetByIdAsync(id);
+            response.IngresoProgramadoById = await base.GetByIdAsync(id);
 
-            if (response.GastoProgramadoById?.Cuenta?.IdUsuario != null)
+            if (response.IngresoProgramadoById?.Cuenta?.IdUsuario != null)
             {
-                response.GastoRespuesta = await GetNewGastoAsync(response.GastoProgramadoById.Cuenta.IdUsuario);
+                response.IngresoRespuesta = await GetNewIngresoAsync(response.IngresoProgramadoById.Cuenta.IdUsuario);
             }
 
             return response;
         }
 
-        public async Task AplicarGasto(int gastoProgramadoId)
+        public async Task AplicarIngreso(int ingresoProgramadoId)
         {
             using (var session = _sessionFactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
                 try
                 {
-                    var gasto = await session.GetAsync<GastoProgramado>(gastoProgramadoId);
-                    if (gasto == null)
+                    var ingreso = await session.GetAsync<IngresoProgramado>(ingresoProgramadoId);
+                    if (ingreso == null)
                     {
-                        throw new Exception($"No se encontró el gasto programado con ID {gastoProgramadoId}");
+                        throw new Exception($"No se encontró el ingreso programado con ID {ingresoProgramadoId}");
                     }
 
-                    if (!gasto.Activo)
+                    if (!ingreso.Activo)
                         return;
 
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Id == gasto!.Cuenta!.Id && c.IdUsuario == gasto.IdUsuario)
+                        .Where(c => c.Id == ingreso!.Cuenta!.Id && c.IdUsuario == ingreso.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        throw new Exception($"No se encontró la cuenta con ID {gasto!.Cuenta!.Id}");
+                        throw new Exception($"No se encontró la cuenta con ID {ingreso!.Cuenta!.Id}");
                     }
 
-                    cuenta.Saldo -= Math.Abs(gasto.Monto);
+                    cuenta.Saldo += Math.Abs(ingreso.Monto);
 
                     session.Update(cuenta);
 
@@ -359,9 +355,9 @@ namespace AppG.Servicio
             return new DateTime(año, mes, dia);
         }
 
-        private void ProgramarTrabajoRecurrente(GastoProgramado createdEntity)
+        private void ProgramarTrabajoRecurrente(IngresoProgramado createdEntity)
         {
-            var recurringJobId = $"AplicarGasto_{createdEntity.Id}";
+            var recurringJobId = $"AplicarIngreso_{createdEntity.Id}";
 
             var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(createdEntity.DiaEjecucion, createdEntity.AjustarAUltimoDia);
 
@@ -388,7 +384,7 @@ namespace AppG.Servicio
 
                 RecurringJob.AddOrUpdate(
                     recurringJobId,
-                    () => AplicarGasto(createdEntity.Id),
+                    () => AplicarIngreso(createdEntity.Id),
                     Cron.Monthly(fechaEjecucion.Value.Day, hora, minuto),
                     new RecurringJobOptions
                     {
@@ -398,6 +394,5 @@ namespace AppG.Servicio
 
             }
         }
-
     }
 }
