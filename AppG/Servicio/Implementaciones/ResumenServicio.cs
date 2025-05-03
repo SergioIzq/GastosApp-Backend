@@ -1,21 +1,13 @@
 ﻿using AppG.BBDD;
-using AppG.Controllers;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Criterion;
-using NHibernate.Dialect.Function;
-using NHibernate.Linq;
-using NHibernate.Transform;
 using OfficeOpenXml;
-using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Reflection;
-using System.Text.Json;
 
 namespace AppG.Servicio
 {
-    public class ResumenServicio
+    public class ResumenServicio : IResumenServicio
     {
         private readonly ISessionFactory _sessionFactory;
 
@@ -286,7 +278,7 @@ namespace AppG.Servicio
 
                 FileInfo fileInfo = new FileInfo(filePath);
                 package.SaveAs(fileInfo);
-                
+
                 // Abrir el archivo en Excel
                 Process.Start(new ProcessStartInfo
                 {
