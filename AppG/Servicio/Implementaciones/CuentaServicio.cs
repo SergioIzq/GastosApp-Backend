@@ -10,12 +10,12 @@ namespace AppG.Servicio
 {
     public class CuentaServicio : BaseServicio<Cuenta>, ICuentaServicio
     {
-        private readonly IGastoProgramadoServicio _gastoServicio;
-        private readonly ITraspasoServicio _traspasoServicio;
+        private readonly IGastoProgramadoServicio _gastoProgramadoServicio;
+        private readonly IIngresoProgramadoServicio _ingresoProgramadoServicio;
 
-        public CuentaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio, ITraspasoServicio traspasoServicio) : base(sessionFactory) { 
-            _gastoServicio = gastoProgramadoServicio;
-            _traspasoServicio = traspasoServicio;
+        public CuentaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio, IIngresoProgramadoServicio ingresoProgramadoServicio) : base(sessionFactory) {
+            _gastoProgramadoServicio = gastoProgramadoServicio;
+            _ingresoProgramadoServicio = ingresoProgramadoServicio;
         }
 
 
@@ -92,7 +92,17 @@ namespace AppG.Servicio
 
                 foreach (var gasto in gastosProgramados)
                 {
-                    await _gastoServicio.DeleteAsync(gasto.Id);
+                    await _gastoProgramadoServicio.DeleteAsync(gasto.Id);
+                }
+
+                // Eliminar los traspasos asociados a la cuenta como origen
+                var ingresoProgramados = await session.Query<IngresoProgramado>()
+                    .Where(c => c!.Cuenta!.Id == id)
+                    .ToListAsync();
+
+                foreach (var ingreso in ingresoProgramados)
+                {
+                    await _ingresoProgramadoServicio.DeleteAsync(ingreso.Id);
                 }
 
                 // Eliminar la cuenta
