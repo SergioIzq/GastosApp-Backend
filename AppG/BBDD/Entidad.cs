@@ -1,7 +1,7 @@
 ﻿namespace AppG.Entidades.BBDD
 
 {
-    public class Entidad
+    public abstract class Entidad
     {
         public Entidad()
         {

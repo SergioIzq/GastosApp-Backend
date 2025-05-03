@@ -11,14 +11,6 @@ namespace AppG.Servicio
     {
         public UsuarioServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
 
-
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            var hasher = new PasswordHasher<Usuario>();
-            var result = hasher.VerifyHashedPassword(null, storedHash, password);
-            return result == PasswordVerificationResult.Success;
-        }
-
         public override async Task UpdateAsync(int id, Usuario entity)
         {
             var errorMessages = new List<string>();

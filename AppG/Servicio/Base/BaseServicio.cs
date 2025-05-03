@@ -7,7 +7,7 @@ using NHibernate.Criterion;
 
 namespace AppG.Servicio
 {
-    public class BaseServicio<T> : IBaseServicio<T> where T : class
+    public class BaseServicio<T> : IBaseServicio<T> where T : Entidad
     {
         protected readonly ISessionFactory _sessionFactory;
 
@@ -16,7 +16,7 @@ namespace AppG.Servicio
             _sessionFactory = sessionFactory;
         }
 
-        public virtual async Task<ResponseList<T>> GetAllAsync<T>(int idUsuario) where T : Entidad
+        public virtual async Task<ResponseList<T>> GetAllAsync(int idUsuario)
         {
             using (var session = _sessionFactory.OpenSession())
             {
@@ -84,29 +84,27 @@ namespace AppG.Servicio
             }
         }
 
-        public virtual async Task<ResponseList<T>> GetCantidadAsync<T>(int page, int size, int idUsuario) where T : Entidad
+        public virtual async Task<ResponseList<T>> GetCantidadAsync(int page, int size, int idUsuario)
         {
             try
             {
                 using (var session = _sessionFactory.OpenSession())
                 {
-                    // Contar el número total de registros usando Criteria
-                    var totalCountCriteria = session.CreateCriteria<T>()
-                                                     .Add(Restrictions.Eq("IdUsuario", idUsuario))
-                                                     .SetProjection(Projections.RowCount());
-                    int totalCount = (int)totalCountCriteria.UniqueResult();
+                    // Contar el número total de registros usando LINQ
+                    int totalCount = await session.Query<T>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .CountAsync();
 
                     // Calcular el offset para la paginación
                     var offset = (page - 1) * size;
 
-                    // Obtener los resultados paginados
-                    var pagedResultsCriteria = session.CreateCriteria<T>()
-                                                       .Add(Restrictions.Eq("IdUsuario", idUsuario)) // Agregar la restricción por idUsuario
-                                                       .SetFirstResult(offset)
-                                                       .SetMaxResults(size)
-                                                       .AddOrder(Order.Asc("id")); // Asegúrate de tener una columna para ordenar
-
-                    var results = pagedResultsCriteria.List<T>();
+                    // Obtener los resultados paginados usando LINQ
+                    var results = await session.Query<T>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .OrderBy(x => x.Id) // Ordenar por Id (asegúrate de tener un campo Id)
+                        .Skip(offset)
+                        .Take(size)
+                        .ToListAsync();
 
                     // Crear la respuesta con el total de registros y los elementos obtenidos
                     return new ResponseList<T>(results, totalCount);
@@ -118,6 +116,7 @@ namespace AppG.Servicio
                 throw new Exception($"Error al obtener cantidad: {ex.Message}", ex);
             }
         }
+
 
 
     }

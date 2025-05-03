@@ -5,12 +5,17 @@ using NHibernate;
 using NHibernate.Linq;
 using OfficeOpenXml;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace AppG.Servicio
 {
     public class PersonaServicio : BaseServicio<Persona>, IPersonaServicio
     {
-        public PersonaServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
+        private readonly IGastoProgramadoServicio _gastoProgramadoServicio;
+        public PersonaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio) : base(sessionFactory)
+        {
+            _gastoProgramadoServicio = gastoProgramadoServicio;
+        }
 
 
         public override async Task<Persona> CreateAsync(Persona entity)
@@ -47,6 +52,7 @@ namespace AppG.Servicio
                 }
                 catch (Exception ex)
                 {
+                    throw new Exception(ex.Message);
                     throw new Exception(ex.Message);
 
                 }
@@ -92,9 +98,32 @@ namespace AppG.Servicio
             }
         }
 
-        public override Task DeleteAsync(int id)
+        public override async Task DeleteAsync(int id)
         {
-            return base.DeleteAsync(id);
+            var errorMessages = new List<string>();
+
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                await EliminarEntidadesRelacionadas<Ingreso>(session, i => i.Persona.Id == id);
+                await EliminarEntidadesRelacionadas<Gasto>(session, g => g!.Persona!.Id == id);
+
+                // Eliminar los traspasos asociados a la cuenta como origen
+                var gastosProgramados = await session.Query<GastoProgramado>()
+                    .Where(c => c!.Persona!.Id == id)
+                    .ToListAsync();
+
+                foreach (var gasto in gastosProgramados)
+                {
+                    await _gastoProgramadoServicio.DeleteAsync(gasto.Id);
+                }
+
+                // Eliminar la cuenta
+                await base.DeleteAsync(id);
+
+                // Confirmar la transacción
+                await transaction.CommitAsync();
+            }
         }
 
         public void ExportarDatosExcelAsync(Excel<PersonaDto> res)
@@ -137,7 +166,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -188,8 +217,20 @@ namespace AppG.Servicio
 
         public class PersonaDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
+        }
+
+        private async Task EliminarEntidadesRelacionadas<T>(NHibernate.ISession session, Expression<Func<T, bool>> predicate) where T : class
+        {
+            var entidades = await session.Query<T>()
+                .Where(predicate)
+                .ToListAsync();
+
+            foreach (var entidad in entidades)
+            {
+                session.Delete(entidad);
+            }
         }
     }
 }

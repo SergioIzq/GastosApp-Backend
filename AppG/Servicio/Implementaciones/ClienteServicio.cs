@@ -10,7 +10,10 @@ namespace AppG.Servicio
 {
     public class ClienteServicio : BaseServicio<Cliente>, IClienteServicio
     {
-        public ClienteServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
+        private readonly IIngresoServicio _ingresoServicio;
+        public ClienteServicio(ISessionFactory sessionFactory, IIngresoServicio ingresoServicio) : base(sessionFactory) {
+            _ingresoServicio = ingresoServicio;
+        }
 
 
         public override async Task<Cliente> CreateAsync(Cliente entity)
@@ -72,9 +75,22 @@ namespace AppG.Servicio
             }
         }
 
-        public override Task DeleteAsync(int id)
-        {
-            return base.DeleteAsync(id);
+        public async override Task DeleteAsync(int id)
+        {            
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                var ingresos = await session.Query<Ingreso>()
+                            .Where(c => c.Concepto.Categoria.Id == id)
+                            .ToListAsync();
+
+                foreach (var ingreso in ingresos)
+                {
+                    await _ingresoServicio.DeleteAsync(ingreso.Id);
+                }
+            }
+
+            await base.DeleteAsync(id);
         }
 
         public void ExportarDatosExcelAsync(Excel<ClienteDto> res)
@@ -117,7 +133,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -167,7 +183,7 @@ namespace AppG.Servicio
 
         public class ClienteDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
         }
     }

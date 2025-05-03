@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppG.Servicio;
-using Microsoft.AspNetCore.Authorization;
+using AppG.Entidades.BBDD;
 
 namespace AppG.Controllers
 {
-    public abstract class BaseController<T> : ControllerBase where T : class
+    public abstract class BaseController<T> : ControllerBase where T : Entidad
     {
         protected readonly IBaseServicio<T> _baseService;
         private readonly JsonSerializerOptions _jsonOptions;
@@ -17,7 +17,7 @@ namespace AppG.Controllers
             _jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 IgnoreReadOnlyProperties = true
             };
         }
@@ -28,7 +28,7 @@ namespace AppG.Controllers
             var options = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 IgnoreReadOnlyProperties = true
                 // No se especifica PropertyNamingPolicy, así que se usa el comportamiento predeterminado
             };

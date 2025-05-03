@@ -1,20 +1,23 @@
 ﻿using NHibernate;
-using NHibernate.Cfg;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AppG.Middleware;
 using Microsoft.AspNetCore.Authorization;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 public class Startup
 {
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
+        ConnectionString = GetConnectionString(Configuration);
     }
 
     public IConfiguration Configuration { get; }
+    public string ConnectionString = string.Empty;
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -36,7 +39,12 @@ public class Startup
             .AddJwtBearer(options =>
             {
 
-                var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
+                var keyString = Configuration["Jwt:Key"];
+                if (string.IsNullOrEmpty(keyString))
+                {
+                    throw new InvalidOperationException("La clave JWT no está configurada en la configuración.");
+                }
+                var key = Encoding.UTF8.GetBytes(keyString);
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -57,13 +65,11 @@ public class Startup
         // Configuración de CORS
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
-                });
+            options.AddPolicy("AllowAppG", builder =>
+                builder.WithOrigins("https://ahorroland.sergioizq.es", "http://localhost:4200")
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials());
         });
 
         // Configuración de NHibernate
@@ -79,6 +85,19 @@ public class Startup
             // Configura la política de nombres de propiedad (cambiar a 'camelCase' si es necesario)
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
         });
+
+        services.AddHangfire(config =>
+        {
+            config.UsePostgreSqlStorage(
+                options => options.UseNpgsqlConnection(ConnectionString),
+                new PostgreSqlStorageOptions
+                {
+                    SchemaName = "hangfire",
+                    QueuePollInterval = TimeSpan.FromSeconds(15)
+                });
+        });
+
+        services.AddHangfireServer();
 
     }
 
@@ -101,7 +120,7 @@ public class Startup
         app.UseSwaggerUI();
 
         // Configuración de CORS
-        app.UseCors("AllowAll");
+        app.UseCors("AllowAppG");
 
         // Configuración de enrutamiento
         app.UseRouting();
@@ -109,25 +128,40 @@ public class Startup
         app.UseAuthentication(); // Añadir autenticación
         app.UseAuthorization();  // Añadir autorización
 
+        app.UseHangfireDashboard("/hangfire");
+
         // Configuración de puntos finales
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-        });        
+        });
     }
 
     private ISessionFactory ConfigureNHibernate(IConfiguration configuration)
     {
-        var cfg = new Configuration();
-        cfg.Configure("NHibernate/hibernate.cfg.xml"); // Ruta correcta al archivo XML
+        var cfg = new NHibernate.Cfg.Configuration();
+        cfg.Configure("NHibernate/hibernate.cfg.xml");
         cfg.AddAssembly(Assembly.GetExecutingAssembly());
 
+        // Establecer la cadena de conexión programáticamente
+        cfg.SetProperty("connection.connection_string", ConnectionString);
+
+        return cfg.BuildSessionFactory();
+    }
+
+    private string GetConnectionString(IConfiguration configuration)
+    {
         // Obtener la cadena de conexión desde appsettings.json o variable de entorno
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        if (connectionString != null && connectionString.Contains("${DB_CONNECTION_STRING}"))
+        if (string.IsNullOrEmpty(connectionString))
         {
-            string? dbConnectionString = System.Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            throw new InvalidOperationException("No se encontró la cadena de conexión 'DefaultConnection'.");
+        }
+
+        if (connectionString.Contains("${DB_CONNECTION_STRING}"))
+        {
+            var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
             if (string.IsNullOrEmpty(dbConnectionString))
             {
@@ -137,10 +171,7 @@ public class Startup
             connectionString = connectionString.Replace("${DB_CONNECTION_STRING}", dbConnectionString);
         }
 
-        // Establecer la cadena de conexión programáticamente
-        cfg.SetProperty("connection.connection_string", connectionString);
-
-        return cfg.BuildSessionFactory();
+        return connectionString;
     }
 
 }

@@ -1,5 +1,4 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
+﻿using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
@@ -10,8 +9,15 @@ namespace AppG.Servicio
 {
     public class CategoriaServicio : BaseServicio<Categoria>, ICategoriaServicio
     {
-        public CategoriaServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
-
+        private readonly IIngresoServicio _ingresoServicio;
+        private readonly IGastoProgramadoServicio _gastoProgramadoServicio;
+        private readonly IGastoServicio _gastoServicio;
+        public CategoriaServicio(ISessionFactory sessionFactory, IIngresoServicio ingresoServicio, IGastoProgramadoServicio gastoProgramadoServicio, IGastoServicio gastoServicio) : base(sessionFactory)
+        {
+            _ingresoServicio = ingresoServicio;
+            _gastoProgramadoServicio = gastoProgramadoServicio;
+            _gastoServicio = gastoServicio;
+        }
 
         public override async Task<Categoria> CreateAsync(Categoria entity)
         {
@@ -75,9 +81,46 @@ namespace AppG.Servicio
             }
         }
 
-        public override Task DeleteAsync(int id)
+        public override async Task DeleteAsync(int id)
         {
-            return base.DeleteAsync(id);
+            var categoria = await GetByIdAsync(id);
+
+            if (categoria == null)
+            {
+                throw new KeyNotFoundException("Categoría no encontrado");
+            }
+
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                // 2. Obtener las entidades relacionadas
+                var ingresos = await session.Query<Ingreso>()
+                                .Where(c => c.Concepto.Categoria.Id == id)
+                                .ToListAsync();
+                var gastos = await session.Query<Gasto>()
+                                .Where(c => c.Concepto.Categoria.Id == id)
+                                .ToListAsync();
+                var gastosProgramados = await session.Query<GastoProgramado>()
+                                .Where(c => c.Concepto.Categoria.Id == id)
+                                .ToListAsync();
+
+                // 3. Eliminar las entidades relacionadas (ingresos, gastos, traspasos)
+                foreach (var ingreso in ingresos)
+                {
+                    await _ingresoServicio.DeleteAsync(ingreso.Id);
+                }
+
+                foreach (var gasto in gastos)
+                {
+                    await _gastoServicio.DeleteAsync(gasto.Id);
+                }
+
+                foreach (var gastoP in gastosProgramados)
+                {
+                    await _gastoProgramadoServicio.DeleteAsync(gastoP.Id);
+                }
+            }
+            await base.DeleteAsync(id);
         }
 
         public void ExportarDatosExcelAsync(Excel<CategoriaDto> res)
@@ -122,7 +165,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -175,7 +218,7 @@ namespace AppG.Servicio
 
         public class CategoriaDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
             public string? Descripcion { get; set; }
         }

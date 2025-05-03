@@ -6,7 +6,7 @@ using NHibernate;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+using NHibernate.Linq;
 using AppG.Exceptions;
 
 [Route("api/auth")]
@@ -29,8 +29,8 @@ public class AuthController : ControllerBase
 
         using (var session = _sessionFactory.OpenSession())
         {
-            var user = session.Query<Usuario>()
-                .SingleOrDefault(u => u.Correo == usuario.Correo);
+            var user = await session.Query<Usuario>()
+                .SingleOrDefaultAsync(u => u.Correo == usuario.Correo);
 
             if (user == null)
             {
@@ -45,8 +45,8 @@ public class AuthController : ControllerBase
             {
                 throw new CustomUnauthorizedAccessException(errorMessages);
             }
-
-            var token = GenerateJwtToken(user);
+        
+            var token = GenerateJwtToken(user!);
             return Ok(new { token });
         }
     }
@@ -116,7 +116,7 @@ public class AuthController : ControllerBase
     private bool VerifyPassword(string password, string storedHash)
     {
         var hasher = new PasswordHasher<Usuario>();
-        var result = hasher.VerifyHashedPassword(null, storedHash, password);
+        var result = hasher.VerifyHashedPassword(null!, storedHash, password);
         return result == PasswordVerificationResult.Success;
     }
 }

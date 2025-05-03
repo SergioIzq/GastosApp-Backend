@@ -6,11 +6,11 @@ namespace AppG.BBDD.Respuestas.Gastos
     {
         public GastoProgramadoByIdRespuesta()
         {
-            GastoById = new GastoProgramado();
+            GastoProgramadoById = new GastoProgramado();
             GastoRespuesta = new GastoRespuesta();
         }
 
-        public GastoProgramado GastoById { get; set; }
+        public GastoProgramado GastoProgramadoById { get; set; }
         public GastoRespuesta GastoRespuesta { get; set; }
     }
 }

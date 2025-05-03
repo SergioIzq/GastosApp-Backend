@@ -21,7 +21,7 @@ namespace AppG.Controllers
         [HttpGet("getFormaPago/{idUsuario}")]
         public async Task<IActionResult> GetFormaPago(int idUsuario)
         {
-            var result = await _formaPagoService.GetAllAsync<FormaPago>(idUsuario);
+            var result = await _formaPagoService.GetAllAsync(idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {
@@ -34,7 +34,7 @@ namespace AppG.Controllers
         [HttpGet("getCantidad")]
         public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
         {
-            var result = await _formaPagoService.GetCantidadAsync<FormaPago>(page, size, idUsuario);
+            var result = await _formaPagoService.GetCantidadAsync(page, size, idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {

@@ -45,6 +45,10 @@
 		<property name="AjustarAUltimoDia" type="bool" not-null="false">
 			<column name="ajustar_a_ultimo_dia" sql-type="boolean" />
 		</property>
+		<property name="HangfireJobId" type="string" not-null="false" length="100">
+			<column name="hangfire_job_id" sql-type="varchar" />
+		</property>
+
 	</class>
 
 </hibernate-mapping>

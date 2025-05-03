@@ -16,7 +16,7 @@ namespace AppG.Servicio
         }
 
 
-        public async Task<Gasto> CreateAsync(Gasto entity)
+        public override async Task<Gasto> CreateAsync(Gasto entity)
         {
             var errorMessages = new List<string>();
 
@@ -26,7 +26,7 @@ namespace AppG.Servicio
                 try
                 {
                     // Obtener la categoría del entity
-                    var entityCategoria = entity?.Concepto.Categoria;
+                    var entityCategoria = entity?.Concepto!.Categoria;
                     if (entityCategoria != null)
                     {
                         // Verificar si la categoría existe en la base de datos
@@ -37,7 +37,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto!.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -47,12 +47,12 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
+                        .Where(c => c.Nombre == entity!.Cuenta!.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta '{entity!.Cuenta!.Nombre}' no existe.");
                     }
 
                     if (errorMessages.Count > 0)
@@ -61,7 +61,7 @@ namespace AppG.Servicio
                     }
 
                     // Actualizar el saldo de la cuenta
-                    cuenta.Saldo -= entity.Monto;
+                    cuenta!.Saldo -= entity!.Monto;
 
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
@@ -102,7 +102,7 @@ namespace AppG.Servicio
                     }
 
                     // Obtener la categoría del entity
-                    var entityCategoria = entity?.Concepto.Categoria;
+                    var entityCategoria = entity!.Concepto!.Categoria;
                     if (entityCategoria != null)
                     {
                         // Verificar si la categoría existe en la base de datos
@@ -113,7 +113,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -123,22 +123,22 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta original del gasto (cuenta del gasto existente)
                     var originalCuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                        .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (originalCuenta == null)
                     {
-                        errorMessages.Add($"La cuenta original '{existingEntity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta original '{existingEntity!.Cuenta!.Nombre}' no existe.");
                     }
 
                     // Buscar la nueva cuenta (cuenta del nuevo entity)
                     var nuevaCuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
+                        .Where(c => c.Nombre == entity!.Cuenta!.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (nuevaCuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta '{entity!.Cuenta!.Nombre}' no existe.");
                     }
 
                     if (errorMessages.Count > 0)
@@ -156,7 +156,7 @@ namespace AppG.Servicio
                     // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
                     if (nuevaCuenta != null)
                     {
-                        nuevaCuenta.Saldo -= entity.Monto;
+                        nuevaCuenta.Saldo -= entity!.Monto;
                         session.Update(nuevaCuenta);
                     }
 
@@ -191,12 +191,12 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                        .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{existingEntity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta '{existingEntity!.Cuenta!.Nombre}' no existe.");
                         throw new ValidationException(errorMessages);
                     }
 
@@ -246,7 +246,7 @@ namespace AppG.Servicio
                 Concepto = item.Concepto?.Nombre ?? string.Empty,
                 Cuenta = item.Cuenta?.Nombre ?? string.Empty,
                 Descripcion = item?.Descripcion ?? string.Empty,
-                Importe = $"+{item.Importe}",
+                Importe = $"+{item!.Importe}",
             }));
 
             exportData.Add(new
@@ -276,7 +276,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -417,12 +417,12 @@ namespace AppG.Servicio
         public class GastoDto
         {
             public DateTime Fecha { get; set; }
-            public Persona Persona { get; set; }
-            public FormaPago FormaPago { get; set; }
-            public Proveedor Proveedor { get; set; }
-            public Categoria Categoria { get; set; }
-            public Concepto Concepto { get; set; }
-            public Cuenta Cuenta { get; set; }
+            public required Persona Persona { get; set; }
+            public required FormaPago FormaPago { get; set; }
+            public required Proveedor Proveedor { get; set; }
+            public required Categoria Categoria { get; set; }
+            public required Concepto Concepto { get; set; }
+            public required Cuenta Cuenta { get; set; }
             public decimal Importe { get; set; }
 
             public string? Descripcion { get; set; }

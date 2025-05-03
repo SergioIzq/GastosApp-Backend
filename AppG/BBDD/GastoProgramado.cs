@@ -4,62 +4,18 @@
     {
         public GastoProgramado()
         {
-        }
-
-        private decimal _Monto;
-        public virtual decimal Monto
-        {
-            get
-            {
-                return this._Monto;
-            }
-            set
-            {
-                if (this._Monto != value)
-                {
-                    this._Monto = value;
-                }
-            }
-        }
-
-        private int _DiaEjecucion;
-        public virtual int DiaEjecucion
-        {
-            get
-            {
-                return this._DiaEjecucion;
-            }
-            set
-            {
-                if (this._DiaEjecucion != value)
-                {
-                    this._DiaEjecucion = value;
-                }
-            }
-        }
-        public virtual Concepto Concepto { get; set; }
-        public virtual Proveedor Proveedor { get; set; }
-        public virtual Persona Persona { get; set; }
-        public virtual Cuenta Cuenta { get; set; }
-        public virtual FormaPago FormaPago { get; set; }
-
-
-        private string? _Descripcion;
-        public virtual string? Descripcion
-        {
-            get
-            {
-                return this._Descripcion;
-            }
-            set
-            {
-                if (this._Descripcion != value)
-                {
-                    this._Descripcion = value;
-                }
-            }
-        }
+        }        
+        public virtual decimal Monto { get; set; }
+        public virtual int DiaEjecucion { get; set; }
+        public virtual Concepto Concepto { get; set; } = new Concepto();
+        public virtual Proveedor Proveedor { get; set; } = new Proveedor();
+        public virtual Persona Persona { get; set; } = new Persona();
+        public virtual Cuenta Cuenta { get; set; } = new Cuenta();
+        public virtual FormaPago FormaPago { get; set; } = new FormaPago();
+        public virtual string? Descripcion{get; set;}
         public virtual bool Activo { get; set; }
         public virtual bool AjustarAUltimoDia { get; set; }
+        public virtual string? HangfireJobId { get; set; }
+
     }
 }

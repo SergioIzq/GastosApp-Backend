@@ -10,7 +10,7 @@ namespace AppG.Controllers
         public ResponseOne(T item, string message)
         {
             Item = item;
-            message = message;
+            this.message = message;
         }
     }
 }

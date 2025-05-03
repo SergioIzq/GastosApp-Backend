@@ -4,6 +4,7 @@ using NHibernate;
 using NHibernate.Linq;
 using AppG.BBDD.Respuestas.Gastos;
 using Hangfire;
+using AppG.BBDD.Respuestas.Ingresos;
 
 namespace AppG.Servicio
 {
@@ -25,7 +26,7 @@ namespace AppG.Servicio
                 try
                 {
                     // Obtener la categoría del entity
-                    var entityCategoria = entity?.Concepto.Categoria;
+                    var entityCategoria = entity?.Concepto!.Categoria;
                     if (entityCategoria != null)
                     {
                         // Verificar si la categoría existe en la base de datos
@@ -36,7 +37,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity!.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto!.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -48,20 +49,21 @@ namespace AppG.Servicio
                     session.Save(entity);
                     await transaction.CommitAsync();
 
+                    // Obtener el ID generado
                     var id = session.GetIdentifier(entity);
+
+                    // Recuperar la entidad completa (por si se llenan otros campos en base de datos)
                     var createdEntity = await session.GetAsync<GastoProgramado>(id);
 
-                    //var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(entity.DiaEjecucion, entity.AjustarAUltimoDia);
-                    //if (fechaEjecucion != null)
-                    //{
-                    //    var delay = fechaEjecucion.Value - DateTime.Now;
-                    //    delay = TimeSpan.Zero;
+                    // Programar el trabajo recurrente en Hangfire
+                    ProgramarTrabajoRecurrente(createdEntity, entity!);
 
-                    //    BackgroundJob.Schedule<IGastoProgramadoServicio>(
-                    //        x => x.AplicarGasto(createdEntity.Id),
-                    //        delay
-                    //    );
-                    //}
+                    // Guardar el HangfireJobId en base de datos si fue modificado
+                    using (var updateTransaction = session.BeginTransaction())
+                    {
+                        await session.UpdateAsync(createdEntity);
+                        await updateTransaction.CommitAsync();
+                    }
 
                     return createdEntity;
                 }
@@ -92,7 +94,7 @@ namespace AppG.Servicio
                     }
 
                     // Obtener la categoría del entity
-                    var entityCategoria = entity?.Concepto.Categoria;
+                    var entityCategoria = entity?.Concepto!.Categoria;
                     if (entityCategoria != null)
                     {
                         // Verificar si la categoría existe en la base de datos
@@ -103,7 +105,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto!.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -113,22 +115,22 @@ namespace AppG.Servicio
 
                     // Buscar la cuenta original del gasto (cuenta del gasto existente)
                     var originalCuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                        .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (originalCuenta == null)
                     {
-                        errorMessages.Add($"La cuenta original '{existingEntity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta original '{existingEntity!.Cuenta!.Nombre}' no existe.");
                     }
 
                     // Buscar la nueva cuenta (cuenta del nuevo entity)
                     var nuevaCuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity.Cuenta.Nombre && c.IdUsuario == entity.IdUsuario)
+                        .Where(c => c.Nombre == entity!.Cuenta!.Nombre && c.IdUsuario == entity.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (nuevaCuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta '{entity!.Cuenta!.Nombre}' no existe.");
                     }
 
                     if (errorMessages.Count > 0)
@@ -146,7 +148,7 @@ namespace AppG.Servicio
                     // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
                     if (nuevaCuenta != null)
                     {
-                        nuevaCuenta.Saldo -= entity.Monto;
+                        nuevaCuenta.Saldo -= entity!.Monto;
                         session.Update(nuevaCuenta);
                     }
 
@@ -179,14 +181,20 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
+                    // Eliminar el job de Hangfire si existe
+                    if (!string.IsNullOrEmpty(existingEntity.HangfireJobId))
+                    {
+                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);
+                    }
+
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity.Cuenta.Nombre && c.IdUsuario == existingEntity.IdUsuario)
-                        .SingleOrDefaultAsync();
+                    .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                    .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{existingEntity.Cuenta.Nombre}' no existe.");
+                        errorMessages.Add($"La cuenta '{existingEntity!.Cuenta!.Nombre}' no existe.");
                         throw new ValidationException(errorMessages);
                     }
 
@@ -269,11 +277,11 @@ namespace AppG.Servicio
         {
             GastoProgramadoByIdRespuesta response = new GastoProgramadoByIdRespuesta();
 
-            response.GastoById = await base.GetByIdAsync(id);
+            response.GastoProgramadoById = await base.GetByIdAsync(id);
 
-            if (response.GastoById?.Cuenta?.IdUsuario != null)
+            if (response.GastoProgramadoById?.Cuenta?.IdUsuario != null)
             {
-                response.GastoRespuesta = await GetNewGastoAsync(response.GastoById.Cuenta.IdUsuario);
+                response.GastoRespuesta = await GetNewGastoAsync(response.GastoProgramadoById.Cuenta.IdUsuario);
             }
 
             return response;
@@ -296,17 +304,17 @@ namespace AppG.Servicio
                         return;
 
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Id == gasto.Cuenta.Id && c.IdUsuario == gasto.IdUsuario)
+                        .Where(c => c.Id == gasto!.Cuenta!.Id && c.IdUsuario == gasto.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        throw new Exception($"No se encontró la cuenta con ID {gasto.Cuenta.Id}");
+                        throw new Exception($"No se encontró la cuenta con ID {gasto!.Cuenta!.Id}");
                     }
 
                     cuenta.Saldo -= Math.Abs(gasto.Monto);
 
-                    session.Update(cuenta);                    
+                    session.Update(cuenta);
 
                     await transaction.CommitAsync();
                 }
@@ -317,5 +325,79 @@ namespace AppG.Servicio
                 }
             }
         }
+
+        private DateTime? CalcularFechaEjecucionDesdeDiaDelMes(int dia, bool ajustarAUltimoDia)
+        {
+            var hoy = DateTime.Today;
+            var año = hoy.Year;
+            var mes = hoy.Month;
+
+            if (dia <= hoy.Day)
+            {
+                mes++;
+                if (mes > 12)
+                {
+                    mes = 1;
+                    año++;
+                }
+            }
+
+            var ultimoDiaDelMes = DateTime.DaysInMonth(año, mes);
+
+            if (dia > ultimoDiaDelMes)
+            {
+                if (ajustarAUltimoDia)
+                {
+                    dia = ultimoDiaDelMes;
+                }
+                else
+                {
+                    return null; // No se programa
+                }
+            }
+
+            return new DateTime(año, mes, dia);
+        }
+
+        private void ProgramarTrabajoRecurrente(GastoProgramado createdEntity)
+        {
+            var recurringJobId = $"AplicarGasto_{createdEntity.Id}";
+
+            var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(createdEntity.DiaEjecucion, createdEntity.AjustarAUltimoDia);
+
+            if (fechaEjecucion != null)
+            {
+                var delay = fechaEjecucion.Value - DateTime.Now;
+
+                if (delay < TimeSpan.Zero)
+                {
+                    fechaEjecucion = fechaEjecucion.Value.AddDays(1);
+                    delay = fechaEjecucion.Value - DateTime.Now;
+                }
+
+                createdEntity.HangfireJobId = recurringJobId;
+
+                var hora = fechaEjecucion.Value.Hour;
+                var minuto = fechaEjecucion.Value.Minute;
+
+                if (hora == 0 && minuto == 0)
+                {
+                    hora = 9;
+                    minuto = 0;
+                }
+
+                RecurringJob.AddOrUpdate(
+                    recurringJobId,
+                    () => AplicarGasto(createdEntity.Id),
+                    Cron.Monthly(fechaEjecucion.Value.Day, hora, minuto),
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.Local
+                    }
+                );
+
+            }
+        }
+
     }
 }

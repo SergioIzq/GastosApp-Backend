@@ -14,14 +14,14 @@
         /// <summary>
         /// Mensaje adicional sobre la operación.
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         /// <summary>
         /// Los elementos de la respuesta.
         /// </summary>
-        public T[] Items { get; set; }
+        public T[] Items { get; set; } = new T[0];
 
-        public List<string> Errors {  get; set; }
+        public List<string> Errors { get; set; } = new List<string>();
     }
 
 

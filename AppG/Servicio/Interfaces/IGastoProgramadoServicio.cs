@@ -1,4 +1,5 @@
 ﻿using AppG.BBDD.Respuestas.Gastos;
+using AppG.BBDD.Respuestas.Ingresos;
 using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio

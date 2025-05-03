@@ -22,7 +22,7 @@ namespace AppG.Controllers
         [HttpGet("getCantidad")]
         public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
         {
-            var result = await _gastoService.GetCantidadAsync<Gasto>(page, size, idUsuario);
+            var result = await _gastoService.GetCantidadAsync(page, size, idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {

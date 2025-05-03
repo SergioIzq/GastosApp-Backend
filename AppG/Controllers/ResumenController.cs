@@ -1,21 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using AppG.BBDD;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace AppG.Controllers
 {
     [ApiController]
     [Route("api/resumen")]
     [Authorize]
-    public class ResumenController : BaseController<Resumen>
+    public class ResumenController : ControllerBase
     {
         private readonly IResumenServicio _resumenService;
+        private readonly JsonSerializerOptions _jsonOptions;
 
-        public ResumenController(IResumenServicio resumenService) : base(resumenService)
+        public ResumenController(IResumenServicio resumenService)
         {
-            _resumenService = resumenService;
+            _resumenService = resumenService;            
+            _jsonOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                IgnoreReadOnlyProperties = true
+            };
         }
 
         [HttpGet("getCantidadIngresos")]

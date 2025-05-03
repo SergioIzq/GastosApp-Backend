@@ -2,7 +2,7 @@
 {
     public class ExportExcelRequest
     {
-        public ResumenDatos Datos { get; set; }
-        public string DirPath { get; set; }
+        public ResumenDatos Datos { get; set; } = new ResumenDatos();
+        public string DirPath { get; set; } = string.Empty;
     }
 }

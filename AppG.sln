@@ -5,8 +5,6 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppG", "AppG\AppG.csproj", "{C36B2CD1-594C-4722-9303-EAD660802522}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CronJobProgramado", "CronJobProgramado\CronJobProgramado.csproj", "{B53DED0D-6430-4918-B00E-6103B7301155}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{C36B2CD1-594C-4722-9303-EAD660802522}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C36B2CD1-594C-4722-9303-EAD660802522}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C36B2CD1-594C-4722-9303-EAD660802522}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B53DED0D-6430-4918-B00E-6103B7301155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B53DED0D-6430-4918-B00E-6103B7301155}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B53DED0D-6430-4918-B00E-6103B7301155}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B53DED0D-6430-4918-B00E-6103B7301155}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

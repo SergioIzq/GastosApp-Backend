@@ -1,17 +1,22 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
+﻿using AppG.Entidades.BBDD;
 using AppG.Exceptions;
-using Microsoft.AspNetCore.Http;
 using NHibernate;
 using NHibernate.Linq;
 using OfficeOpenXml;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace AppG.Servicio
 {
     public class CuentaServicio : BaseServicio<Cuenta>, ICuentaServicio
     {
-        public CuentaServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
+        private readonly IGastoProgramadoServicio _gastoServicio;
+        private readonly ITraspasoServicio _traspasoServicio;
+
+        public CuentaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio, ITraspasoServicio traspasoServicio) : base(sessionFactory) { 
+            _gastoServicio = gastoProgramadoServicio;
+            _traspasoServicio = traspasoServicio;
+        }
 
 
         public override async Task<Cuenta> CreateAsync(Cuenta entity)
@@ -67,46 +72,31 @@ namespace AppG.Servicio
             }
         }
 
-        public async Task DeleteAsync(int id)
+        public override async Task DeleteAsync(int id)
         {
             var errorMessages = new List<string>();
 
             using (var session = _sessionFactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
-
-                // Obtener la cuenta que se va a eliminar
-                var cuenta = await session.Query<Cuenta>()
-                    .Where(c => c.Id == id)
-                    .SingleOrDefaultAsync();
-
-                if (cuenta == null)
-                {
-                    throw new KeyNotFoundException("La cuenta no fue encontrada.");
-                }
+                // Uso dentro de tu método principal
+                await EliminarEntidadesRelacionadas<Traspaso>(session, t => t.CuentaOrigen.Id == id);
+                await EliminarEntidadesRelacionadas<Traspaso>(session, t => t.CuentaDestino.Id == id);
+                await EliminarEntidadesRelacionadas<Ingreso>(session, i => i.Cuenta.Id == id);
+                await EliminarEntidadesRelacionadas<Gasto>(session, g => g!.Cuenta!.Id == id);
 
                 // Eliminar los traspasos asociados a la cuenta como origen
-                var traspasosOrigen = await session.Query<Traspaso>()
-                    .Where(t => t.CuentaOrigen.Id == id)
+                var gastosProgramados = await session.Query<GastoProgramado>()
+                    .Where(c => c!.Cuenta!.Id == id)
                     .ToListAsync();
 
-                foreach (var traspaso in traspasosOrigen)
+                foreach (var gasto in gastosProgramados)
                 {
-                    session.Delete(traspaso);
-                }
-
-                // Eliminar los traspasos asociados a la cuenta como destino
-                var traspasosDestino = await session.Query<Traspaso>()
-                    .Where(t => t.CuentaDestino.Id == id)
-                    .ToListAsync();
-
-                foreach (var traspaso in traspasosDestino)
-                {
-                    session.Delete(traspaso);
+                    await _gastoServicio.DeleteAsync(gasto.Id);
                 }
 
                 // Eliminar la cuenta
-                session.Delete(cuenta);
+                await base.DeleteAsync(id);
 
                 // Confirmar la transacción
                 await transaction.CommitAsync();
@@ -154,7 +144,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -205,8 +195,20 @@ namespace AppG.Servicio
 
         public class CuentaDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
+        }
+
+        private async Task EliminarEntidadesRelacionadas<T>(NHibernate.ISession session, Expression<Func<T, bool>> predicate) where T : class
+        {
+            var entidades = await session.Query<T>()
+                .Where(predicate)
+                .ToListAsync();
+
+            foreach (var entidad in entidades)
+            {
+                session.Delete(entidad);
+            }
         }
     }
 }
