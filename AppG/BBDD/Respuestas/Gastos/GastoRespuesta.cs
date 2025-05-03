@@ -1,10 +1,11 @@
 ﻿using AppG.Entidades.BBDD;
 
-namespace AppG.BBDD.Respuestas
+namespace AppG.BBDD.Respuestas.Gastos
 {
     public class GastoRespuesta
     {
-        public GastoRespuesta() {
+        public GastoRespuesta()
+        {
             ListaCuentas = new List<Cuenta>();
             ListaProveedores = new List<Proveedor>();
             ListaConceptos = new List<Concepto>();

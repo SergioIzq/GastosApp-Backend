@@ -23,7 +23,7 @@ namespace AppG.Controllers
         [HttpGet("getCantidad")]
         public async Task<IActionResult> GetCantidad(int page, int size, int idUsuario)
         {
-            var result = await _categoriaService.GetCantidadAsync<Categoria>(page, size, idUsuario);
+            var result = await _categoriaService.GetCantidadAsync(page, size, idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {
@@ -37,7 +37,7 @@ namespace AppG.Controllers
         [HttpGet("getCategorias/{idUsuario}")]
         public async Task<IActionResult> GetCategorias(int idUsuario)
         {
-            var result = await _categoriaService.GetAllAsync<Categoria>(idUsuario);
+            var result = await _categoriaService.GetAllAsync(idUsuario);
 
             if (result is IDictionary<string, object> errorResult && errorResult.ContainsKey("Error"))
             {

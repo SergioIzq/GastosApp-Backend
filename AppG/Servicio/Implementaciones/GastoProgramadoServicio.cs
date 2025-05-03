@@ -2,21 +2,21 @@
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
-using OfficeOpenXml;
-using System.Diagnostics;
 using AppG.BBDD.Respuestas.Gastos;
+using Hangfire;
+using AppG.BBDD.Respuestas.Ingresos;
 
 namespace AppG.Servicio
 {
-    public class GastoServicio : BaseServicio<Gasto>, IGastoServicio
+    public class GastoProgramadoServicio : BaseServicio<GastoProgramado>, IGastoProgramadoServicio
     {
-        public GastoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
+        public GastoProgramadoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
         {
 
         }
 
 
-        public override async Task<Gasto> CreateAsync(Gasto entity)
+        public async override Task<GastoProgramado> CreateAsync(GastoProgramado entity)
         {
             var errorMessages = new List<string>();
 
@@ -45,33 +45,25 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Buscar la cuenta correspondiente por nombre
-                    var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == entity!.Cuenta!.Nombre && c.IdUsuario == entity.IdUsuario)
-                        .SingleOrDefaultAsync();
-
-                    if (cuenta == null)
-                    {
-                        errorMessages.Add($"La cuenta '{entity!.Cuenta!.Nombre}' no existe.");
-                    }
-
-                    if (errorMessages.Count > 0)
-                    {
-                        throw new ValidationException(errorMessages);
-                    }
-
-                    // Actualizar el saldo de la cuenta
-                    cuenta!.Saldo -= entity!.Monto;
-
-                    // Guardar la cuenta actualizada
-                    session.Update(cuenta);
-
-                    // Guardar el ingreso
+                    // Guardar el gasto programado
                     session.Save(entity);
                     await transaction.CommitAsync();
 
+                    // Obtener el ID generado
                     var id = session.GetIdentifier(entity);
-                    var createdEntity = await session.GetAsync<Gasto>(id);
+
+                    // Recuperar la entidad completa (por si se llenan otros campos en base de datos)
+                    var createdEntity = await session.GetAsync<GastoProgramado>(id);
+
+                    // Programar el trabajo recurrente en Hangfire
+                    ProgramarTrabajoRecurrente(createdEntity, entity!);
+
+                    // Guardar el HangfireJobId en base de datos si fue modificado
+                    using (var updateTransaction = session.BeginTransaction())
+                    {
+                        await session.UpdateAsync(createdEntity);
+                        await updateTransaction.CommitAsync();
+                    }
 
                     return createdEntity;
                 }
@@ -84,7 +76,7 @@ namespace AppG.Servicio
         }
 
 
-        public override async Task UpdateAsync(int id, Gasto entity)
+        public override async Task UpdateAsync(int id, GastoProgramado entity)
         {
             var errorMessages = new List<string>();
 
@@ -102,7 +94,7 @@ namespace AppG.Servicio
                     }
 
                     // Obtener la categoría del entity
-                    var entityCategoria = entity!.Concepto!.Categoria;
+                    var entityCategoria = entity?.Concepto!.Categoria;
                     if (entityCategoria != null)
                     {
                         // Verificar si la categoría existe en la base de datos
@@ -113,7 +105,7 @@ namespace AppG.Servicio
                         if (existingCategoria != null)
                         {
                             // Asignar el ID de la categoría existente a la entidad
-                            entity!.Concepto.Categoria = existingCategoria;
+                            entity!.Concepto!.Categoria = existingCategoria;
                         }
                         else
                         {
@@ -182,17 +174,23 @@ namespace AppG.Servicio
                 try
                 {
                     // Cargar la entidad existente
-                    var existingEntity = await session.GetAsync<Gasto>(id);
+                    var existingEntity = await session.GetAsync<GastoProgramado>(id);
                     if (existingEntity == null)
                     {
                         errorMessages.Add($"Entidad con ID {id} no encontrada");
                         throw new ValidationException(errorMessages);
                     }
 
+                    // Eliminar el job de Hangfire si existe
+                    if (!string.IsNullOrEmpty(existingEntity.HangfireJobId))
+                    {
+                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);
+                    }
+
                     // Buscar la cuenta correspondiente por nombre
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
-                        .SingleOrDefaultAsync();
+                    .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
+                    .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
@@ -215,130 +213,6 @@ namespace AppG.Servicio
                     await transaction.RollbackAsync();
                     throw new Exception(ex.Message);
                 }
-            }
-        }
-
-        public void ExportarDatosExcelAsync(Excel<GastoDto> res)
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            string directorioPath = res.DirPath;
-
-            // Comprobar si la ruta del directorio es válida
-            if (!Directory.Exists(directorioPath))
-            {
-                throw new DirectoryNotFoundException($"El directorio especificado no existe: {directorioPath}");
-            }
-
-            // Definir la ruta completa del archivo
-            var filePath = Path.Combine(directorioPath, "gastos.xlsx");
-
-            var exportData = new List<dynamic>();
-
-            // Convertir la lista de ingresos a un formato adecuado para Excel
-            exportData.AddRange(res.Data.Select(item => new
-            {
-                TipoOperacion = "Gasto",
-                Fecha = item.Fecha.ToString("dd/MM/yyyy"),
-                Persona = item.Persona?.Nombre ?? string.Empty,
-                FormaPago = item.FormaPago?.Nombre ?? string.Empty,
-                Proveedor = item.Proveedor?.Nombre ?? string.Empty,
-                Categoria = item.Categoria?.Nombre ?? string.Empty,
-                Concepto = item.Concepto?.Nombre ?? string.Empty,
-                Cuenta = item.Cuenta?.Nombre ?? string.Empty,
-                Descripcion = item?.Descripcion ?? string.Empty,
-                Importe = $"+{item!.Importe}",
-            }));
-
-            exportData.Add(new
-            {
-                TipoOperacion = "Gasto",
-                Fecha = "",
-                Persona = "",
-                FormaPago = "",
-                Cliente = "",
-                Categoria = "",
-                Concepto = "",
-                Cuenta = "",
-                Descripcion = "",
-                Importe = ""
-            });
-
-            using (var package = new ExcelPackage())
-            {
-                ExcelWorksheet worksheet;
-
-                if (File.Exists(filePath))
-                {
-                    try
-                    {
-                        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
-                        {
-                            package.Load(stream);
-                        }
-                    }
-                    catch (FileLoadException)
-                    {
-                        throw new FileLoadException();
-                    }
-                    worksheet = package.Workbook.Worksheets["Gastos"];
-
-                    if (worksheet == null)
-                    {
-                        worksheet = package.Workbook.Worksheets.Add("Gastos");
-                    }
-                }
-                else
-                {
-                    worksheet = package.Workbook.Worksheets.Add("Gastos");
-                }
-
-                worksheet.Cells.Clear();
-
-                // Establecer las cabeceras de las columnas
-                worksheet.Cells["A1"].Value = "Tipo Operacion";
-                worksheet.Cells["B1"].Value = "Fecha";
-                worksheet.Cells["C1"].Value = "Persona";
-                worksheet.Cells["D1"].Value = "Forma de Pago";
-                worksheet.Cells["E1"].Value = "Proveedor";
-                worksheet.Cells["F1"].Value = "Categoria";
-                worksheet.Cells["G1"].Value = "Concepto";
-                worksheet.Cells["H1"].Value = "Cuenta";
-                worksheet.Cells["I1"].Value = "Descripcion";
-                worksheet.Cells["J1"].Value = "Importe";
-
-                // Cargar los datos manualmente a partir de la fila 2
-                var row = 2;
-                foreach (var item in exportData.Take(exportData.Count - 1))
-                {
-                    worksheet.Cells[row, 1].Value = item.TipoOperacion;
-                    worksheet.Cells[row, 2].Value = item.Fecha;
-                    worksheet.Cells[row, 3].Value = item.Persona;
-                    worksheet.Cells[row, 4].Value = item.FormaPago;
-                    worksheet.Cells[row, 5].Value = item.Proveedor;
-                    worksheet.Cells[row, 6].Value = item.Categoria;
-                    worksheet.Cells[row, 7].Value = item.Concepto;
-                    worksheet.Cells[row, 8].Value = item.Cuenta;
-                    worksheet.Cells[row, 9].Value = item.Descripcion;
-                    worksheet.Cells[row, 10].Value = item.Importe;
-                    row++;
-                }
-
-                row++;
-
-                if (worksheet.Dimension != null)
-                {
-                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                }
-
-                FileInfo fileInfo = new FileInfo(filePath);
-                package.SaveAs(fileInfo);
-
-                // Abrir el archivo en Excel
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = filePath,
-                    UseShellExecute = true
-                });
             }
         }
 
@@ -399,39 +273,131 @@ namespace AppG.Servicio
             }
         }
 
-        public async Task<GastoByIdRespuesta> GetGastoByIdAsync(int id)
+        public async Task<GastoProgramadoByIdRespuesta> GetGastoByIdAsync(int id)
         {
-            GastoByIdRespuesta response = new GastoByIdRespuesta();
-            
-            response.GastoById = await base.GetByIdAsync(id);
+            GastoProgramadoByIdRespuesta response = new GastoProgramadoByIdRespuesta();
 
-            if (response.GastoById?.Cuenta?.IdUsuario != null)
+            response.GastoProgramadoById = await base.GetByIdAsync(id);
+
+            if (response.GastoProgramadoById?.Cuenta?.IdUsuario != null)
             {
-                response.GastoRespuesta = await GetNewGastoAsync(response.GastoById.Cuenta.IdUsuario);
+                response.GastoRespuesta = await GetNewGastoAsync(response.GastoProgramadoById.Cuenta.IdUsuario);
             }
 
             return response;
         }
 
-
-        public class GastoDto
+        public async Task AplicarGasto(int gastoProgramadoId)
         {
-            public DateTime Fecha { get; set; }
-            public required Persona Persona { get; set; }
-            public required FormaPago FormaPago { get; set; }
-            public required Proveedor Proveedor { get; set; }
-            public required Categoria Categoria { get; set; }
-            public required Concepto Concepto { get; set; }
-            public required Cuenta Cuenta { get; set; }
-            public decimal Importe { get; set; }
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
+            {
+                try
+                {
+                    var gasto = await session.GetAsync<GastoProgramado>(gastoProgramadoId);
+                    if (gasto == null)
+                    {
+                        throw new Exception($"No se encontró el gasto programado con ID {gastoProgramadoId}");
+                    }
 
-            public string? Descripcion { get; set; }
+                    if (!gasto.Activo)
+                        return;
+
+                    var cuenta = await session.Query<Cuenta>()
+                        .Where(c => c.Id == gasto!.Cuenta!.Id && c.IdUsuario == gasto.IdUsuario)
+                        .SingleOrDefaultAsync();
+
+                    if (cuenta == null)
+                    {
+                        throw new Exception($"No se encontró la cuenta con ID {gasto!.Cuenta!.Id}");
+                    }
+
+                    cuenta.Saldo -= Math.Abs(gasto.Monto);
+
+                    session.Update(cuenta);
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
+        private DateTime? CalcularFechaEjecucionDesdeDiaDelMes(int dia, bool ajustarAUltimoDia)
+        {
+            var hoy = DateTime.Today;
+            var año = hoy.Year;
+            var mes = hoy.Month;
+
+            if (dia <= hoy.Day)
+            {
+                mes++;
+                if (mes > 12)
+                {
+                    mes = 1;
+                    año++;
+                }
+            }
+
+            var ultimoDiaDelMes = DateTime.DaysInMonth(año, mes);
+
+            if (dia > ultimoDiaDelMes)
+            {
+                if (ajustarAUltimoDia)
+                {
+                    dia = ultimoDiaDelMes;
+                }
+                else
+                {
+                    return null; // No se programa
+                }
+            }
+
+            return new DateTime(año, mes, dia);
+        }
+
+        private void ProgramarTrabajoRecurrente(GastoProgramado createdEntity)
+        {
+            var recurringJobId = $"AplicarGasto_{createdEntity.Id}";
+
+            var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(createdEntity.DiaEjecucion, createdEntity.AjustarAUltimoDia);
+
+            if (fechaEjecucion != null)
+            {
+                var delay = fechaEjecucion.Value - DateTime.Now;
+
+                if (delay < TimeSpan.Zero)
+                {
+                    fechaEjecucion = fechaEjecucion.Value.AddDays(1);
+                    delay = fechaEjecucion.Value - DateTime.Now;
+                }
+
+                createdEntity.HangfireJobId = recurringJobId;
+
+                var hora = fechaEjecucion.Value.Hour;
+                var minuto = fechaEjecucion.Value.Minute;
+
+                if (hora == 0 && minuto == 0)
+                {
+                    hora = 9;
+                    minuto = 0;
+                }
+
+                RecurringJob.AddOrUpdate(
+                    recurringJobId,
+                    () => AplicarGasto(createdEntity.Id),
+                    Cron.Monthly(fechaEjecucion.Value.Day, hora, minuto),
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.Local
+                    }
+                );
+
+            }
+        }
 
     }
 }
-
-
-
-

@@ -119,7 +119,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -170,7 +170,7 @@ namespace AppG.Servicio
 
         public class FormaPagoDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
         }
     }

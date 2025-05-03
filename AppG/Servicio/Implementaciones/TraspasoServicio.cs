@@ -49,9 +49,9 @@ namespace AppG.Servicio
                     }
 
                     // Realizar el traspaso
-                    cuentaOrigen.Saldo -= entity.Importe;
+                    cuentaOrigen!.Saldo -= entity.Importe;
 
-                    cuentaDestino.Saldo += entity.Importe;
+                    cuentaDestino!.Saldo += entity.Importe;
 
 
                     Traspaso traspaso = new Traspaso
@@ -79,7 +79,7 @@ namespace AppG.Servicio
 
                     return createdEntity;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Rollback de la transacción en caso de error
                     await transaction.RollbackAsync();
@@ -154,8 +154,8 @@ namespace AppG.Servicio
 
                     // Actualizar los saldos de las cuentas
                     // Revertir el saldo anterior de las cuentas involucradas
-                    cuentaOrigen.Saldo += existingTraspaso.Importe;
-                    cuentaDestino.Saldo -= existingTraspaso.Importe;
+                    cuentaOrigen!.Saldo += existingTraspaso.Importe;
+                    cuentaDestino!.Saldo -= existingTraspaso.Importe;
 
                     // Aplicar el saldo actual del nuevo traspaso
                     cuentaOrigen.Saldo -= entity.Importe;
@@ -182,7 +182,7 @@ namespace AppG.Servicio
                     // Commit de la transacción
                     await transaction.CommitAsync();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Rollback en caso de error
                     await transaction.RollbackAsync();
@@ -243,7 +243,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -307,9 +307,9 @@ namespace AppG.Servicio
         public class TraspasoDto
         {
             public DateTime Fecha { get; set; }
-            public string CuentaOrigen { get; set; }
+            public required string CuentaOrigen { get; set; }
             public decimal SaldoCuentaOrigen { get; set; }
-            public string CuentaDestino { get; set; }
+            public required string CuentaDestino { get; set; }
             public decimal SaldoCuentaDestino { get; set; }
             public decimal Importe { get; set; }
 

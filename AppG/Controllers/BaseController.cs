@@ -2,22 +2,22 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppG.Servicio;
-using Microsoft.AspNetCore.Authorization;
+using AppG.Entidades.BBDD;
 
 namespace AppG.Controllers
 {
-    public abstract class BaseController<T> : ControllerBase where T : class
+    public abstract class BaseController<T> : ControllerBase where T : Entidad
     {
-        protected readonly IBaseServicio<T> _gastoService;
+        protected readonly IBaseServicio<T> _baseService;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public BaseController(IBaseServicio<T> gastoService)
+        public BaseController(IBaseServicio<T> baseService)
         {
-            _gastoService = gastoService ?? throw new ArgumentNullException(nameof(gastoService));
+            _baseService = baseService ?? throw new ArgumentNullException(nameof(baseService));
             _jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 IgnoreReadOnlyProperties = true
             };
         }
@@ -28,7 +28,7 @@ namespace AppG.Controllers
             var options = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 IgnoreReadOnlyProperties = true
                 // No se especifica PropertyNamingPolicy, así que se usa el comportamiento predeterminado
             };
@@ -48,7 +48,7 @@ namespace AppG.Controllers
         {
             try
             {
-                var entity = await _gastoService.GetByIdAsync(id);
+                var entity = await _baseService.GetByIdAsync(id);
                 if (entity == null)
                 {
                     return NotFound($"Entidad con ID {id} no encontrada");
@@ -66,7 +66,7 @@ namespace AppG.Controllers
         {
             try
             {
-                var createdEntity = await _gastoService.CreateAsync(entity);
+                var createdEntity = await _baseService.CreateAsync(entity);
                 var message = $"{typeof(T).Name} creado correctamente";
 
                 var response = new ResponseOne<T>(entity, message);
@@ -84,7 +84,7 @@ namespace AppG.Controllers
         {
             try
             {
-                await _gastoService.UpdateAsync(id, entity);
+                await _baseService.UpdateAsync(id, entity);
                 return OkJson(new { message = $"{typeof(T).Name} con ID {id} actualizado correctamente" });
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace AppG.Controllers
         {
             try
             {
-                await _gastoService.DeleteAsync(id);
+                await _baseService.DeleteAsync(id);
                 return OkJson(new { message = $"{typeof(T).Name} con ID {id} eliminado correctamente" });
             }
             catch (Exception ex)

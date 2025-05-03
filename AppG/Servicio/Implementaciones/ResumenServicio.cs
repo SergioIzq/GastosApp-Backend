@@ -15,11 +15,13 @@ using System.Text.Json;
 
 namespace AppG.Servicio
 {
-    public class ResumenServicio : BaseServicio<Resumen>, IResumenServicio
+    public class ResumenServicio
     {
-        public ResumenServicio(ISessionFactory sessionFactory) : base(sessionFactory)
-        {
+        private readonly ISessionFactory _sessionFactory;
 
+        public ResumenServicio(ISessionFactory sessionFactory)
+        {
+            _sessionFactory = sessionFactory;
         }
 
         public virtual async Task<ResumenGastosResponse> GetGastosAsync(int page, int size, string periodoInicio, string periodoFin, int idUsuario)
@@ -210,7 +212,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
 
                     }

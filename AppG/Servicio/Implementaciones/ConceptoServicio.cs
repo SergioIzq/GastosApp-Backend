@@ -10,7 +10,10 @@ namespace AppG.Servicio
 {
     public class ConceptoServicio : BaseServicio<Concepto>, IConceptoServicio
     {
-        public ConceptoServicio(ISessionFactory sessionFactory) : base(sessionFactory) { }
+        private readonly ICategoriaServicio _categoriaServicio;
+        public ConceptoServicio(ISessionFactory sessionFactory, ICategoriaServicio categoriaServicio) : base(sessionFactory) { 
+            _categoriaServicio = categoriaServicio;
+        }
 
 
         public override async Task<Concepto> CreateAsync(Concepto entity)
@@ -73,9 +76,9 @@ namespace AppG.Servicio
             }
         }
 
-        public override Task DeleteAsync(int id)
+        public override async Task DeleteAsync(int id)
         {
-            return base.DeleteAsync(id);
+            await base.DeleteAsync(id);
         }
 
         public void ExportarDatosExcelAsync(Excel<ConceptoDto> res)
@@ -120,7 +123,7 @@ namespace AppG.Servicio
                             package.Load(stream);
                         }
                     }
-                    catch (FileLoadException ex)
+                    catch (FileLoadException)
                     {
                         throw new FileLoadException();
                     }
@@ -173,9 +176,9 @@ namespace AppG.Servicio
 
         public class ConceptoDto
         {
-            public string Nombre { get; set; }
+            public required string Nombre { get; set; }
 
-            public string CategoriaAsociada { get; set; }
+            public required string CategoriaAsociada { get; set; }
 
         }
     }

@@ -1,4 +1,4 @@
-﻿using AppG.BBDD.Respuestas;
+﻿using AppG.BBDD.Respuestas.Ingresos;
 using AppG.Entidades.BBDD;
 using static AppG.Servicio.IngresoServicio;
 

@@ -1,6 +1,6 @@
 ﻿using AppG.Entidades.BBDD;
 
-namespace AppG.BBDD.Respuestas
+namespace AppG.BBDD.Respuestas.Ingresos
 {
     public class IngresoByIdRespuesta
     {
