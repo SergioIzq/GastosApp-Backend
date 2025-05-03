@@ -1,4 +1,4 @@
-﻿using NHibernate;
+using NHibernate;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -63,6 +63,7 @@ public class Startup
                 .RequireAuthenticatedUser().Build());
         });
         // Configuración de CORS
+
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAppG", builder =>
@@ -98,11 +99,13 @@ public class Startup
         });
 
         services.AddHangfireServer();
-
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        // Configuración de CORS
+        app.UseCors("AllowAppG");
+
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -119,9 +122,8 @@ public class Startup
         app.UseSwagger();
         app.UseSwaggerUI();
 
-        // Configuración de CORS
+      // Configuración de CORS
         app.UseCors("AllowAppG");
-
         // Configuración de enrutamiento
         app.UseRouting();
 

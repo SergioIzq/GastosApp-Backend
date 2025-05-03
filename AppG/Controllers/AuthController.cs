@@ -38,7 +38,7 @@ public class AuthController : ControllerBase
             }
             else if (!VerifyPassword(usuario.Contrasena, user.Contrasena))
             {
-                errorMessages.Add($"Contraseña '{usuario.Contrasena}' incorrecta.");
+                errorMessages.Add($"Contraseña incorrecta.");
             }
 
             if (errorMessages.Count > 0)

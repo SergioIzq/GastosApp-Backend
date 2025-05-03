@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System.Net.Http;
-
 public class Program
 {
     public static void Main(string[] args)
@@ -21,15 +16,15 @@ public class Program
                       .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                       .AddEnvironmentVariables();
             })
-
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                var httpClientHandler = new HttpClientHandler
+                webBuilder.ConfigureKestrel(serverOptions =>
                 {
-                    ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) => true
-                };
+                    // No usamos HTTPS en Kestrel, ya que Nginx lo manejará
+                    serverOptions.ListenAnyIP(5000); // Solo HTTP en el puerto 5000
+                });
 
-                var httpClient = new HttpClient(httpClientHandler);
-                webBuilder.UseStartup<Startup>(); // Usar Startup.cs para la configuración
+                // Configura la aplicación para usar Startup.cs
+                webBuilder.UseStartup<Startup>();
             });
 }

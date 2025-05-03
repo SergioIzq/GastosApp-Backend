@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <StartupObject>Program</StartupObject>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<StartupObject>Program</StartupObject>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Entidades\**" />
-    <Content Remove="Entidades\**" />
-    <EmbeddedResource Remove="Entidades\**" />
-    <None Remove="Entidades\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Entidades\**" />
+		<Content Remove="Entidades\**" />
+		<EmbeddedResource Remove="Entidades\**" />
+		<None Remove="Entidades\**" />
+	</ItemGroup>
 
   <ItemGroup>
     <None Remove="BBDD\Categoria.hbm.xml" />
@@ -83,10 +83,10 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="NHibernate\hibernate.cfg.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="NHibernate\hibernate.cfg.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>
