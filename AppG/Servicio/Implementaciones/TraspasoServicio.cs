@@ -1,14 +1,8 @@
-﻿using AppG.Entidades.BBDD;
+﻿using AppG.BBDD.Respuestas.Traspasos;
+using AppG.Entidades.BBDD;
 using AppG.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 using NHibernate;
 using NHibernate.Linq;
-using System.Linq.Expressions;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using AppG.Controllers;
-using System.Threading.Tasks;
-using System.Transactions;
 using OfficeOpenXml;
 using System.Diagnostics;
 
@@ -18,6 +12,47 @@ namespace AppG.Servicio
     {
         public TraspasoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
         {
+        }
+
+        public async Task<TraspasoByIdRespuesta> GetTraspasoByIdAsync(int id)
+        {
+            TraspasoByIdRespuesta response = new TraspasoByIdRespuesta();
+            var listaCuentas = new List<Cuenta>();
+
+            response.TraspasoById = await base.GetByIdAsync(id);
+
+            if (response.TraspasoById?.IdUsuario != null)
+            {
+                var idUsuario = response.TraspasoById.IdUsuario;
+                using (var session = _sessionFactory.OpenSession())
+                {
+                    listaCuentas = await session.Query<Cuenta>()
+                                        .Where(c => c.IdUsuario == idUsuario)
+                                        .OrderBy(c => c.Nombre)
+                                        .ToListAsync();
+                }
+                response.ListaCuentas = listaCuentas;
+            }
+
+            return response;
+        }
+
+        public async Task<List<Cuenta>> GetNewTraspasoAsync(int id)
+        {
+            var listaCuentas = new List<Cuenta>();
+
+            if (id > 0)
+            {
+                using (var session = _sessionFactory.OpenSession())
+                {
+                    listaCuentas = await session.Query<Cuenta>()
+                                        .Where(c => c.IdUsuario == id)
+                                        .OrderBy(c => c.Nombre)
+                                        .ToListAsync();
+                }
+            }
+
+            return listaCuentas;
         }
 
         public async Task<Traspaso> RealizarTraspaso(Traspaso entity)
