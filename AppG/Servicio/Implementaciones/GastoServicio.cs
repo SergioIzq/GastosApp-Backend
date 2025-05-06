@@ -16,7 +16,7 @@ namespace AppG.Servicio
         }
 
 
-        public override async Task<Gasto> CreateAsync(Gasto entity)
+        public async Task<Gasto> CreateAsync(Gasto entity, bool esGastoProgramado = false)
         {
             var errorMessages = new List<string>();
 
@@ -60,9 +60,10 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    // Actualizar el saldo de la cuenta
-                    cuenta!.Saldo -= entity!.Monto;
-
+                    if (!esGastoProgramado)
+                    {
+                        cuenta!.Saldo -= entity!.Monto;
+                    }
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
 
@@ -402,7 +403,7 @@ namespace AppG.Servicio
         public async Task<GastoByIdRespuesta> GetGastoByIdAsync(int id)
         {
             GastoByIdRespuesta response = new GastoByIdRespuesta();
-            
+
             response.GastoById = await base.GetByIdAsync(id);
 
             if (response.GastoById?.Cuenta?.IdUsuario != null)

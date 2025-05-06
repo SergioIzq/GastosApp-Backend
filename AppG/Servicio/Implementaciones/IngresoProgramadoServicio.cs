@@ -186,20 +186,6 @@ namespace AppG.Servicio
                         RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);
                     }
 
-                    // Buscar la cuenta correspondiente por nombre
-                    var cuenta = await session.Query<Cuenta>()
-                    .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
-                    .SingleOrDefaultAsync();
-
-                    if (cuenta == null)
-                    {
-                        errorMessages.Add($"La cuenta '{existingEntity!.Cuenta!.Nombre}' no existe.");
-                        throw new ValidationException(errorMessages);
-                    }
-
-                    // Guardar la cuenta actualizada
-                    session.Update(cuenta);
-
                     // Eliminar el gasto
                     await session.DeleteAsync(existingEntity);
 
