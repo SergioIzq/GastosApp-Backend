@@ -2,8 +2,6 @@
 using NHibernate.Linq;
 using AppG.Controllers;
 using AppG.Entidades.BBDD;
-using System.Drawing.Printing;
-using NHibernate.Criterion;
 
 namespace AppG.Servicio
 {

@@ -37,7 +37,7 @@ namespace AppG.Controllers
         public override async Task<IActionResult> Create([FromBody] Gasto entity)
         {
 
-            var createdEntity = await _gastoService.CreateAsync(entity);
+            var createdEntity = await _gastoService.CreateAsync(entity, false);
 
             var message = $"{typeof(Gasto).Name} creado correctamente";
 
