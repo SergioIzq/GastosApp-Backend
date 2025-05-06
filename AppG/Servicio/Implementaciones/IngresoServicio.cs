@@ -16,7 +16,7 @@ namespace AppG.Servicio
         }
 
 
-        public override async Task<Ingreso> CreateAsync(Ingreso entity)
+        public async Task<Ingreso> CreateAsync(Ingreso entity, bool esGastoProgramado = false)
         {
             var errorMessages = new List<string>();
 
@@ -40,9 +40,10 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    // Actualizar el saldo de la cuenta
-                    cuenta!.Saldo += entity.Monto;
-
+                    if (!esGastoProgramado)
+                    {
+                        cuenta!.Saldo += entity!.Monto;
+                    }
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
 

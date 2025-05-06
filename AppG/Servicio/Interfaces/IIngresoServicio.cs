@@ -9,6 +9,7 @@ namespace AppG.Servicio
         void ExportarDatosExcelAsync(Excel<IngresoDto> res);
         Task<IngresoRespuesta> GetNewIngresoAsync(int idUsuario);
         Task<IngresoByIdRespuesta> GetIngresoByIdAsync(int id);
+        Task<Ingreso> CreateAsync(Ingreso entity, bool esGastoProgramado = false);
     }
 
 }

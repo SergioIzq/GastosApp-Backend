@@ -14,7 +14,7 @@
         public virtual FormaPago FormaPago { get; set; } = new FormaPago();
         public virtual string? Descripcion{get; set;}
         public virtual bool Activo { get; set; }
-        public virtual string? HangfireJobId { get; set; }
+        public virtual string HangfireJobId { get; set; } = string.Empty;
         public virtual string Frecuencia { get; set; } = string.Empty;
     }
 }

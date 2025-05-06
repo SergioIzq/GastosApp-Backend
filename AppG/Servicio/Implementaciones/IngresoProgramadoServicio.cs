@@ -2,16 +2,17 @@
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
-using Hangfire;
 using AppG.BBDD.Respuestas.Ingresos;
+using Hangfire;
 
 namespace AppG.Servicio
 {
     public class IngresoProgramadoServicio : BaseServicio<IngresoProgramado>, IIngresoProgramadoServicio
     {
-        public IngresoProgramadoServicio(ISessionFactory sessionFactory) : base(sessionFactory)
+        private readonly IIngresoServicio _ingresoServicio;
+        public IngresoProgramadoServicio(ISessionFactory sessionFactory, IIngresoServicio ingresoServicio) : base(sessionFactory)
         {
-
+            _ingresoServicio = ingresoServicio;
         }
 
 
@@ -44,7 +45,7 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Guardar el gasto programado
+                    // Guardar el ingreso programado
                     session.Save(entity);
                     await transaction.CommitAsync();
 
@@ -55,7 +56,7 @@ namespace AppG.Servicio
                     var createdEntity = await session.GetAsync<IngresoProgramado>(id);
 
                     // Programar el trabajo recurrente en Hangfire
-                    ProgramarTrabajoRecurrente(createdEntity);
+                    await ProgramarTrabajoRecurrente(createdEntity);
 
                     // Guardar el HangfireJobId en base de datos si fue modificado
                     using (var updateTransaction = session.BeginTransaction())
@@ -85,7 +86,7 @@ namespace AppG.Servicio
                 try
                 {
                     // Cargar la entidad existente
-                    var existingEntity = await session.GetAsync<Gasto>(id);
+                    var existingEntity = await session.GetAsync<IngresoProgramado>(id);
                     if (existingEntity == null)
                     {
                         errorMessages.Add($"Entidad con ID {id} no encontrada");
@@ -112,7 +113,7 @@ namespace AppG.Servicio
                         }
                     }
 
-                    // Buscar la cuenta original del gasto (cuenta del gasto existente)
+                    // Buscar la cuenta original del ingreso (cuenta del ingreso existente)
                     var originalCuenta = await session.Query<Cuenta>()
                         .Where(c => c.Nombre == existingEntity!.Cuenta!.Nombre && c.IdUsuario == existingEntity.IdUsuario)
                         .SingleOrDefaultAsync();
@@ -137,23 +138,12 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    // Revertir el saldo de la cuenta original basado en el gasto anterior
-                    if (originalCuenta != null)
-                    {
-                        originalCuenta.Saldo += existingEntity.Monto;
-                        session.Update(originalCuenta);
-                    }
-
-                    // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
-                    if (nuevaCuenta != null)
-                    {
-                        nuevaCuenta.Saldo -= entity!.Monto;
-                        session.Update(nuevaCuenta);
-                    }
-
                     // Fusionar y guardar la entidad actualizada
                     session.Merge(entity);
                     await transaction.CommitAsync();
+
+                    // Reprogramar Hangfire
+                    await ProgramarTrabajoRecurrente(entity!);
                 }
                 catch (Exception ex)
                 {
@@ -183,10 +173,10 @@ namespace AppG.Servicio
                     // Eliminar el job de Hangfire si existe
                     if (!string.IsNullOrEmpty(existingEntity.HangfireJobId))
                     {
-                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);
+                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);                        
                     }
 
-                    // Eliminar el gasto
+                    // Eliminar el ingreso
                     await session.DeleteAsync(existingEntity);
 
                     await transaction.CommitAsync();
@@ -199,7 +189,7 @@ namespace AppG.Servicio
             }
         }
 
-        // Monta objeto para crear un nuevo gasto
+        // Monta objeto para crear un nuevo ingreso
         public async Task<IngresoRespuesta> GetNewIngresoAsync(int idUsuario)
         {
             var errorMessages = new List<string>();
@@ -239,6 +229,7 @@ namespace AppG.Servicio
                             .OrderBy(c => c.Nombre)
                             .ToListAsync();
 
+                    // Crear objeto respuesta al frontend para nuevos ingresos
                     newIngreso.ListaClientes = listaClientes;
                     newIngreso.ListaCuentas = listaCuentas;
                     newIngreso.ListaConceptos = listaConceptos;
@@ -276,28 +267,40 @@ namespace AppG.Servicio
             {
                 try
                 {
-                    var ingreso = await session.GetAsync<IngresoProgramado>(ingresoProgramadoId);
-                    if (ingreso == null)
+                    var ingresoP = await session.GetAsync<IngresoProgramado>(ingresoProgramadoId);
+                    if (ingresoP == null)
                     {
                         throw new Exception($"No se encontró el ingreso programado con ID {ingresoProgramadoId}");
                     }
 
-                    if (!ingreso.Activo)
+                    if (!ingresoP.Activo)
                         return;
 
                     var cuenta = await session.Query<Cuenta>()
-                        .Where(c => c.Id == ingreso!.Cuenta!.Id && c.IdUsuario == ingreso.IdUsuario)
+                        .Where(c => c.Id == ingresoP!.Cuenta!.Id && c.IdUsuario == ingresoP.IdUsuario)
                         .SingleOrDefaultAsync();
 
                     if (cuenta == null)
                     {
-                        throw new Exception($"No se encontró la cuenta con ID {ingreso!.Cuenta!.Id}");
+                        throw new Exception($"No se encontró la cuenta con ID {ingresoP!.Cuenta!.Id}");
                     }
 
-                    cuenta.Saldo += Math.Abs(ingreso.Monto);
+                    cuenta.Saldo += Math.Abs(ingresoP.Monto);
 
                     session.Update(cuenta);
 
+                    Ingreso ingreso = new Ingreso();
+                    ingreso.Cliente = ingresoP.Cliente;
+                    ingreso.Concepto = ingresoP.Concepto;
+                    ingreso.Cuenta = ingresoP.Cuenta;
+                    ingreso.Descripcion = ingresoP.Descripcion;
+                    ingreso.Fecha = DateTime.Now;
+                    ingreso.FormaPago = ingresoP.FormaPago;
+                    ingreso.IdUsuario = ingresoP.IdUsuario;
+                    ingreso.Monto = ingresoP.Monto;
+                    ingreso.Persona = ingresoP.Persona;
+
+                    await _ingresoServicio.CreateAsync(ingreso, true);
                     await transaction.CommitAsync();
                 }
                 catch (Exception)
@@ -308,76 +311,148 @@ namespace AppG.Servicio
             }
         }
 
-        private DateTime? CalcularFechaEjecucionDesdeDiaDelMes(int dia, bool ajustarAUltimoDia)
+        private DateTime? CalcularFechaEjecucionDesdeDiaDelMes(DateTime fechaEjecucion, string frecuencia)
         {
             var hoy = DateTime.Today;
-            var año = hoy.Year;
-            var mes = hoy.Month;
+            var año = fechaEjecucion.Year;
+            var mes = fechaEjecucion.Month;
+            var dia = fechaEjecucion.Day;
 
-            if (dia <= hoy.Day)
+            // Frecuencia Diaria
+            if (frecuencia.Equals("DIARIA", StringComparison.OrdinalIgnoreCase))
             {
+                DateTime fechaActual = DateTime.Now;
+
+                // Obtener solo la fecha (sin hora) de la fecha actual
+                DateTime fechaHoy = new DateTime(fechaActual.Year, fechaActual.Month, fechaActual.Day);
+
+                // Si la hora de fechaEjecucion es posterior a la hora actual del día
+                if (fechaEjecucion < fechaHoy.AddHours(fechaEjecucion.Hour).AddMinutes(fechaEjecucion.Minute))
+                {
+                    // Si la hora no ha pasado aún, programar para hoy a esa hora
+                    return fechaHoy.AddHours(fechaEjecucion.Hour).AddMinutes(fechaEjecucion.Minute);
+                }
+                else
+                {
+                    // Si la hora ya ha pasado hoy, programar para mañana a esa hora
+                    return fechaEjecucion.AddDays(1);
+                }
+            }
+
+            // Frecuencia Mensual
+            if (frecuencia.Equals("MENSUAL", StringComparison.OrdinalIgnoreCase))
+            {
+                // Si el día de ejecución es mayor que el día de hoy y aún no ha pasado, ejecutamos en este mes
+                if (fechaEjecucion.Month == hoy.Month && fechaEjecucion.Day >= hoy.Day)
+                {
+                    // Si el día aún no ha pasado este mes, la ejecución es este mes
+                    return new DateTime(hoy.Year, hoy.Month, fechaEjecucion.Day, fechaEjecucion.Hour, fechaEjecucion.Minute, 0);
+                }
+
+                // Si el día ya pasó o estamos en un mes posterior, programar para el siguiente mes
                 mes++;
                 if (mes > 12)
                 {
                     mes = 1;
                     año++;
                 }
+
+                return new DateTime(año, mes, dia, fechaEjecucion.Hour, fechaEjecucion.Minute, 0);
             }
 
-            var ultimoDiaDelMes = DateTime.DaysInMonth(año, mes);
-
-            if (dia > ultimoDiaDelMes)
+            if (frecuencia.Equals("SEMANAL", StringComparison.OrdinalIgnoreCase))
             {
-                if (ajustarAUltimoDia)
-                {
-                    dia = ultimoDiaDelMes;
-                }
-                else
-                {
-                    return null; // No se programa
-                }
+                return fechaEjecucion;
             }
 
-            return new DateTime(año, mes, dia);
+            // Si la frecuencia no es válida, devolver null
+            return null;
         }
 
-        private void ProgramarTrabajoRecurrente(IngresoProgramado createdEntity)
+        private async Task ProgramarTrabajoRecurrente(IngresoProgramado createdEntity)
         {
-            var recurringJobId = $"AplicarIngreso_{createdEntity.Id}";
-
-            var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(createdEntity.DiaEjecucion, createdEntity.AjustarAUltimoDia);
-
-            if (fechaEjecucion != null)
+            try
             {
-                var delay = fechaEjecucion.Value - DateTime.Now;
+                var recurringJobId = $"AplicarIngreso_{createdEntity.Id}";
 
-                if (delay < TimeSpan.Zero)
-                {
-                    fechaEjecucion = fechaEjecucion.Value.AddDays(1);
-                    delay = fechaEjecucion.Value - DateTime.Now;
-                }
-
-                createdEntity.HangfireJobId = recurringJobId;
-
-                var hora = fechaEjecucion.Value.Hour;
-                var minuto = fechaEjecucion.Value.Minute;
-
-                if (hora == 0 && minuto == 0)
-                {
-                    hora = 9;
-                    minuto = 0;
-                }
-
-                RecurringJob.AddOrUpdate(
-                    recurringJobId,
-                    () => AplicarIngreso(createdEntity.Id),
-                    Cron.Monthly(fechaEjecucion.Value.Day, hora, minuto),
-                    new RecurringJobOptions
-                    {
-                        TimeZone = TimeZoneInfo.Local
-                    }
+                var fechaEjecucion = CalcularFechaEjecucionDesdeDiaDelMes(
+                    createdEntity.FechaEjecucion,
+                    createdEntity.Frecuencia
                 );
 
+                if (fechaEjecucion != null)
+                {
+                    var delay = fechaEjecucion.Value - DateTime.Now;
+
+                    if (delay < TimeSpan.Zero)
+                    {
+                        if (createdEntity.Frecuencia.Equals("DIARIA", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fechaEjecucion = fechaEjecucion.Value.AddDays(1);
+                        }
+                        else if (createdEntity.Frecuencia.Equals("SEMANAL", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fechaEjecucion = fechaEjecucion.Value.AddDays(7);
+                        }
+
+                        delay = fechaEjecucion.Value - DateTime.Now;
+                    }
+
+                    createdEntity.HangfireJobId = recurringJobId;
+
+                    var hora = fechaEjecucion.Value.Hour;
+                    var minuto = fechaEjecucion.Value.Minute;
+
+                    if (hora == 0 && minuto == 0)
+                    {
+                        hora = 8;
+                        minuto = 0;
+                    }
+
+                    if (createdEntity.Frecuencia.Equals("DIARIA", StringComparison.OrdinalIgnoreCase))
+                    {
+                        RecurringJob.AddOrUpdate(
+                            recurringJobId,
+                            () => AplicarIngreso(createdEntity.Id),
+                            Cron.Daily(hora, minuto),
+                            new RecurringJobOptions
+                            {
+                                TimeZone = TimeZoneInfo.Local
+                            }
+                        );
+                    }
+                    else if (createdEntity.Frecuencia.Equals("SEMANAL", StringComparison.OrdinalIgnoreCase))
+                    {
+                        DayOfWeek dayOfWeek = fechaEjecucion.Value.DayOfWeek;
+
+                        RecurringJob.AddOrUpdate(
+                            recurringJobId,
+                            () => AplicarIngreso(createdEntity.Id),
+                            Cron.Weekly(dayOfWeek, hora, minuto),
+                            new RecurringJobOptions
+                            {
+                                TimeZone = TimeZoneInfo.Local
+                            }
+                        );
+                    }
+                    else if (createdEntity.Frecuencia.Equals("MENSUAL", StringComparison.OrdinalIgnoreCase))
+                    {
+                        RecurringJob.AddOrUpdate(
+                            recurringJobId,
+                            () => AplicarIngreso(createdEntity.Id),
+                            Cron.Monthly(fechaEjecucion.Value.Day, hora, minuto),
+                            new RecurringJobOptions
+                            {
+                                TimeZone = TimeZoneInfo.Local
+                            }
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await DeleteAsync(createdEntity.Id);
+                throw new Exception("No se ha podido programar el ingreso. " + ex.Message);
             }
         }
     }
