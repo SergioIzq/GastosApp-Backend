@@ -15,7 +15,12 @@
 			<column name="contrasena" sql-type="varchar" />
 		</property>
 		<property name="FechaCreacion" column="fecha_creacion" not-null="true" insert="true" update="false" />
-
+		<property name="TokenConfirmacion" type="string" length="500" not-null="false">
+			<column name="token_confirmacion" sql-type="varchar" />
+		</property>
+		<property name="Activo" type="bool" not-null="true">
+			<column name="activo" sql-type="boolean" />
+		</property>
 	</class>
 
 </hibernate-mapping>

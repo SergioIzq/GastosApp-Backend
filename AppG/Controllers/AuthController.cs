@@ -15,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly ISessionFactory _sessionFactory;
     private readonly IConfiguration _configuration;
+    private readonly EmailService _emailService;
 
-    public AuthController(ISessionFactory sessionFactory, IConfiguration configuration)
+    public AuthController(ISessionFactory sessionFactory, IConfiguration configuration, EmailService emailService)
     {
         _sessionFactory = sessionFactory;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     [HttpPost("login")]
@@ -41,11 +43,16 @@ public class AuthController : ControllerBase
                 errorMessages.Add($"Contraseña incorrecta.");
             }
 
+            if (!user!.Activo)
+            {
+                throw new UnauthorizedAccessException("Debe confirmar su correo antes de iniciar sesión.");
+            }
+
             if (errorMessages.Count > 0)
             {
                 throw new CustomUnauthorizedAccessException(errorMessages);
             }
-        
+
             var token = GenerateJwtToken(user!);
             return Ok(new { token });
         }
@@ -73,15 +80,40 @@ public class AuthController : ControllerBase
             var hasher = new PasswordHasher<Usuario>();
             var hashedPassword = hasher.HashPassword(usuario, usuario.Contrasena);
             usuario.Contrasena = hashedPassword;
-
+            usuario.TokenConfirmacion = Guid.NewGuid().ToString();
+            usuario.Activo = false;
             // Guardar el nuevo usuario
             using (var transaction = session.BeginTransaction())
             {
                 session.Save(usuario);
                 await transaction.CommitAsync();
             }
+            try
+            {
+                var baseUrl = "https://ahorroland.sergioizq.es";
+#if DEBUG
+                baseUrl = "http://localhost:4200";
+#endif
+                var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={usuario.TokenConfirmacion}";
 
-            // Generar el token (opcional, puedes decidir si quieres emitir un token al registrar un usuario)
+                await _emailService.SendEmailAsync(
+                    usuario.Correo,
+                    "Bienvenido a Ahorroland",
+                    $@"
+                    <html>
+                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                        <h1>Gracias por registrarte en Ahorroland</h1>
+                        <p>Estamos felices de tenerte aquí. Por favor accede al siguiente enlace para verificar y activar su cuenta:</p>
+                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
+                      </body>
+                    </html>
+                    "
+                    );
+
+            }
+            catch (Exception) {
+                throw new Exception("Ha ocurrido un error al enviar correo");
+            }
             var token = GenerateJwtToken(usuario);
             return Ok(new { token });
         }
@@ -90,7 +122,7 @@ public class AuthController : ControllerBase
     private string GenerateJwtToken(Usuario usuario)
     {
         var expirationTime = DateTime.UtcNow.AddMinutes(720);
-        var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds(); 
+        var expirationUnix = new DateTimeOffset(expirationTime).ToUnixTimeSeconds();
 
         var claims = new[]
         {
@@ -119,4 +151,26 @@ public class AuthController : ControllerBase
         var result = hasher.VerifyHashedPassword(null!, storedHash, password);
         return result == PasswordVerificationResult.Success;
     }
+
+    [HttpGet("confirmar-correo")]
+    public IActionResult ConfirmarCorreo([FromQuery] string token)
+    {
+        using (var session = _sessionFactory.OpenSession())
+        using (var transaction = session.BeginTransaction())
+        {
+            var usuario = session.Query<Usuario>().SingleOrDefault(u => u.TokenConfirmacion == token);
+            if (usuario == null)
+            {
+                return BadRequest("Token inválido o expirado.");
+            }
+
+            usuario.Activo = true;
+            usuario.TokenConfirmacion = null; // Limpia el token
+            session.Update(usuario);
+            transaction.Commit();
+
+            return Ok("Correo confirmado correctamente.");
+        }
+    }
+
 }

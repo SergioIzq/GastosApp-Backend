@@ -35,6 +35,9 @@ public class Startup
             }
         }
 
+        services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+        services.AddScoped<EmailService>();
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
