@@ -35,7 +35,7 @@ namespace AppG.Controllers
         public async Task<IActionResult> RealizarTraspaso(Traspaso entity)
         {
 
-            var createdEntity = await _traspasoService.RealizarTraspaso(entity);
+            var createdEntity = await _traspasoService.RealizarTraspaso(entity, false);
 
             var message = $"{typeof(Traspaso).Name} creado correctamente";
 

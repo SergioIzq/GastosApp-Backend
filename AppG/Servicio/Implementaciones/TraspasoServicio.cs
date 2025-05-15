@@ -55,7 +55,7 @@ namespace AppG.Servicio
             return listaCuentas;
         }
 
-        public async Task<Traspaso> RealizarTraspaso(Traspaso entity)
+        public async Task<Traspaso> RealizarTraspaso(Traspaso entity, bool esProgramado = false)
         {
             IList<string> errorMessages = new List<string>();
             using (var session = _sessionFactory.OpenSession())
@@ -83,28 +83,32 @@ namespace AppG.Servicio
                         errorMessages.Add($"La cuenta de destino '{entity.CuentaDestino.Nombre}' no existe.");
                     }
 
-                    // Realizar el traspaso
-                    cuentaOrigen!.Saldo -= entity.Importe;
+                    if (!esProgramado)
+                    {
+                        // Realizar el traspaso
+                        cuentaOrigen!.Saldo -= entity.Importe;
 
-                    cuentaDestino!.Saldo += entity.Importe;
-
+                        cuentaDestino!.Saldo += entity.Importe;
+                    }
 
                     Traspaso traspaso = new Traspaso
                     {
-                        CuentaOrigen = cuentaOrigen,
-                        SaldoCuentaOrigen = cuentaOrigen.Saldo,
-                        CuentaDestino = cuentaDestino,
-                        SaldoCuentaDestino = cuentaDestino.Saldo,
+                        CuentaOrigen = cuentaOrigen!,
+                        SaldoCuentaOrigen = cuentaOrigen!.Saldo,
+                        CuentaDestino = cuentaDestino!,
+                        SaldoCuentaDestino = cuentaDestino!.Saldo,
                         Fecha = entity.Fecha,
                         Descripcion = entity.Descripcion,
                         Importe = entity.Importe,
                         IdUsuario = entity.CuentaOrigen.IdUsuario
                     };
 
-                    // Guardar los cambios en las cuentas
-                    await session.SaveOrUpdateAsync(cuentaOrigen);
-                    await session.SaveOrUpdateAsync(cuentaDestino);
-
+                    if (!esProgramado)
+                    {
+                        // Guardar los cambios en las cuentas
+                        await session.SaveOrUpdateAsync(cuentaOrigen);
+                        await session.SaveOrUpdateAsync(cuentaDestino);
+                    }
                     await session.SaveAsync(traspaso);
 
                     await transaction.CommitAsync();
@@ -337,7 +341,6 @@ namespace AppG.Servicio
                 });
             }
         }
-
 
         public class TraspasoDto
         {

@@ -8,7 +8,7 @@ namespace AppG.Servicio
 
         Task<TraspasoByIdRespuesta> GetTraspasoByIdAsync(int id);
         Task<List<Cuenta>> GetNewTraspasoAsync(int id);
-        Task<Traspaso> RealizarTraspaso(Traspaso traspasoP);
+        Task<Traspaso> RealizarTraspaso(Traspaso traspasoP, bool esProgramado);
         void ExportarDatosExcelAsync(Excel<TraspasoDto> res);
 
 
