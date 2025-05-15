@@ -1,7 +1,9 @@
 ﻿using AppG.Entidades.BBDD;
 using AppG.Exceptions;
+using Hangfire;
 using NHibernate;
 using NHibernate.Linq;
+using Npgsql;
 using OfficeOpenXml;
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -13,7 +15,8 @@ namespace AppG.Servicio
         private readonly IGastoProgramadoServicio _gastoProgramadoServicio;
         private readonly IIngresoProgramadoServicio _ingresoProgramadoServicio;
 
-        public CuentaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio, IIngresoProgramadoServicio ingresoProgramadoServicio) : base(sessionFactory) {
+        public CuentaServicio(ISessionFactory sessionFactory, IGastoProgramadoServicio gastoProgramadoServicio, IIngresoProgramadoServicio ingresoProgramadoServicio) : base(sessionFactory)
+        {
             _gastoProgramadoServicio = gastoProgramadoServicio;
             _ingresoProgramadoServicio = ingresoProgramadoServicio;
         }
@@ -74,43 +77,46 @@ namespace AppG.Servicio
 
         public override async Task DeleteAsync(int id)
         {
-            var errorMessages = new List<string>();
-
             using (var session = _sessionFactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
-                // Uso dentro de tu método principal
-                await EliminarEntidadesRelacionadas<Traspaso>(session, t => t.CuentaOrigen.Id == id);
-                await EliminarEntidadesRelacionadas<Traspaso>(session, t => t.CuentaDestino.Id == id);
-                await EliminarEntidadesRelacionadas<Ingreso>(session, i => i.Cuenta.Id == id);
-                await EliminarEntidadesRelacionadas<Gasto>(session, g => g!.Cuenta!.Id == id);
-
-                // Eliminar los traspasos asociados a la cuenta como origen
-                var gastosProgramados = await session.Query<GastoProgramado>()
-                    .Where(c => c!.Cuenta!.Id == id)
-                    .ToListAsync();
-
-                foreach (var gasto in gastosProgramados)
+                try
                 {
-                    await _gastoProgramadoServicio.DeleteAsync(gasto.Id);
+                    var traspasosProgramados = await session.Query<TraspasoProgramado>()
+                                            .Where(c => c.CuentaOrigen.Id == id || c.CuentaDestino.Id == id)
+                                            .ToListAsync();
+
+                    foreach (var traspasoProgramado in traspasosProgramados)
+                    {
+                        if (!string.IsNullOrEmpty(traspasoProgramado.HangfireJobId))
+                        {
+                            RecurringJob.RemoveIfExists(traspasoProgramado.HangfireJobId);
+                        }
+                    }
+
+                    var gastosProgramados = await session.Query<GastoProgramado>()
+                        .Where(c => c.Cuenta.Id == id)
+                        .ToListAsync();
+
+                    foreach (var gasto in gastosProgramados)
+                        await _gastoProgramadoServicio.DeleteAsync(gasto.Id);
+
+                    var ingresosProgramados = await session.Query<IngresoProgramado>()
+                        .Where(c => c.Cuenta.Id == id)
+                        .ToListAsync();
+
+                    foreach (var ingreso in ingresosProgramados)
+                        await _ingresoProgramadoServicio.DeleteAsync(ingreso.Id);
+
+                    await base.DeleteAsync(id); // Esto eliminará la cuenta y en cascada los traspasos
+
+                    await transaction.CommitAsync();
                 }
-
-                // Eliminar los traspasos asociados a la cuenta como origen
-                var ingresoProgramados = await session.Query<IngresoProgramado>()
-                    .Where(c => c!.Cuenta!.Id == id)
-                    .ToListAsync();
-
-                foreach (var ingreso in ingresoProgramados)
+                catch (Exception)
                 {
-                    await _ingresoProgramadoServicio.DeleteAsync(ingreso.Id);
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-
-                // Eliminar la cuenta
-                await base.DeleteAsync(id);
-
-                // Confirmar la transacción
-                await transaction.CommitAsync();
-
             }
         }
 

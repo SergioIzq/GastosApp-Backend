@@ -27,6 +27,7 @@
     <None Remove="BBDD\Persona.hbm.xml" />
     <None Remove="BBDD\Proveedor.hbm.xml" />
     <None Remove="BBDD\Traspaso.hbm.xml" />
+    <None Remove="BBDD\TraspasoProgramado.hbm.xml" />
     <None Remove="BBDD\Usuario.hbm.xml" />
   </ItemGroup>
 
@@ -35,6 +36,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="BBDD\GastoProgramado.hbm.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BBDD\TraspasoProgramado.hbm.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="BBDD\Usuario.hbm.xml">

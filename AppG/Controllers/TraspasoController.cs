@@ -35,7 +35,7 @@ namespace AppG.Controllers
         public async Task<IActionResult> RealizarTraspaso(Traspaso entity)
         {
 
-            var createdEntity = await _traspasoService.RealizarTraspaso(entity);
+            var createdEntity = await _traspasoService.RealizarTraspaso(entity, false);
 
             var message = $"{typeof(Traspaso).Name} creado correctamente";
 
@@ -51,6 +51,22 @@ namespace AppG.Controllers
             _traspasoService.ExportarDatosExcelAsync(res);
 
             return Ok();
+        }
+
+        [HttpGet("getNewTraspaso/{idUsuario}")]
+        public async Task<IActionResult> GetNewTraspaso(int idUsuario)
+        {
+            var newTraspaso = await _traspasoService.GetNewTraspasoAsync(idUsuario);
+
+            return Ok(newTraspaso);
+        }
+
+        [HttpGet("getById/{id}")]
+        public async Task<IActionResult> GetTraspasoById(int id)
+        {
+            var traspasoById = await _traspasoService.GetTraspasoByIdAsync(id);
+
+            return Ok(traspasoById);
         }
 
     }
