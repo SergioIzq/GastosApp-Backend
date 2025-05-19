@@ -1,19 +1,20 @@
-﻿using AppG.Entidades.BBDD;
+﻿using AppG.BBDD.Respuestas.Gastos;
+using AppG.Entidades.BBDD;
 using AppG.Exceptions;
+using Hangfire;
 using NHibernate;
 using NHibernate.Linq;
-using AppG.BBDD.Respuestas.Gastos;
-using Hangfire;
-using AppG.BBDD.Respuestas.Ingresos;
 
 namespace AppG.Servicio
 {
     public class GastoProgramadoServicio : BaseServicio<GastoProgramado>, IGastoProgramadoServicio
     {
         private readonly IGastoServicio _gastoServicio;
-        public GastoProgramadoServicio(ISessionFactory sessionFactory, IGastoServicio gastoServicio) : base(sessionFactory)
+        private readonly EmailService _emailService;
+        public GastoProgramadoServicio(ISessionFactory sessionFactory, IGastoServicio gastoServicio, EmailService emailService) : base(sessionFactory)
         {
             _gastoServicio = gastoServicio;
+            _emailService = emailService;
         }
 
 
@@ -303,6 +304,40 @@ namespace AppG.Servicio
 
                     await _gastoServicio.CreateAsync(gasto, true);
                     await transaction.CommitAsync();
+
+                    var usuario = await session.GetAsync<Usuario>(gasto.IdUsuario);
+
+                    var baseUrl = "https://ahorroland.sergioizq.es/gastos";
+#if DEBUG
+                    baseUrl = "http://localhost:4200/gastos";
+#endif
+
+                    await _emailService.SendEmailAsync(
+                            usuario.Correo,
+                            "Gasto programado ejecutado - Ahorroland",
+                            $@"
+                            <html>
+                              <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                                <h1>Gasto programado ejecutado correctamente</h1>
+                                <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
+                                <ul>
+                                  <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
+                                  <li><strong>Importe:</strong> {gasto.Monto:C}</li>
+                                  <li><strong>Cuenta:</strong> {gasto.Cuenta}</li>
+                                  <li><strong>Concepto:</strong> {gasto.Concepto}</li>
+                                </ul>
+                                <p>Puedes ver el gasto registrado en la sección <strong>Operaciones > Gastos</strong> de tu cuenta:</p>
+                                <p>
+                                  <a href='{baseUrl}' target='_blank' 
+                                     style='display: inline-block; padding: 10px 20px; background-color: #1a73e8; color: white; text-decoration: none; border-radius: 4px;'>
+                                    Ver Gastos
+                                  </a>
+                                </p>
+                                <p style='margin-top: 20px;'>Si no reconoces este gasto, por favor contacta con el administrador.</p>
+                              </body>
+                            </html>
+                            "
+                        );
                 }
                 catch (Exception)
                 {

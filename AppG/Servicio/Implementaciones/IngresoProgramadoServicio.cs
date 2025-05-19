@@ -10,9 +10,11 @@ namespace AppG.Servicio
     public class IngresoProgramadoServicio : BaseServicio<IngresoProgramado>, IIngresoProgramadoServicio
     {
         private readonly IIngresoServicio _ingresoServicio;
-        public IngresoProgramadoServicio(ISessionFactory sessionFactory, IIngresoServicio ingresoServicio) : base(sessionFactory)
+        private readonly EmailService _emailService;
+        public IngresoProgramadoServicio(ISessionFactory sessionFactory, IIngresoServicio ingresoServicio, EmailService emailService) : base(sessionFactory)
         {
             _ingresoServicio = ingresoServicio;
+            _emailService = emailService;
         }
 
 
@@ -173,7 +175,7 @@ namespace AppG.Servicio
                     // Eliminar el job de Hangfire si existe
                     if (!string.IsNullOrEmpty(existingEntity.HangfireJobId))
                     {
-                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);                        
+                        RecurringJob.RemoveIfExists(existingEntity.HangfireJobId);
                     }
 
                     // Eliminar el ingreso
@@ -302,6 +304,41 @@ namespace AppG.Servicio
 
                     await _ingresoServicio.CreateAsync(ingreso, true);
                     await transaction.CommitAsync();
+
+                    var usuario = await session.GetAsync<Usuario>(ingreso.IdUsuario);
+
+                    var baseUrl = "https://ahorroland.sergioizq.es/ingresos";
+#if DEBUG
+                    baseUrl = "http://localhost:4200/ingresos";
+#endif
+
+                    await _emailService.SendEmailAsync(
+                            usuario.Correo,
+                            "Ingreso programado ejecutado - Ahorroland",
+                            $@"
+                            <html>
+                              <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                                <h1>Ingreso programado ejecutado correctamente</h1>
+                                <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
+                                <ul>
+                                  <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
+                                  <li><strong>Importe:</strong> {ingreso.Monto:C}</li>
+                                  <li><strong>Cuenta:</strong> {ingreso.Cuenta}</li>
+                                  <li><strong>Concepto:</strong> {ingreso.Concepto}</li>
+                                </ul>
+                                <p>Puedes ver el ingreso registrado en la sección <strong>Operaciones > Ingresos</strong> de tu cuenta:</p>
+                                <p>
+                                  <a href='{baseUrl}' target='_blank' 
+                                     style='display: inline-block; padding: 10px 20px; background-color: #1a73e8; color: white; text-decoration: none; border-radius: 4px;'>
+                                    Ver Ingresos
+                                  </a>
+                                </p>
+                                <p style='margin-top: 20px;'>Si no reconoces este ingreso, por favor contacta con el administrador.</p>
+                              </body>
+                            </html>
+                            "
+                        );
+
                 }
                 catch (Exception)
                 {

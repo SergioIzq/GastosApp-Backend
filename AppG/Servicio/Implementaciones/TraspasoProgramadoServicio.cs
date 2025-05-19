@@ -9,10 +9,12 @@ namespace AppG.Servicio
 {
     public class TraspasoProgramadoServicio : BaseServicio<TraspasoProgramado>, ITraspasoProgramadoServicio
     {
+        private readonly EmailService _emailService;
         private readonly ITraspasoServicio _traspasoServicio;
-        public TraspasoProgramadoServicio(ISessionFactory sessionFactory, ITraspasoServicio traspasoServicio) : base(sessionFactory)
+        public TraspasoProgramadoServicio(ISessionFactory sessionFactory, ITraspasoServicio traspasoServicio, EmailService emailService) : base(sessionFactory)
         {
             _traspasoServicio = traspasoServicio;
+            _emailService = emailService;
         }
 
 
@@ -288,6 +290,42 @@ namespace AppG.Servicio
                     
                     await _traspasoServicio.RealizarTraspaso(traspaso, true);
                     await transaction.CommitAsync();
+
+                    var usuario = await session.GetAsync<Usuario>(traspaso.IdUsuario);
+
+                    var baseUrl = "https://ahorroland.sergioizq.es/traspasos";
+#if DEBUG
+                    baseUrl = "http://localhost:4200/traspasos";
+#endif
+
+                    await _emailService.SendEmailAsync(
+                            usuario.Correo,
+                            "Gasto programado ejecutado - Ahorroland",
+                            $@"
+                            <html>
+                              <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                                <h1>Traspaso programado ejecutado correctamente</h1>
+                                <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
+                                <ul>
+                                  <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
+                                  <li><strong>Importe:</strong> {traspaso.Importe:C}</li>
+                                  <li><strong>Cuenta origen:</strong> {traspaso.CuentaOrigen.Nombre}</li>
+                                  <li><strong>Saldo cuenta origen:</strong> {traspaso.SaldoCuentaOrigen}</li>
+                                  <li><strong>Cuenta destino:</strong> {traspaso.CuentaDestino.Nombre}</li>
+                                  <li><strong>Saldo cuenta destino:</strong> {traspaso.SaldoCuentaDestino}</li>
+                                </ul>
+                                <p>Puedes ver el traspaso registrado en la sección <strong>Operaciones > Traspasos</strong> de tu cuenta:</p>
+                                <p>
+                                  <a href='{baseUrl}' target='_blank' 
+                                     style='display: inline-block; padding: 10px 20px; background-color: #1a73e8; color: white; text-decoration: none; border-radius: 4px;'>
+                                    Ver Traspaso
+                                  </a>
+                                </p>
+                                <p style='margin-top: 20px;'>Si no reconoces este traspaso, por favor contacta con el administrador.</p>
+                              </body>
+                            </html>
+                            "
+                        );
                 }
                 catch (Exception)
                 {

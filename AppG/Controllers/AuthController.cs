@@ -9,6 +9,7 @@ using System.Text;
 using NHibernate.Linq;
 using AppG.Exceptions;
 using System.Net.Mail;
+using AppG.BBDD.Requests;
 
 [Route("api/auth")]
 [ApiController]
@@ -156,13 +157,15 @@ public class AuthController : ControllerBase
     [HttpGet("confirmar-correo")]
     public IActionResult ConfirmarCorreo([FromQuery] string token)
     {
+        IList<string> errorMessages = new List<string>();
         using (var session = _sessionFactory.OpenSession())
         using (var transaction = session.BeginTransaction())
         {
             var usuario = session.Query<Usuario>().SingleOrDefault(u => u.TokenConfirmacion == token);
             if (usuario == null)
             {
-                return BadRequest("Token inválido o expirado.");
+                errorMessages.Add("Enlace inválido o expirado, si ya ha confirmado su correo inicie sesión.");
+                throw new CustomUnauthorizedAccessException(errorMessages);
             }
 
             usuario.Activo = true;
@@ -171,6 +174,159 @@ public class AuthController : ControllerBase
             transaction.Commit();
 
             return Ok(new { mensaje = "Correo confirmado correctamente." });
+        }
+    }
+
+
+    [HttpPost("confirmar-nueva-pwd")]
+    public IActionResult ConfirmarNuevaPwd([FromBody] PasswordRequest request)
+    {
+        IList<string> errorMessages = new List<string>();
+        using (var session = _sessionFactory.OpenSession())
+        using (var transaction = session.BeginTransaction())
+        {
+            var usuario = session.Query<Usuario>().SingleOrDefault(u => u.TokenConfirmacion == request.Token);
+            if (usuario == null)
+            {
+                errorMessages.Add("Enlace inválido o expirado. Pida otro.");
+                throw new CustomUnauthorizedAccessException(errorMessages);
+            }
+            var hasher = new PasswordHasher<Usuario>();
+            var hashedPassword = hasher.HashPassword(usuario, request.Password);
+            usuario.Contrasena = hashedPassword;
+            
+            usuario.TokenConfirmacion = null;
+            session.Update(usuario);
+            transaction.Commit();
+
+            return Ok(new { mensaje = "Contraseña restablecida correctamente." });
+        }
+    }
+
+    [HttpPost("reenviar-correo")]
+    public async Task<IActionResult> ReenviarCorreoConfirmacion([FromBody] CorreoRequest correo)
+    {
+        IList<string> errorMessages = new List<string>();
+
+        using (var session = _sessionFactory.OpenSession())
+        {
+            // Verificar si el usuario ya existe
+            var existingUser = session.Query<Usuario>()
+                .SingleOrDefault(u => u.Correo == correo.Correo);
+
+            if (existingUser == null)
+            {
+                errorMessages.Add($"El correo '{correo}' no está registrado.");
+
+                throw new ValidationException(errorMessages);
+            }
+
+            if (existingUser.Activo)
+            {
+                errorMessages.Add($"Ya ha confirmado su correo, inicie sesión.");
+
+                throw new ValidationException(errorMessages);
+            }
+
+            existingUser.TokenConfirmacion = Guid.NewGuid().ToString();
+
+            // Guardar el nuevo usuario
+            using (var transaction = session.BeginTransaction())
+            {
+                session.Save(existingUser);
+                await transaction.CommitAsync();
+            }
+            try
+            {
+                var baseUrl = "https://ahorroland.sergioizq.es";
+#if DEBUG
+                baseUrl = "http://localhost:4200";
+#endif
+                var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={existingUser.TokenConfirmacion}";
+
+                await _emailService.SendEmailAsync(
+                    existingUser.Correo,
+                    "Reenvío email confirmación - Ahorroland",
+                    $@"
+                    <html>
+                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                        <h1>Reenvío email confirmación</h1>
+                        <p>Hemos recibido una solicitud para generar un nuevo enlace de activación para esta cuenta.</p>
+                        <p>Por favor, pulsa en el siguiente enlace para activar su cuenta:</p>
+                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
+                        <p>Si no solicitaste este cambio, ignora este correo.</p>
+                      </body>
+                    </html>
+                    "
+                );
+
+            }
+            catch (SmtpException)
+            {
+                throw new SmtpException("Ha ocurrido un error al enviar correo");
+            }
+
+            return Ok(new { mensaje = "Email enviado correctamente." });
+        }
+    }
+
+    [HttpPost("email-recuperar-password")]
+    public async Task<IActionResult> EnviarEmailRecuperarPassword([FromBody] CorreoRequest correo)
+    {
+        IList<string> errorMessages = new List<string>();
+
+        using (var session = _sessionFactory.OpenSession())
+        {
+            // Verificar si el usuario ya existe
+            var existingUser = session.Query<Usuario>()
+                .SingleOrDefault(u => u.Correo == correo.Correo);
+
+            if (existingUser == null)
+            {
+                errorMessages.Add($"El correo '{correo}' no está registrado.");
+
+                throw new ValidationException(errorMessages);
+            }
+
+            existingUser.TokenConfirmacion = Guid.NewGuid().ToString();
+
+            // Guardar el nuevo usuario
+            using (var transaction = session.BeginTransaction())
+            {
+                session.Save(existingUser);
+                await transaction.CommitAsync();
+            }
+            try
+            {
+                var baseUrl = "https://ahorroland.sergioizq.es";
+#if DEBUG
+                baseUrl = "http://localhost:4200";
+#endif
+                var confirmUrl = $"{baseUrl}/auth/confirmar-nueva-pwd?token={existingUser.TokenConfirmacion}";
+
+                await _emailService.SendEmailAsync(
+                    existingUser.Correo,
+                    "Recuperación de contraseña - Ahorroland",
+                    $@"
+                    <html>
+                      <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+                        <h1>Recuperación de contraseña</h1>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.</p>
+                        <p>Por favor, pulsa en el siguiente enlace para crear una nueva contraseña:</p>
+                        <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Restablecer mi contraseña</a></p>
+                        <p>Si no solicitaste este cambio, ignora este correo.</p>
+                      </body>
+                    </html>
+                    "
+                );
+
+            }
+            catch (SmtpException)
+            {
+                throw new SmtpException("Ha ocurrido un error al enviar correo");
+            }
+
+            return Ok(new { mensaje = "Email enviado correctamente." });
         }
     }
 
