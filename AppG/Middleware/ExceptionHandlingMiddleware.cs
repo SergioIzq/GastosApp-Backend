@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Net.Mail;
     using System.Text.Json;
     using System.Threading.Tasks;
 
@@ -101,6 +102,24 @@
                             Succeeded = false,
                             Message = "Operación no autorizada.",
                             Errors = new List<string> { "Problema al intentar abrir el Excel generado, si lo tiene abierto, ciérrelo." }
+                        };
+                        break;
+                    case SmtpException e:
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        responseModel = new
+                        {
+                            Succeeded = false,
+                            e.Message,
+                            Errors = new List<string> { "No se ha podido enviar el correo contacte con el administrador para solucionarlo." }
+                        };
+                        break;
+                    case UnauthorizedAccessException e:
+                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        responseModel = new
+                        {
+                            Succeeded = false,
+                            e.Message,
+                            Errors =  new List<string> { "Debe confirmar su correo antes de iniciar sesión." }
                         };
                         break;
                     default:

@@ -7,6 +7,7 @@ using AppG.Middleware;
 using Microsoft.AspNetCore.Authorization;
 using Hangfire;
 using Hangfire.PostgreSql;
+using System.Text.Json;
 
 public class Startup
 {
@@ -35,6 +36,9 @@ public class Startup
             }
         }
 
+        services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+        services.AddScoped<EmailService>();
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -54,6 +58,8 @@ public class Startup
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
+
+                ConfigureJwtBearerEvents(options);
             });
 
         services.AddAuthorization(auth =>
@@ -174,6 +180,45 @@ public class Startup
         }
 
         return connectionString;
+    }
+
+    private static void ConfigureJwtBearerEvents(JwtBearerOptions options)
+    {
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse(); // Evita la respuesta automática
+
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                var response = new
+                {
+                    Succeeded = false,
+                    Message = "Sesión expirada o token inválido.",
+                    Errors = new[] { "Tu sesión ha expirado. Por favor, inicia sesión nuevamente." }
+                };
+
+                var json = JsonSerializer.Serialize(response);
+                return context.Response.WriteAsync(json);
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+
+                var response = new
+                {
+                    Succeeded = false,
+                    Message = "Acceso denegado.",
+                    Errors = new[] { "No tienes permisos para acceder a este recurso." }
+                };
+
+                var json = JsonSerializer.Serialize(response);
+                return context.Response.WriteAsync(json);
+            }
+        };
     }
 
 }
