@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using NHibernate.Linq;
 using AppG.Exceptions;
+using System.Net.Mail;
 
 [Route("api/auth")]
 [ApiController]
@@ -45,7 +46,7 @@ public class AuthController : ControllerBase
 
             if (!user!.Activo)
             {
-                throw new UnauthorizedAccessException("Debe confirmar su correo antes de iniciar sesión.");
+                throw new UnauthorizedAccessException("Error en login.");
             }
 
             if (errorMessages.Count > 0)
@@ -109,13 +110,13 @@ public class AuthController : ControllerBase
                     </html>
                     "
                     );
+            }
+            catch (SmtpException)
+            {
+                throw new SmtpException("Ha ocurrido un error al enviar correo");
+            }
 
-            }
-            catch (Exception) {
-                throw new Exception("Ha ocurrido un error al enviar correo");
-            }
-            var token = GenerateJwtToken(usuario);
-            return Ok(new { token });
+            return Ok(new { mensaje = "Usuario creado correctamente." });
         }
     }
 
@@ -169,7 +170,7 @@ public class AuthController : ControllerBase
             session.Update(usuario);
             transaction.Commit();
 
-            return Ok("Correo confirmado correctamente.");
+            return Ok(new { mensaje = "Correo confirmado correctamente." });
         }
     }
 
