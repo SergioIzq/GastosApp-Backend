@@ -5,6 +5,7 @@ using NHibernate.Linq;
 using OfficeOpenXml;
 using System.Diagnostics;
 using AppG.BBDD.Respuestas.Gastos;
+using AppG.Controllers;
 
 namespace AppG.Servicio
 {
@@ -15,6 +16,38 @@ namespace AppG.Servicio
 
         }
 
+        public override async Task<ResponseList<Gasto>> GetCantidadAsync(int page, int size, int idUsuario)
+        {
+            try
+            {
+                using (var session = _sessionFactory.OpenSession())
+                {
+                    // Contar el número total de registros usando LINQ
+                    int totalCount = await session.Query<Gasto>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .CountAsync();
+
+                    // Calcular el offset para la paginación
+                    var offset = (page - 1) * size;
+
+                    // Obtener los resultados paginados usando LINQ
+                    var results = await session.Query<Gasto>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .OrderByDescending(x => x.Fecha)
+                        .Skip(offset)
+                        .Take(size)
+                        .ToListAsync();
+
+                    // Crear la respuesta con el total de registros y los elementos obtenidos
+                    return new ResponseList<Gasto>(results, totalCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones
+                throw new Exception($"Error al obtener cantidad: {ex.Message}", ex);
+            }
+        }
 
         public async Task<Gasto> CreateAsync(Gasto entity, bool esGastoProgramado = false)
         {

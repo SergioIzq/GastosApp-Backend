@@ -99,7 +99,7 @@ namespace AppG.Servicio
                     // Obtener los resultados paginados usando LINQ
                     var results = await session.Query<T>()
                         .Where(x => x.IdUsuario == idUsuario)
-                        .OrderBy(x => x.Id) // Ordenar por Id (asegúrate de tener un campo Id)
+                        .OrderBy(x => x.FechaCreacion) // Ordenar por Id (asegúrate de tener un campo Id)
                         .Skip(offset)
                         .Take(size)
                         .ToListAsync();

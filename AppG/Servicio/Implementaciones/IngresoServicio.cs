@@ -1,4 +1,5 @@
 ﻿using AppG.BBDD.Respuestas.Ingresos;
+using AppG.Controllers;
 using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
@@ -15,6 +16,38 @@ namespace AppG.Servicio
 
         }
 
+        public override async Task<ResponseList<Ingreso>> GetCantidadAsync(int page, int size, int idUsuario)
+        {
+            try
+            {
+                using (var session = _sessionFactory.OpenSession())
+                {
+                    // Contar el número total de registros usando LINQ
+                    int totalCount = await session.Query<Ingreso>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .CountAsync();
+
+                    // Calcular el offset para la paginación
+                    var offset = (page - 1) * size;
+
+                    // Obtener los resultados paginados usando LINQ
+                    var results = await session.Query<Ingreso>()
+                        .Where(x => x.IdUsuario == idUsuario)
+                        .OrderByDescending(x => x.Fecha)
+                        .Skip(offset)
+                        .Take(size)
+                        .ToListAsync();
+
+                    // Crear la respuesta con el total de registros y los elementos obtenidos
+                    return new ResponseList<Ingreso>(results, totalCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones
+                throw new Exception($"Error al obtener cantidad: {ex.Message}", ex);
+            }
+        }
 
         public async Task<Ingreso> CreateAsync(Ingreso entity, bool esGastoProgramado = false)
         {
