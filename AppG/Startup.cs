@@ -1,12 +1,12 @@
+using AppG.Middleware;
+using Hangfire;
+using Hangfire.MySql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using NHibernate;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AppG.Middleware;
-using Microsoft.AspNetCore.Authorization;
-using Hangfire;
-using Hangfire.PostgreSql;
 using System.Text.Json;
 
 public class Startup
@@ -95,13 +95,15 @@ public class Startup
 
         services.AddHangfire(config =>
         {
-            config.UsePostgreSqlStorage(
-                options => options.UseNpgsqlConnection(ConnectionString),
-                new PostgreSqlStorageOptions
-                {
-                    SchemaName = "hangfire",
-                    QueuePollInterval = TimeSpan.FromSeconds(15)
-                });
+            config.UseStorage(
+                new MySqlStorage(
+                    ConnectionString, // tu cadena de conexión MySQL
+                    new MySqlStorageOptions
+                    {
+                        QueuePollInterval = TimeSpan.FromSeconds(15),
+                        // No hay esquema en MySQL, pero puedes usar prefijos en tablas si quieres
+                        TablesPrefix = "hangfire_"
+                    }));
         });
 
         services.AddHangfireServer();

@@ -3,9 +3,7 @@
 
 	<class name="IngresoProgramado" table="ingreso_programado">
 		<id name="Id" column="id">
-			<generator class="sequence">
-				<param name="sequence">seq_ingreso_programado_id</param>
-			</generator>
+			<generator class="identity" />
 		</id>
 
 		<property name="Monto" type="decimal" precision="10" scale="2" not-null="true">

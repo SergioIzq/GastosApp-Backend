@@ -4,6 +4,7 @@ using AppG.Exceptions;
 using Hangfire;
 using NHibernate;
 using NHibernate.Linq;
+using System.Globalization;
 
 namespace AppG.Servicio
 {
@@ -304,12 +305,13 @@ namespace AppG.Servicio
 
                     await _gastoServicio.CreateAsync(gasto, true);
                     await transaction.CommitAsync();
+                    await session.FlushAsync();
 
                     var usuario = await session.GetAsync<Usuario>(gasto.IdUsuario);
 
-                    var baseUrl = "https://ahorroland.sergioizq.es/gastos";
+                    var baseUrl = $"https://ahorroland.sergioizq.es/gastos/gasto-detail/{gasto.Id}";
 #if DEBUG
-                    baseUrl = "http://localhost:4200/gastos";
+                    baseUrl = $"http://localhost:4200/gastos/gasto-detail/{gasto.Id}";
 #endif
 
                     await _emailService.SendEmailAsync(
@@ -322,15 +324,16 @@ namespace AppG.Servicio
                                 <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
-                                  <li><strong>Importe:</strong> {gasto.Monto:C}</li>
-                                  <li><strong>Cuenta:</strong> {gasto.Cuenta}</li>
-                                  <li><strong>Concepto:</strong> {gasto.Concepto}</li>
+                                  <li><strong>Importe:</strong> -{gasto.Monto.ToString("N2", new CultureInfo("es-ES"))} €</li>
+                                  < li><strong>Cuenta:</strong> {gasto.Cuenta.Nombre}</li>
+                                  <li><strong>Categoria:</strong> {gasto.Concepto.Categoria.Nombre}</li> 
+                                  <li><strong>Concepto:</strong> {gasto.Concepto.Nombre}</li>
                                 </ul>
                                 <p>Puedes ver el gasto registrado en la sección <strong>Operaciones > Gastos</strong> de tu cuenta:</p>
                                 <p>
                                   <a href='{baseUrl}' target='_blank' 
                                      style='display: inline-block; padding: 10px 20px; background-color: #1a73e8; color: white; text-decoration: none; border-radius: 4px;'>
-                                    Ver Gastos
+                                    Ver Gasto
                                   </a>
                                 </p>
                                 <p style='margin-top: 20px;'>Si no reconoces este gasto, por favor contacta con el administrador.</p>
