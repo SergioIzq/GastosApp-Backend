@@ -3,9 +3,7 @@
 
 	<class name="Usuario" table="usuario">
 		<id name="Id" column="id">
-			<generator class="sequence">
-				<param name="sequence">usuario_id_seq</param>
-			</generator>
+			<generator class="identity" />
 		</id>
 
 		<property name="Correo" type="string" length="100" not-null="true">

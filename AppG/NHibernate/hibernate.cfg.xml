@@ -4,11 +4,11 @@
 		<!-- Proveedor de conexión -->
 		<property name="connection.provider">NHibernate.Connection.DriverConnectionProvider</property>
 
-		<!-- Dialecto para PostgreSQL -->
-		<property name="dialect">NHibernate.Dialect.PostgreSQLDialect</property>
+		<!-- Dialecto para MySQL 8 -->
+		<property name="dialect">NHibernate.Dialect.MySQL8Dialect</property>
 
-		<!-- Driver de conexión adecuado para PostgreSQL en .NET -->
-		<property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
+		<!-- Driver de conexión adecuado para MySQL en .NET -->
+		<property name="connection.driver_class">NHibernate.Driver.MySqlDataDriver</property>
 
 		<!-- Nivel de aislamiento de la conexión -->
 		<property name="connection.isolation">ReadCommitted</property>
@@ -20,6 +20,6 @@
 		<property name="current_session_context_class">call</property>
 
 		<!-- Mostrar SQL generado en la consola -->
-		<property name="show_sql">true</property>		
+		<property name="show_sql">true</property>
 	</session-factory>
 </hibernate-configuration>

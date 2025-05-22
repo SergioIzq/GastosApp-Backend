@@ -3,9 +3,7 @@
 
 	<class name="TraspasoProgramado" table="traspaso_programado">
 		<id name="Id" column="id">
-			<generator class="sequence">
-				<param name="sequence">traspaso_programado_id_seq</param>
-			</generator>
+			<generator class="identity" />
 		</id>
 
 		<property name="Importe" type="decimal" precision="18" scale="2" not-null="true">

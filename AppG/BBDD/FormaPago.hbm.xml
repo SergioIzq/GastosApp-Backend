@@ -3,9 +3,7 @@
 
 	<class name="FormaPago" table="forma_pago">
 		<id name="Id" column="id">
-			<generator class="sequence">
-				<param name="sequence">forma_pago_id_seq</param>
-			</generator>
+			<generator class="identity" />
 		</id>
 
 		<property name="Nombre" type="string" length="100" not-null="true">

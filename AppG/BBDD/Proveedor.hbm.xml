@@ -3,9 +3,7 @@
 
 	<class name="Proveedor" table="proveedor">
 		<id name="Id" column="id">
-			<generator class="sequence">
-				<param name="sequence">proveedor_id_seq</param>
-			</generator>
+			<generator class="identity" />
 		</id>
 		<property name="Nombre" type="string" length="100" not-null="true">
 			<column name="nombre" sql-type="varchar" />

@@ -323,8 +323,8 @@ namespace AppG.Servicio
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                   <li><strong>Importe:</strong> {ingreso.Monto:C}</li>
-                                  <li><strong>Cuenta:</strong> {ingreso.Cuenta}</li>
-                                  <li><strong>Concepto:</strong> {ingreso.Concepto}</li>
+                                  <li><strong>Cuenta:</strong> {ingreso.Cuenta.Nombre}</li>
+                                  <li><strong>Concepto:</strong> {ingreso.Concepto.Nombre}</li>
                                 </ul>
                                 <p>Puedes ver el ingreso registrado en la sección <strong>Operaciones > Ingresos</strong> de tu cuenta:</p>
                                 <p>
