@@ -4,6 +4,7 @@ using AppG.Exceptions;
 using Hangfire;
 using NHibernate;
 using NHibernate.Linq;
+using System.Globalization;
 
 namespace AppG.Servicio
 {
@@ -290,12 +291,13 @@ namespace AppG.Servicio
                     
                     await _traspasoServicio.RealizarTraspaso(traspaso, true);
                     await transaction.CommitAsync();
+                    await session.FlushAsync();
 
                     var usuario = await session.GetAsync<Usuario>(traspaso.IdUsuario);
 
-                    var baseUrl = "https://ahorroland.sergioizq.es/traspasos";
+                    var baseUrl = "https://ahorroland.sergioizq.es/traspasos/traspaso-detail/{traspaso.Id}";
 #if DEBUG
-                    baseUrl = "http://localhost:4200/traspasos";
+                    baseUrl = $"http://localhost:4200/traspasos/traspaso-detail/{traspaso.Id}";
 #endif
 
                     await _emailService.SendEmailAsync(
@@ -308,11 +310,11 @@ namespace AppG.Servicio
                                 <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
-                                  <li><strong>Importe:</strong> {traspaso.Importe:C}</li>
+                                  <li><strong>Importe:</strong> {traspaso.Importe.ToString("N2", new CultureInfo("es-ES"))} €</li>
                                   <li><strong>Cuenta origen:</strong> {traspaso.CuentaOrigen.Nombre}</li>
-                                  <li><strong>Saldo cuenta origen:</strong> {traspaso.SaldoCuentaOrigen}</li>
+                                  <li><strong>Saldo cuenta origen:</strong> {traspaso.SaldoCuentaOrigen.ToString("N2", new CultureInfo("es-ES"))} €</li>
                                   <li><strong>Cuenta destino:</strong> {traspaso.CuentaDestino.Nombre}</li>
-                                  <li><strong>Saldo cuenta destino:</strong> {traspaso.SaldoCuentaDestino}</li>
+                                  <li><strong>Saldo cuenta destino:</strong> {traspaso.SaldoCuentaDestino.ToString("N2", new CultureInfo("es-ES"))} €</li>
                                 </ul>
                                 <p>Puedes ver el traspaso registrado en la sección <strong>Operaciones > Traspasos</strong> de tu cuenta:</p>
                                 <p>

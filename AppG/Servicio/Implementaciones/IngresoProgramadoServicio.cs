@@ -4,6 +4,7 @@ using NHibernate;
 using NHibernate.Linq;
 using AppG.BBDD.Respuestas.Ingresos;
 using Hangfire;
+using System.Globalization;
 
 namespace AppG.Servicio
 {
@@ -302,14 +303,15 @@ namespace AppG.Servicio
                     ingreso.Monto = ingresoP.Monto;
                     ingreso.Persona = ingresoP.Persona;
 
-                    await _ingresoServicio.CreateAsync(ingreso, true);
+                    await _ingresoServicio.CreateAsync(ingreso, true);                    
                     await transaction.CommitAsync();
+                    await session.FlushAsync();
 
                     var usuario = await session.GetAsync<Usuario>(ingreso.IdUsuario);
 
-                    var baseUrl = "https://ahorroland.sergioizq.es/ingresos";
+                    var baseUrl = $"https://ahorroland.sergioizq.es/ingresos/ingreso-detail/{ingreso.Id}";
 #if DEBUG
-                    baseUrl = "http://localhost:4200/ingresos";
+                    baseUrl = $"http://localhost:4200/ingresos/ingreso-detail/{ingreso.Id}";
 #endif
 
                     await _emailService.SendEmailAsync(
@@ -322,15 +324,16 @@ namespace AppG.Servicio
                                 <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
-                                  <li><strong>Importe:</strong> {ingreso.Monto:C}</li>
+                                  <li><strong>Importe:</strong> +{ingreso.Monto.ToString("N2", new CultureInfo("es-ES"))} €</li>
                                   <li><strong>Cuenta:</strong> {ingreso.Cuenta.Nombre}</li>
+                                  <li><strong>Categoria:</strong> {ingreso.Concepto.Categoria.Nombre}</li> 
                                   <li><strong>Concepto:</strong> {ingreso.Concepto.Nombre}</li>
                                 </ul>
                                 <p>Puedes ver el ingreso registrado en la sección <strong>Operaciones > Ingresos</strong> de tu cuenta:</p>
                                 <p>
                                   <a href='{baseUrl}' target='_blank' 
                                      style='display: inline-block; padding: 10px 20px; background-color: #1a73e8; color: white; text-decoration: none; border-radius: 4px;'>
-                                    Ver Ingresos
+                                    Ver Ingreso
                                   </a>
                                 </p>
                                 <p style='margin-top: 20px;'>Si no reconoces este ingreso, por favor contacta con el administrador.</p>
