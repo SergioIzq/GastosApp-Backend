@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
+using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
-using AppG.Exceptions;
 using AppG.Servicio;
-using static AppG.Servicio.GastoServicio;
-using static AppG.Servicio.CategoriaServicio;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using static AppG.Servicio.CategoriaServicio;
 
 namespace AppG.Controllers
 {
@@ -66,15 +65,6 @@ namespace AppG.Controllers
             await _categoriaService.UpdateAsync(id, entity);
 
             return Ok(new { message = $"{typeof(Categoria).Name} actualizado correctamente" });
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<CategoriaDto> res)
-        {
-
-            _categoriaService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
     }
 }

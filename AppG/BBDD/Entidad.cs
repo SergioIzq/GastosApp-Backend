@@ -1,7 +1,9 @@
-﻿namespace AppG.Entidades.BBDD
+﻿using AppG.Servicio.Base;
+
+namespace AppG.Entidades.BBDD
 
 {
-    public abstract class Entidad
+    public abstract class Entidad : IExportable
     {
         public Entidad()
         {
@@ -16,7 +18,10 @@
 
         public virtual DateTime FechaCreacion { get; set; }
 
-
+        public virtual object? GetValueByName(string propertyName)
+        {
+            return GetType().GetProperty(propertyName)?.GetValue(this);
+        }
     }
 
 }

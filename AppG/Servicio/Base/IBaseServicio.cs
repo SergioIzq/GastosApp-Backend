@@ -1,4 +1,4 @@
-﻿using AppG.Controllers;
+﻿using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio

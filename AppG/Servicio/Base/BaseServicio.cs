@@ -1,7 +1,7 @@
 ﻿using NHibernate;
 using NHibernate.Linq;
-using AppG.Controllers;
 using AppG.Entidades.BBDD;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Servicio
 {

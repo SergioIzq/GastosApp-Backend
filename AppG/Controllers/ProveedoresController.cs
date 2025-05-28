@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.ProveedorServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -62,15 +63,6 @@ namespace AppG.Controllers
             await _proveedorService.UpdateAsync(id, entity);
 
             return Ok(new { message = $"{typeof(Proveedor).Name} actualizado correctamente" });
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<ProveedorDto> res)
-        {
-
-            _proveedorService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
     }

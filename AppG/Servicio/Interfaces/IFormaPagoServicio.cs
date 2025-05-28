@@ -1,11 +1,9 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
-using static AppG.Servicio.FormaPagoServicio;
+﻿using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio
 {
-    public interface IFormaPagoServicio : IBaseServicio<FormaPago> {
-        void ExportarDatosExcelAsync(Excel<FormaPagoDto> res);
+    public interface IFormaPagoServicio : IBaseServicio<FormaPago>
+    {
 
     }
 

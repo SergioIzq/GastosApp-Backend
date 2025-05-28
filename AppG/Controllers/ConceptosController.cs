@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.ConceptoServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 
 namespace AppG.Controllers
@@ -65,15 +66,6 @@ namespace AppG.Controllers
 
             return Ok(new { message = $"{typeof(Concepto).Name} actualizado correctamente" });
 
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<ConceptoDto> res)
-        {
-
-            _conceptoService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
     }

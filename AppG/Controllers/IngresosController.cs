@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.IngresoServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -52,15 +53,6 @@ namespace AppG.Controllers
             await _ingresoService.UpdateAsync(id, entity);
             return Ok(new { message = $"{typeof(Ingreso).Name} actualizado correctamente" });
 
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<IngresoDto> res)
-        {
-
-            _ingresoService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
         [HttpGet("getNewIngreso/{idUsuario}")]

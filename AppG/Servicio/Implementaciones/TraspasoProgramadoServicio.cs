@@ -48,12 +48,29 @@ namespace AppG.Servicio
                         errorMessages.Add($"La cuenta de destino '{entity.CuentaDestino.Nombre}' no existe.");
                     }
 
+                    TraspasoProgramado traspasoP = new TraspasoProgramado
+                    {
+                        CuentaOrigen = cuentaOrigen!,
+                        SaldoCuentaOrigen = cuentaOrigen!.Saldo,
+                        CuentaDestino = cuentaDestino!,
+                        SaldoCuentaDestino = cuentaDestino!.Saldo,
+                        FechaEjecucion = entity.FechaEjecucion,
+                        Frecuencia = entity.Frecuencia,
+                        Activo = entity.Activo,
+                        FechaCreacion = entity.FechaCreacion,
+                        HangfireJobId = entity.HangfireJobId,
+                        Id = entity.Id,
+                        Descripcion = entity.Descripcion,
+                        Importe = entity.Importe,
+                        IdUsuario = entity.CuentaOrigen.IdUsuario
+                    };
+
                     // Guardar el traspaso programado
-                    session.Save(entity);
+                    session.Save(traspasoP);
                     await transaction.CommitAsync();
 
                     // Obtener el ID generado
-                    var id = session.GetIdentifier(entity);
+                    var id = session.GetIdentifier(traspasoP);
 
                     // Recuperar la entidad completa (por si se llenan otros campos en base de datos)
                     var createdEntity = await session.GetAsync<TraspasoProgramado>(id);

@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
-using static AppG.Servicio.FormaPagoServicio;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AppG.Controllers
 {
@@ -64,15 +64,6 @@ namespace AppG.Controllers
 
             return Ok(new { message = $"{typeof(FormaPago).Name} actualizado correctamente" });
 
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<FormaPagoDto> res)
-        {
-
-            _formaPagoService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
     }
 }

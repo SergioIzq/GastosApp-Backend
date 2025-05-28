@@ -288,7 +288,7 @@ namespace AppG.Servicio
                         throw new Exception($"No se encontró la cuenta con ID {gastoP!.Cuenta!.Id}");
                     }
 
-                    cuenta.Saldo -= Math.Abs(gastoP.Monto);
+                    cuenta.Saldo -= Math.Abs(gastoP.Importe);
 
                     session.Update(cuenta);
 
@@ -300,7 +300,7 @@ namespace AppG.Servicio
                     gasto.Fecha = DateTime.Now;
                     gasto.FormaPago = gastoP.FormaPago;
                     gasto.IdUsuario = gastoP.IdUsuario;
-                    gasto.Monto = gastoP.Monto;
+                    gasto.Importe = gastoP.Importe;
                     gasto.Persona = gastoP.Persona;                    
 
                     await _gastoServicio.CreateAsync(gasto, true);
@@ -324,7 +324,7 @@ namespace AppG.Servicio
                                 <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
-                                  <li><strong>Importe:</strong> -{gasto.Monto.ToString("N2", new CultureInfo("es-ES"))} €</li>
+                                  <li><strong>Importe:</strong> -{gasto.Importe.ToString("N2", new CultureInfo("es-ES"))} €</li>
                                   < li><strong>Cuenta:</strong> {gasto.Cuenta.Nombre}</li>
                                   <li><strong>Categoria:</strong> {gasto.Concepto.Categoria.Nombre}</li> 
                                   <li><strong>Concepto:</strong> {gasto.Concepto.Nombre}</li>

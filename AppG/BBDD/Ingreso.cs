@@ -8,7 +8,7 @@
 
           
         }
-        public virtual decimal Monto { get; set; }
+        public virtual decimal Importe { get; set; }
         public virtual DateTime Fecha { get;set; }
 
         public virtual Concepto Concepto { get; set; } = new Concepto();

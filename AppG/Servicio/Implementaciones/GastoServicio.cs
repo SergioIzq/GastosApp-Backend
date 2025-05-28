@@ -1,11 +1,9 @@
-﻿using AppG.Entidades.BBDD;
+﻿using AppG.BBDD.Respuestas;
+using AppG.BBDD.Respuestas.Gastos;
+using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
-using OfficeOpenXml;
-using System.Diagnostics;
-using AppG.BBDD.Respuestas.Gastos;
-using AppG.Controllers;
 
 namespace AppG.Servicio
 {
@@ -95,7 +93,7 @@ namespace AppG.Servicio
 
                     if (!esGastoProgramado)
                     {
-                        cuenta!.Saldo -= entity!.Monto;
+                        cuenta!.Saldo -= entity!.Importe;
                     }
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
@@ -183,14 +181,14 @@ namespace AppG.Servicio
                     // Revertir el saldo de la cuenta original basado en el gasto anterior
                     if (originalCuenta != null)
                     {
-                        originalCuenta.Saldo += existingEntity.Monto;
+                        originalCuenta.Saldo += existingEntity.Importe;
                         session.Update(originalCuenta);
                     }
 
-                    // Actualizar el saldo de la nueva cuenta basado en el nuevo monto
+                    // Actualizar el saldo de la nueva cuenta basado en el nuevo importe
                     if (nuevaCuenta != null)
                     {
-                        nuevaCuenta.Saldo -= entity!.Monto;
+                        nuevaCuenta.Saldo -= entity!.Importe;
                         session.Update(nuevaCuenta);
                     }
 
@@ -234,7 +232,7 @@ namespace AppG.Servicio
                         throw new ValidationException(errorMessages);
                     }
 
-                    cuenta.Saldo += existingEntity.Monto;
+                    cuenta.Saldo += existingEntity.Importe;
 
                     // Guardar la cuenta actualizada
                     session.Update(cuenta);
@@ -249,130 +247,6 @@ namespace AppG.Servicio
                     await transaction.RollbackAsync();
                     throw new Exception(ex.Message);
                 }
-            }
-        }
-
-        public void ExportarDatosExcelAsync(Excel<GastoDto> res)
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            string directorioPath = res.DirPath;
-
-            // Comprobar si la ruta del directorio es válida
-            if (!Directory.Exists(directorioPath))
-            {
-                throw new DirectoryNotFoundException($"El directorio especificado no existe: {directorioPath}");
-            }
-
-            // Definir la ruta completa del archivo
-            var filePath = Path.Combine(directorioPath, "gastos.xlsx");
-
-            var exportData = new List<dynamic>();
-
-            // Convertir la lista de ingresos a un formato adecuado para Excel
-            exportData.AddRange(res.Data.Select(item => new
-            {
-                TipoOperacion = "Gasto",
-                Fecha = item.Fecha.ToString("dd/MM/yyyy"),
-                Persona = item.Persona?.Nombre ?? string.Empty,
-                FormaPago = item.FormaPago?.Nombre ?? string.Empty,
-                Proveedor = item.Proveedor?.Nombre ?? string.Empty,
-                Categoria = item.Categoria?.Nombre ?? string.Empty,
-                Concepto = item.Concepto?.Nombre ?? string.Empty,
-                Cuenta = item.Cuenta?.Nombre ?? string.Empty,
-                Descripcion = item?.Descripcion ?? string.Empty,
-                Importe = $"+{item!.Importe}",
-            }));
-
-            exportData.Add(new
-            {
-                TipoOperacion = "Gasto",
-                Fecha = "",
-                Persona = "",
-                FormaPago = "",
-                Cliente = "",
-                Categoria = "",
-                Concepto = "",
-                Cuenta = "",
-                Descripcion = "",
-                Importe = ""
-            });
-
-            using (var package = new ExcelPackage())
-            {
-                ExcelWorksheet worksheet;
-
-                if (File.Exists(filePath))
-                {
-                    try
-                    {
-                        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
-                        {
-                            package.Load(stream);
-                        }
-                    }
-                    catch (FileLoadException)
-                    {
-                        throw new FileLoadException();
-                    }
-                    worksheet = package.Workbook.Worksheets["Gastos"];
-
-                    if (worksheet == null)
-                    {
-                        worksheet = package.Workbook.Worksheets.Add("Gastos");
-                    }
-                }
-                else
-                {
-                    worksheet = package.Workbook.Worksheets.Add("Gastos");
-                }
-
-                worksheet.Cells.Clear();
-
-                // Establecer las cabeceras de las columnas
-                worksheet.Cells["A1"].Value = "Tipo Operacion";
-                worksheet.Cells["B1"].Value = "Fecha";
-                worksheet.Cells["C1"].Value = "Persona";
-                worksheet.Cells["D1"].Value = "Forma de Pago";
-                worksheet.Cells["E1"].Value = "Proveedor";
-                worksheet.Cells["F1"].Value = "Categoria";
-                worksheet.Cells["G1"].Value = "Concepto";
-                worksheet.Cells["H1"].Value = "Cuenta";
-                worksheet.Cells["I1"].Value = "Descripcion";
-                worksheet.Cells["J1"].Value = "Importe";
-
-                // Cargar los datos manualmente a partir de la fila 2
-                var row = 2;
-                foreach (var item in exportData.Take(exportData.Count - 1))
-                {
-                    worksheet.Cells[row, 1].Value = item.TipoOperacion;
-                    worksheet.Cells[row, 2].Value = item.Fecha;
-                    worksheet.Cells[row, 3].Value = item.Persona;
-                    worksheet.Cells[row, 4].Value = item.FormaPago;
-                    worksheet.Cells[row, 5].Value = item.Proveedor;
-                    worksheet.Cells[row, 6].Value = item.Categoria;
-                    worksheet.Cells[row, 7].Value = item.Concepto;
-                    worksheet.Cells[row, 8].Value = item.Cuenta;
-                    worksheet.Cells[row, 9].Value = item.Descripcion;
-                    worksheet.Cells[row, 10].Value = item.Importe;
-                    row++;
-                }
-
-                row++;
-
-                if (worksheet.Dimension != null)
-                {
-                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                }
-
-                FileInfo fileInfo = new FileInfo(filePath);
-                package.SaveAs(fileInfo);
-
-                // Abrir el archivo en Excel
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = filePath,
-                    UseShellExecute = true
-                });
             }
         }
 
@@ -446,22 +320,6 @@ namespace AppG.Servicio
 
             return response;
         }
-
-
-        public class GastoDto
-        {
-            public DateTime Fecha { get; set; }
-            public required Persona Persona { get; set; }
-            public required FormaPago FormaPago { get; set; }
-            public required Proveedor Proveedor { get; set; }
-            public required Categoria Categoria { get; set; }
-            public required Concepto Concepto { get; set; }
-            public required Cuenta Cuenta { get; set; }
-            public decimal Importe { get; set; }
-
-            public string? Descripcion { get; set; }
-        }
-
 
     }
 }

@@ -5,7 +5,7 @@
         public IngresoProgramado()
         {
         }        
-        public virtual decimal Monto { get; set; }
+        public virtual decimal Importe { get; set; }
         public virtual DateTime FechaEjecucion { get; set; }
         public virtual Concepto Concepto { get; set; } = new Concepto();
         public virtual Cliente Cliente { get; set; } = new Cliente();
