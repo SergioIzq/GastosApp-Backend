@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AppG.Controllers
+﻿namespace AppG.BBDD.Respuestas
 {
     public class ResponseList<T>
     {

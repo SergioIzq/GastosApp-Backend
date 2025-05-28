@@ -1,11 +1,9 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
-using static AppG.Servicio.CategoriaServicio;
+﻿using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio
 {
-    public interface ICategoriaServicio : IBaseServicio<Categoria> {
-        void ExportarDatosExcelAsync(Excel<CategoriaDto> res);
+    public interface ICategoriaServicio : IBaseServicio<Categoria>
+    {
     }
 
 }

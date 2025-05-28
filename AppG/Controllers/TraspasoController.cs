@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.TraspasoServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -42,15 +43,6 @@ namespace AppG.Controllers
             var response = new ResponseOne<Traspaso>(createdEntity, message);
 
             return Ok(response);
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<TraspasoDto> res)
-        {
-
-            _traspasoService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
         [HttpGet("getNewTraspaso/{idUsuario}")]

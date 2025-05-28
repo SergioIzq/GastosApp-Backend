@@ -26,9 +26,9 @@ namespace AppG.Servicio
                     DateTime inicio = DateTime.Parse(periodoInicio);
                     DateTime fin = DateTime.Parse(periodoFin);
 
-                    // Consultas SQL directas para sumar los montos en la tabla Ingreso
+                    // Consultas SQL directas para sumar los importes en la tabla Ingreso
                     string gastosSql = @"
-                        SELECT COALESCE(SUM(Monto), 0) 
+                        SELECT COALESCE(SUM(Importe), 0) 
                         FROM gasto 
                         WHERE Fecha BETWEEN :Inicio AND :Fin AND id_Usuario = :IdUsuario";
 
@@ -80,9 +80,9 @@ namespace AppG.Servicio
                     DateTime inicio = DateTime.Parse(periodoInicio).Date; // Esto establece la hora a 00:00:00
                     DateTime fin = DateTime.Parse(periodoFin).Date.AddDays(1).AddSeconds(-1); // Esto establece la hora a 23:59:59 del mismo día
 
-                    // Consultas SQL directas para sumar los montos en la tabla Ingreso
+                    // Consultas SQL directas para sumar los importes en la tabla Ingreso
                     string ingresosSql = @"
-                        SELECT COALESCE(SUM(Monto), 0) 
+                        SELECT COALESCE(SUM(Importe), 0) 
                         FROM ingreso 
                         WHERE Fecha BETWEEN :Inicio AND :Fin AND id_usuario = :IdUsuario";
 
@@ -151,7 +151,7 @@ namespace AppG.Servicio
                 Categoria = item.Concepto?.Nombre ?? string.Empty,
                 Concepto = item.Concepto?.Nombre ?? string.Empty,
                 Cuenta = item.Cuenta?.Nombre ?? string.Empty,
-                Importe = $"-{item.Monto}",
+                Importe = $"-{item.Importe}",
                 Cliente = string.Empty  // Cliente no aplicable para Gasto
             }));
 
@@ -166,7 +166,7 @@ namespace AppG.Servicio
                 Categoria = item.Concepto?.Categoria?.Nombre ?? string.Empty,
                 Concepto = item.Concepto?.Nombre ?? string.Empty,
                 Cuenta = item.Cuenta?.Nombre ?? string.Empty,
-                Importe = $"+{item.Monto}",
+                Importe = $"+{item.Importe}",
                 Proveedor = string.Empty
             }));
 

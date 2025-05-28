@@ -2,6 +2,7 @@
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {

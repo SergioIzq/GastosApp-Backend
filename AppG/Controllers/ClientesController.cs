@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
-using static AppG.Servicio.ClienteServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 
 namespace AppG.Controllers
@@ -63,15 +63,6 @@ namespace AppG.Controllers
             await _clienteService.UpdateAsync(id, entity);
 
             return Ok(new { message = $"{typeof(Cliente).Name} actualizado correctamente" });
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<ClienteDto> res)
-        {
-
-            _clienteService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
     }

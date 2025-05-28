@@ -86,8 +86,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
     <PackageReference Include="MySql.Data" Version="9.3.0" />
-    <PackageReference Include="NHibernate" Version="5.5.2" />    
-    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="NHibernate" Version="5.5.2" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />

@@ -3,8 +3,6 @@ using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using NHibernate;
 using NHibernate.Linq;
-using OfficeOpenXml;
-using System.Diagnostics;
 
 namespace AppG.Servicio
 {
@@ -228,130 +226,6 @@ namespace AppG.Servicio
                     throw new ValidationException(errorMessages);
                 }
             }
-        }
-
-        public void ExportarDatosExcelAsync(Excel<TraspasoDto> res)
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            string directorioPath = res.DirPath;
-
-            // Comprobar si la ruta del directorio es válida
-            if (!Directory.Exists(directorioPath))
-            {
-                throw new DirectoryNotFoundException($"El directorio especificado no existe: {directorioPath}");
-            }
-
-            // Definir la ruta completa del archivo
-            var filePath = Path.Combine(directorioPath, "traspasos.xlsx");
-
-            var exportData = new List<dynamic>();
-
-            // Convertir la lista de ingresos a un formato adecuado para Excel
-            exportData.AddRange(res.Data.Select(item => new
-            {
-                Fecha = item.Fecha.ToString("dd/MM/yyyy"),
-                CuentaOrigen = item.CuentaOrigen ?? string.Empty,
-                SaldoCuentaOrigen = item.SaldoCuentaOrigen,
-                CuentaDestino = item.CuentaDestino ?? string.Empty,
-                SaldoCuentaDestino = item.SaldoCuentaDestino,
-                Importe = $"+{item.Importe}",
-                Descripcion = item?.Descripcion ?? string.Empty,
-            }));
-
-            exportData.Add(new
-            {
-                Fecha = "",
-                CuentaOrigen = "",
-                SaldoCuentaOrigen = "",
-                CuentaDestino = "",
-                SaldoCuentaDestino = "",
-                Importe = "",
-                Descripcion = "",
-            });
-
-            using (var package = new ExcelPackage())
-            {
-                ExcelWorksheet worksheet;
-
-                if (File.Exists(filePath))
-                {
-                    try
-                    {
-                        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
-                        {
-                            package.Load(stream);
-                        }
-                    }
-                    catch (FileLoadException)
-                    {
-                        throw new FileLoadException();
-                    }
-                    worksheet = package.Workbook.Worksheets["Traspaso"];
-
-                    if (worksheet == null)
-                    {
-                        worksheet = package.Workbook.Worksheets.Add("Traspaso");
-                    }
-                }
-                else
-                {
-                    worksheet = package.Workbook.Worksheets.Add("Traspaso");
-                }
-
-                worksheet.Cells.Clear();
-
-                // Establecer las cabeceras de las columnas
-                worksheet.Cells["A1"].Value = "Fecha";
-                worksheet.Cells["B1"].Value = "Cuenta Origen";
-                worksheet.Cells["C1"].Value = "Saldo Cuenta Origen";
-                worksheet.Cells["D1"].Value = "Cuenta Destino";
-                worksheet.Cells["E1"].Value = "SaldoCuentaDestino";
-                worksheet.Cells["F1"].Value = "Importe";
-                worksheet.Cells["G1"].Value = "Descripcion";
-
-
-                var row = 2;
-                foreach (var item in exportData.Take(exportData.Count - 1))
-                {
-                    worksheet.Cells[row, 1].Value = item.Fecha;
-                    worksheet.Cells[row, 2].Value = item.CuentaOrigen;
-                    worksheet.Cells[row, 3].Value = item.SaldoCuentaOrigen;
-                    worksheet.Cells[row, 4].Value = item.CuentaDestino;
-                    worksheet.Cells[row, 5].Value = item.SaldoCuentaDestino;
-                    worksheet.Cells[row, 6].Value = item.Importe;
-                    worksheet.Cells[row, 7].Value = item.Descripcion;
-                    row++;
-                }
-
-                row++;
-
-                if (worksheet.Dimension != null)
-                {
-                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                }
-
-                FileInfo fileInfo = new FileInfo(filePath);
-                package.SaveAs(fileInfo);
-
-                // Abrir el archivo en Excel
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = filePath,
-                    UseShellExecute = true
-                });
-            }
-        }
-
-        public class TraspasoDto
-        {
-            public DateTime Fecha { get; set; }
-            public required string CuentaOrigen { get; set; }
-            public decimal SaldoCuentaOrigen { get; set; }
-            public required string CuentaDestino { get; set; }
-            public decimal SaldoCuentaDestino { get; set; }
-            public decimal Importe { get; set; }
-
-            public string? Descripcion { get; set; }
         }
 
     }

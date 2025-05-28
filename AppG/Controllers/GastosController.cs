@@ -54,15 +54,6 @@ namespace AppG.Controllers
             return Ok(new { message = $"{typeof(Gasto).Name} con ID {id} actualizado correctamente" });
         }
 
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<GastoDto> res)
-        {
-
-            _gastoService.ExportarDatosExcelAsync(res);
-
-            return Ok();
-        }
-
         [HttpGet("getNewGasto/{idUsuario}")]
         public async Task<IActionResult> GetNewGasto(int idUsuario)
         {

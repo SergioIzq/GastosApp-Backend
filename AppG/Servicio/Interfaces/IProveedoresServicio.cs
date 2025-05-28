@@ -1,11 +1,8 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
-using static AppG.Servicio.ProveedorServicio;
+﻿using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio
 {
     public interface IProveedorServicio : IBaseServicio<Proveedor> {
-        void ExportarDatosExcelAsync(Excel<ProveedorDto> res);
 
     }
 

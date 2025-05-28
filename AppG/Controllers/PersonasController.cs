@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.PersonaServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -64,15 +65,6 @@ namespace AppG.Controllers
 
             return Ok(new { message = $"{typeof(Persona).Name} actualizado correctamente" });
 
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<PersonaDto> res)
-        {
-
-            _personaService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
     }
 }

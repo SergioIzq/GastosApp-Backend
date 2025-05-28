@@ -130,8 +130,6 @@ public class AuthController : ControllerBase
         {
         new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Exp, expirationUnix.ToString()),
-
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("F7o/dfNfO5AqZbHkLXM6z5Zm8DZpX0m6v7KD0tJr0uI="));
@@ -194,7 +192,7 @@ public class AuthController : ControllerBase
             var hasher = new PasswordHasher<Usuario>();
             var hashedPassword = hasher.HashPassword(usuario, request.Password);
             usuario.Contrasena = hashedPassword;
-            
+
             usuario.TokenConfirmacion = null;
             session.Update(usuario);
             transaction.Commit();

@@ -36,6 +36,7 @@ public class Startup
             }
         }
 
+        services.AddHttpContextAccessor();
         services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
         services.AddScoped<EmailService>();
 
@@ -130,7 +131,7 @@ public class Startup
         app.UseSwagger();
         app.UseSwaggerUI();
 
-      // Configuración de CORS
+        // Configuración de CORS
         app.UseCors("AllowAppG");
         // Configuración de enrutamiento
         app.UseRouting();

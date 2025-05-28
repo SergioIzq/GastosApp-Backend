@@ -1,12 +1,15 @@
+using AppG.BBDD.Excel;
+using AppG.BBDD.Respuestas;
+using AppG.Entidades.BBDD;
+using AppG.Servicio;
+using AppG.Servicio.Base;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AppG.Servicio;
-using AppG.Entidades.BBDD;
 
 namespace AppG.Controllers
 {
-    public abstract class BaseController<T> : ControllerBase where T : Entidad
+    public abstract class BaseController<T> : ControllerBase where T : Entidad, IExportable
     {
         protected readonly IBaseServicio<T> _baseService;
         private readonly JsonSerializerOptions _jsonOptions;
@@ -105,6 +108,18 @@ namespace AppG.Controllers
             {
                 return StatusCode(500, $"Error al eliminar entidad: {ex.Message}");
             }
+        }
+
+        [HttpPost("exportar")]
+        public async Task<IActionResult> ExportarGenerico([FromBody] ExportarOpciones opciones, [FromServices] IExcelServicio excelServicio)
+        {
+            if (!typeof(IExportable).IsAssignableFrom(typeof(T)))
+            {
+                return BadRequest($"La entidad {typeof(T).Name} no soporta exportación.");
+            }
+
+            var bytes = await excelServicio.ExportarExcelAsync<T>(opciones);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{opciones.NombreArchivo}.xlsx");
         }
 
     }

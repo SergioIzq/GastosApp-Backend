@@ -3,6 +3,7 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using static AppG.Servicio.CuentaServicio;
 using Microsoft.AspNetCore.Authorization;
+using AppG.BBDD.Respuestas;
 
 namespace AppG.Controllers
 {
@@ -72,15 +73,6 @@ namespace AppG.Controllers
 
             return Ok(new { message = $"{typeof(Cuenta).Name} eliminada correctamente" });
 
-        }
-
-        [HttpPost("exportExcel")]
-        public IActionResult ExportExcel([FromBody] Excel<CuentaDto> res)
-        {
-
-            _cuentaService.ExportarDatosExcelAsync(res);
-
-            return Ok();
         }
 
     }
