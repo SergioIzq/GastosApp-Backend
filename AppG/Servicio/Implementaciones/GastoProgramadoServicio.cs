@@ -321,11 +321,11 @@ namespace AppG.Servicio
                             <html>
                               <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
                                 <h1>Gasto programado ejecutado correctamente</h1>
-                                <p>Se ha aplicado automáticamente un ingreso programado con los siguientes detalles:</p>
+                                <p>Se ha aplicado automáticamente un gasto programado con los siguientes detalles:</p>
                                 <ul>
                                   <li><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</li>
                                   <li><strong>Importe:</strong> -{gasto.Importe.ToString("N2", new CultureInfo("es-ES"))} €</li>
-                                  < li><strong>Cuenta:</strong> {gasto.Cuenta.Nombre}</li>
+                                  <li><strong>Cuenta:</strong> {gasto.Cuenta.Nombre}</li>
                                   <li><strong>Categoria:</strong> {gasto.Concepto.Categoria.Nombre}</li> 
                                   <li><strong>Concepto:</strong> {gasto.Concepto.Nombre}</li>
                                 </ul>
