@@ -328,4 +328,26 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("contactoForm")]
+    public async Task<IActionResult> EnviarCorreoContacto([FromBody] ContactoFormRequest contactoFormRequest)
+    {
+        IList<string> errorMessages = new List<string>();
+
+        using (var session = _sessionFactory.OpenSession())
+        {
+            try
+            {
+                await _emailService.SendEmailAsync("ahorroland@sergioizq.es", "Contacto", "Correo enviado por " + contactoFormRequest.Email + " con nombre" + contactoFormRequest.Nombre + " y con mensaje: " + contactoFormRequest.Mensaje);
+
+            }
+            catch (SmtpException)
+            {
+                throw new SmtpException("Ha ocurrido un error al enviar correo");
+                throw new SmtpException("Ha ocurrido un error al enviar correo");
+            }
+
+            return Ok(new { mensaje = "Email enviado correctamente." });
+        }
+    }
+
 }
