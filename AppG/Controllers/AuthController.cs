@@ -337,7 +337,7 @@ public class AuthController : ControllerBase
         {
             try
             {
-                await _emailService.SendEmailAsync("ahorroland@sergioizq.es", "Contacto", "Correo enviado por " + contactoFormRequest.Email + " con nombre" + contactoFormRequest.Nombre + " y con mensaje: " + contactoFormRequest.Mensaje);
+                await _emailService.SendEmailAsync("ahorroland@sergioizq.es", "Contacto", "Correo enviado por " + contactoFormRequest.Email + " con nombre " + contactoFormRequest.Nombre + " y con mensaje: " + contactoFormRequest.Mensaje);
 
             }
             catch (SmtpException)
