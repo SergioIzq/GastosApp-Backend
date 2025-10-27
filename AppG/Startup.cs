@@ -74,11 +74,22 @@ public class Startup
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAppG", builder =>
-                builder.WithOrigins("https://ahorroland.sergioizq.es", "http://localhost:4200")
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials());
+            {
+                builder.SetIsOriginAllowed(origin =>
+                {
+                    // Permite localhost:4200
+                    if (origin == "http://localhost:4200") return true;
+
+                    // Permite cualquier subdominio de sergioizq.es
+                    Uri uri = new(origin);
+                    return uri.Host.EndsWith(".sergioizq.es");
+                })
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+            });
         });
+
 
         // Configuración de NHibernate
         var sessionFactory = ConfigureNHibernate(Configuration);
