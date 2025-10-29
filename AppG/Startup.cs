@@ -73,7 +73,7 @@ public class Startup
 
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAppG", builder =>
+            options.AddPolicy("SergioIzqDomain", builder =>
             {
                 builder.SetIsOriginAllowed(origin =>
                 {
@@ -82,7 +82,8 @@ public class Startup
 
                     // Permite cualquier subdominio de sergioizq.es
                     Uri uri = new(origin);
-                    return uri.Host.EndsWith(".sergioizq.es");
+                    // Permite el dominio raíz (sergioizq.es) O cualquier subdominio (.sergioizq.es)
+                    return uri.Host == "sergioizq.es" || uri.Host.EndsWith(".sergioizq.es");
                 })
                 .AllowAnyMethod()
                 .AllowAnyHeader()
@@ -124,7 +125,7 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         // Configuración de CORS
-        app.UseCors("AllowAppG");
+        app.UseCors("SergioIzqDomain");
 
         if (env.IsDevelopment())
         {
@@ -143,7 +144,7 @@ public class Startup
         app.UseSwaggerUI();
 
         // Configuración de CORS
-        app.UseCors("AllowAppG");
+        app.UseCors("SergioIzqDomain");
         // Configuración de enrutamiento
         app.UseRouting();
 
