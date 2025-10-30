@@ -1,6 +1,8 @@
-﻿namespace AhorroLand.Domain.Personas
+﻿using AhorroLand.Shared.Domain.Interfaces;
+
+namespace AhorroLand.Domain.Personas
 {
-    internal interface IPersonaRepository
-    {
+    public interface IPersonaRepository : IRepository<Persona>
+    {        
     }
 }
