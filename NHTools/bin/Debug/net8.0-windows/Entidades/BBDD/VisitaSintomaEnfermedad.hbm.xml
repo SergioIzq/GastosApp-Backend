@@ -1,9 +1,0 @@
-﻿<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="Proyecto_Integrado" namespace="Proyecto_Integrado.Entidades.BBDD">
-	<class name="VisitaSintomaEnfermedad" table="VISITA_SINTOMA_ENFERMEDAD">
-		<id name="Id">
-			<generator class="native" />
-		</id>
-		<property name="Id_Visita" column="ID_VISITA" not-null="true" />
-		<property name="Id_SintomaEnfermedad" column="ID_SINTOMA_ENFERMEDAD" not-null="true" />
-	</class>
-</hibernate-mapping>
