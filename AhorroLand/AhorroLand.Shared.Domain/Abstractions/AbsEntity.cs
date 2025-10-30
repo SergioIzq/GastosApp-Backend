@@ -1,4 +1,6 @@
-﻿namespace AhorroLandBackend.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Interfaces;
+
+namespace AhorroLand.Shared.Domain.Abstractions;
 
 public abstract class AbsEntity
 {
@@ -8,9 +10,9 @@ public abstract class AbsEntity
         FechaCreacion = DateTime.Now;
     }
 
-    private readonly List<IDomainEvent> _domainEvents = new();
+    private readonly List<IDomainEvent> _domainEvents = [];
     protected virtual Guid Id { get; init; }
-    protected virtual DateTime FechaCreacion { get; set; }
+    protected virtual DateTime FechaCreacion { get; init; }
 
     protected IReadOnlyList<IDomainEvent> GetDomainEvents()
     {

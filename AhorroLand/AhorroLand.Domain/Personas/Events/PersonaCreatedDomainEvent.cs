@@ -1,5 +1,5 @@
-﻿using AhorroLandBackend.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Events;
 
-namespace AhorroLandBackend.Domain.Personas.Events;
+namespace AhorroLand.Domain.Personas.Events;
 
-public sealed record PersonaCreatedDomainEvent(Guid UserId) : IDomainEvent;
+public sealed record PersonaCreatedDomainEvent(Guid id) : DomainEventBase;

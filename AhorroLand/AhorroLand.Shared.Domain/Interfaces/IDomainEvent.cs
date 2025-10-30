@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace AhorroLandBackend.Domain.Abstractions;
+namespace AhorroLand.Shared.Domain.Interfaces;
 
 public interface IDomainEvent : INotification
 {
