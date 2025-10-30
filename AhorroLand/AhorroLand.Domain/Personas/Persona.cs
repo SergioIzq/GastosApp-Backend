@@ -1,11 +1,12 @@
-﻿using AhorroLandBackend.Domain.Abstractions;
-using AhorroLandBackend.Domain.Personas.Events;
+﻿using AhorroLand.Domain.Personas.Events;
+using AhorroLand.Shared.Domain.Abstractions;
+using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLandBackend.Domain.Personas;
+namespace AhorroLand.Domain.Personas;
 
 public sealed class Persona : AbsEntity
 {
-    private Persona(Guid id): base(id)
+    private Persona(Guid id, Nombre nombre): base(id)
     {
         
     }
@@ -14,10 +15,7 @@ public sealed class Persona : AbsEntity
 
     public static Persona Create(Guid id, Nombre nombre)
     {
-        var persona = new Persona(id)
-        {
-            Nombre = nombre
-        };
+        var persona = new Persona(id, nombre);
 
         persona.RaiseDomainEvent(new PersonaCreatedDomainEvent(persona.Id));
 
