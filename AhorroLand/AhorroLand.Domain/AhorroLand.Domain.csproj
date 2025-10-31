@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AhorroLand.Shared.Domain\AhorroLand.Shared.Domain.csproj" />
+    <ProjectReference Include="..\AhorroLand.Shared.Domain\AhorroLand.Shared.Domain.csproj" />
   </ItemGroup>
 
 </Project>
