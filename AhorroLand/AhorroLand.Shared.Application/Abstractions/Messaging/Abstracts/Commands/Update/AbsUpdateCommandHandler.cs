@@ -7,14 +7,14 @@ using Mapster;
 using MediatR;
 
 namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
-public abstract class UpdateCommandHandler<TEntity, TDto, TCommand>
+public abstract class AbsUpdateCommandHandler<TEntity, TDto, TCommand>
     : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result<TDto>>
     where TEntity : AbsEntity
     where TCommand : AbsUpdateCommand<TEntity, TDto>
 {
     private readonly IReadOnlyRepository<TEntity> _readRepository;
 
-    public UpdateCommandHandler(
+    public AbsUpdateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity> writeRepository,
         ICacheService cacheService,
