@@ -8,10 +8,10 @@ public sealed class Persona : AbsEntity
 {
     private Persona(Guid id, Nombre nombre): base(id)
     {
-        
+        Nombre = nombre;
     }
 
-    public Nombre? Nombre { get; private set; }
+    public Nombre Nombre { get; private set; }
 
     public static Persona Create(Guid id, Nombre nombre)
     {

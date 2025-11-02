@@ -11,7 +11,7 @@ public abstract class AbsEntity
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
-    protected virtual Guid Id { get; init; }
+    public virtual Guid Id { get; init; }
     protected virtual DateTime FechaCreacion { get; init; }
 
     protected IReadOnlyList<IDomainEvent> GetDomainEvents()

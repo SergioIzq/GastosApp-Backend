@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-
-namespace AhorroLand.Shared.Domain.ValueObjects;
+﻿namespace AhorroLand.Shared.Domain.ValueObjects;
 
 public record PasswordHash
 {

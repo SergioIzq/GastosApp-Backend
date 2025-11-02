@@ -1,4 +1,4 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
+﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 namespace AhorroLand.Domain.Personas
 {
