@@ -1,0 +1,69 @@
+﻿using AhorroLand.Domain.Usuarios.Events;
+using AhorroLand.Shared.Domain.Abstractions;
+using AhorroLand.Shared.Domain.ValueObjects;
+
+namespace AhorroLand.Domain.Usuarios;
+
+// Usuario es la Raíz del Agregado de Identidad
+public sealed class Usuario : AbsEntity
+{
+    // Constructor Privado estricto (llamado por el método Create)
+    private Usuario(
+        Guid id,
+        Email correo,
+        PasswordHash contrasenaHash,
+        ConfirmationToken? tokenConfirmacion,
+        bool activo) : base(id)
+    {
+        Correo = correo;
+        ContrasenaHash = contrasenaHash;
+        TokenConfirmacion = tokenConfirmacion;
+        Activo = activo;
+    }
+
+    public Email Correo { get; private set; }
+    public PasswordHash ContrasenaHash { get; private set; }
+    public ConfirmationToken? TokenConfirmacion { get; private set; }
+    public bool Activo { get; private set; }
+
+    /// <summary>
+    /// Crea un nuevo Usuario. El HASHING DEBE OCURRIR FUERA del Dominio.
+    /// </summary>
+    public static Usuario Create(
+        Email correo,
+        PasswordHash contrasenaHash)
+    {
+        // 1. Generar elementos iniciales de seguridad
+        var tokenVO = ConfirmationToken.GenerateNew();
+
+        // 2. Crear la entidad
+        var usuario = new Usuario(
+            Guid.NewGuid(),
+            correo,
+            contrasenaHash,
+            tokenVO,
+            activo: false
+        );
+
+        // 3. Emitir evento
+        usuario.RaiseDomainEvent(new UsuarioCreatedDomainEvent(usuario.Id, usuario.Correo));
+
+        return usuario;
+    }
+
+    /// <summary>
+    /// Activa la cuenta del usuario si el token coincide.
+    /// </summary>
+    public void Confirmar(string tokenSuministrado)
+    {
+        if (Activo) return;
+
+        if (TokenConfirmacion is null || !TokenConfirmacion.Value.Equals(tokenSuministrado))
+        {
+            throw new InvalidOperationException("El token de confirmación no es válido.");
+        }
+
+        Activo = true;
+        TokenConfirmacion = null;
+    }
+}
