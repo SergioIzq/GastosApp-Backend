@@ -5,6 +5,7 @@
     /// </summary>
     public record ClienteDto(
         Guid Id,
-        string Nombre
+        string Nombre,
+        Guid UsuarioId
     );
 }

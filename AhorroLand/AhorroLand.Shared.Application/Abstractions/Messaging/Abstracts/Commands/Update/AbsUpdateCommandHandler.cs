@@ -12,13 +12,13 @@ public abstract class AbsUpdateCommandHandler<TEntity, TDto, TCommand>
     where TEntity : AbsEntity
     where TCommand : AbsUpdateCommand<TEntity, TDto>
 {
-    private readonly IReadOnlyRepository<TEntity> _readRepository;
+    private readonly IReadRepository<TEntity> _readRepository;
 
     public AbsUpdateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity> writeRepository,
         ICacheService cacheService,
-        IReadOnlyRepository<TEntity> readRepository)
+        IReadRepository<TEntity> readRepository)
         : base(unitOfWork, writeRepository, cacheService)
     {
         _readRepository = readRepository;

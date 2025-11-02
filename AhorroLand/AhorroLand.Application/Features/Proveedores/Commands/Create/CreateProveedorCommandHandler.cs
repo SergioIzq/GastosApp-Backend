@@ -21,7 +21,10 @@ public sealed class CreateProveedorCommandHandler : AbsCreateCommandHandler<Prov
     protected override Proveedor CreateEntity(CreateProveedorCommand command)
     {
         var nombreVO = new Nombre(command.Nombre);
-        var newProveedor = Proveedor.Create(Guid.NewGuid(), nombreVO);
+        var usuarioId = new UsuarioId(command.UsuarioId);
+
+
+        var newProveedor = Proveedor.Create(Guid.NewGuid(), nombreVO, usuarioId);
         return newProveedor;
     }
 }

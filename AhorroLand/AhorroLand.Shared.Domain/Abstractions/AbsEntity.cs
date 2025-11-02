@@ -10,22 +10,6 @@ public abstract class AbsEntity
         FechaCreacion = DateTime.Now;
     }
 
-    private readonly List<IDomainEvent> _domainEvents = [];
     public virtual Guid Id { get; init; }
-    protected virtual DateTime FechaCreacion { get; init; }
-
-    protected IReadOnlyList<IDomainEvent> GetDomainEvents()
-    {
-        return _domainEvents.ToList();
-    }
-
-    protected void ClearDomainEvents()
-    {
-        _domainEvents.Clear();
-    }
-
-    protected void RaiseDomainEvent(IDomainEvent domainEvent)
-    {
-        _domainEvents.Add(domainEvent);
-    }
+    public virtual DateTime FechaCreacion { get; init; }
 }

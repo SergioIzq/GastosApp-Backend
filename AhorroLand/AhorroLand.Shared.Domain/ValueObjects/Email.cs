@@ -2,7 +2,7 @@
 
 namespace AhorroLand.Shared.Domain.ValueObjects;
 
-public record Email
+public readonly record struct Email
 {
     private static readonly Regex EmailRegex =
         new(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);

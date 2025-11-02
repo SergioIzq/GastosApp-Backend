@@ -1,69 +1,71 @@
-﻿using AhorroLand.Domain.Cuentas;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
+using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.ValueObjects;
-using AhorroLand.Domain.Traspasos.Events;
 
 namespace AhorroLand.Domain.Traspasos;
 
-public sealed class Traspaso : AbsEntity
+public sealed class Traspaso : AbsEntity, IDomainEvent
 {
+    private readonly List<IDomainEvent> _domainEvents = new();
+    public IReadOnlyList<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
+
+    // ⭐ 2. Limpia los eventos después de que el UnitOfWork los publica
+    public void ClearDomainEvents() => _domainEvents.Clear();
+
+    // ⭐ 3. Método para que las entidades añadan eventos
+    public void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
     private Traspaso(
         Guid id,
-        Cuenta cuentaOrigen,
-        Cuenta cuentaDestino,
+        CuentaId cuentaOrigen,
+        CuentaId cuentaDestino,
         Cantidad importe,
         FechaRegistro fecha,
+        UsuarioId usuarioId,
         Descripcion? descripcion) : base(id)
     {
         CuentaOrigen = cuentaOrigen;
         CuentaDestino = cuentaDestino;
         Importe = importe;
         Fecha = fecha;
+        UsuarioId = usuarioId;
         Descripcion = descripcion;
     }
 
-    public Cuenta CuentaOrigen { get; }
-    public Cuenta CuentaDestino { get; }
+
+    public CuentaId CuentaOrigen { get; }
+    public CuentaId CuentaDestino { get; }
 
     public Cantidad Importe { get; }
     public FechaRegistro Fecha { get; }
-    public Descripcion? Descripcion { get; }
+    public UsuarioId UsuarioId { get; }
 
+    public Descripcion? Descripcion { get; }
     public static Traspaso Create(
-        Cuenta cuentaOrigen,
-        Cuenta cuentaDestino,
-        decimal importe,
-        DateTime fecha,
-        string? descripcion)
+        CuentaId cuentaOrigen,
+        CuentaId cuentaDestino,
+        Cantidad importe,
+        FechaRegistro fecha,
+        UsuarioId usuarioId,
+        Descripcion? descripcion)
     {
+        // ⭐ Única validación de dominio intrínseca del Traspaso:
         if (cuentaOrigen.Equals(cuentaDestino))
         {
             throw new InvalidOperationException("La cuenta de origen y destino deben ser diferentes.");
         }
 
-        var importeVO = new Cantidad(importe);
-        var fechaVO = new FechaRegistro(fecha);
-        var descripcionVO = descripcion != null
-                    ? (Descripcion?)new Descripcion(descripcion)
-                    : null;
-
-        // 🔑 LÓGICA DDD: La responsabilidad de los saldos es de la entidad Cuenta.
-        // La Entidad Traspaso dispara los cambios en las cuentas.
-
-        // 1. Actualizar saldos (asumiendo que los métodos Depositar/Retirar existen y validan)
-        cuentaOrigen.Retirar(importeVO);
-        cuentaDestino.Depositar(importeVO);
-
-        // 2. Crear la entidad Traspaso (Registro de la acción)
         var traspaso = new Traspaso(
             Guid.NewGuid(),
             cuentaOrigen,
             cuentaDestino,
-            importeVO,
-            fechaVO,
-            descripcionVO);
-
-        traspaso.RaiseDomainEvent(new TraspasoCreatedDomainEvent(traspaso.Id));
+            importe,
+            fecha,
+            usuarioId,
+            descripcion);
 
         return traspaso;
     }

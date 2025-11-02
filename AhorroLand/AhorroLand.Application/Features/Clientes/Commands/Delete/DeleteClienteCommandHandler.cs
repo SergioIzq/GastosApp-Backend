@@ -17,7 +17,7 @@ public sealed class DeleteClienteCommandHandler
     public DeleteClienteCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<Cliente> writeRepository,
-        IReadOnlyRepository<Cliente> readOnlyRepository,
+        IReadRepository<Cliente> readOnlyRepository,
         ICacheService cacheService)
         : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
     {

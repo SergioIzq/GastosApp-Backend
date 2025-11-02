@@ -35,7 +35,7 @@ public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
     /// </summary>
     protected abstract TEntity CreateEntity(TCommand command);
 
-    public async Task<Result<TDto>> Handle(TCommand command, CancellationToken cancellationToken)
+    public virtual async Task<Result<TDto>> Handle(TCommand command, CancellationToken cancellationToken)
     {
         // 1. Lógica de Negocio: Crear la entidad (provista por la clase concreta)
         TEntity entity;

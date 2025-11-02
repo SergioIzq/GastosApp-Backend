@@ -14,7 +14,7 @@ public sealed class GetClienteByIdQueryHandler
 {
     public GetClienteByIdQueryHandler(
         ICacheService cacheService,
-        IReadOnlyRepository<Cliente> readOnlyRepository
+        IReadRepository<Cliente> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

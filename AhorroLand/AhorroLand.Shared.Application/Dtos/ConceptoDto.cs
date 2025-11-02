@@ -7,6 +7,7 @@
         Guid Id,
         string Nombre,
         Guid CategoriaId,
-        string CategoriaNombre
+        string CategoriaNombre,
+        Guid UsuarioId
     );
 }

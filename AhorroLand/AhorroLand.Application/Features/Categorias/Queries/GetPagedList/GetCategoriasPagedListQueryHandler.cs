@@ -16,7 +16,7 @@ public sealed class GetCategoriasPagedListQueryHandler
     : GetPagedListQueryHandler<Categoria, CategoriaDto, GetCategoriasPagedListQuery>
 {
     public GetCategoriasPagedListQueryHandler(
-        IReadOnlyRepository<Categoria> repository,
+        IReadRepository<Categoria> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

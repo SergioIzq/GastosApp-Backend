@@ -21,7 +21,9 @@ public sealed class CreatePersonaCommandHandler : AbsCreateCommandHandler<Person
     protected override Persona CreateEntity(CreatePersonaCommand command)
     {
         var nombreVO = new Nombre(command.Nombre);
-        var newPersona = Persona.Create(Guid.NewGuid(), nombreVO);
+        var usuarioId = new UsuarioId(command.UsuarioId);
+
+        var newPersona = Persona.Create(Guid.NewGuid(), nombreVO, usuarioId);
         return newPersona;
     }
 }

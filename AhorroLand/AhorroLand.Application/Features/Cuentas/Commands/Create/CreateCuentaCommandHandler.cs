@@ -22,7 +22,9 @@ public sealed class CreateCuentaCommandHandler : AbsCreateCommandHandler<Cuenta,
     {
         var nombreVO = new Nombre(command.Nombre);
         var saldoVO = new Cantidad(command.Saldo);
-        var newCuenta = Cuenta.Create(Guid.NewGuid(), nombreVO, saldoVO);
+        var usuarioId = new UsuarioId(command.UsuarioId);
+
+        var newCuenta = Cuenta.Create(nombreVO, saldoVO, usuarioId);
         return newCuenta;
     }
 }

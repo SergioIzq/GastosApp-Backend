@@ -5,6 +5,7 @@
     /// </summary>
     public record FormaPagoDto(
         Guid Id,
-        string Nombre
+        string Nombre,
+        Guid UsuarioId
     );
 }

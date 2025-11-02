@@ -25,6 +25,8 @@
         string CuentaNombre,
 
         Guid FormaPagoId,
-        string FormaPagoNombre
+        string FormaPagoNombre,
+
+        Guid UsuarioId
     );
 }

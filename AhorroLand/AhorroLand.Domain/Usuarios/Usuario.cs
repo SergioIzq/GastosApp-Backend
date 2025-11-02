@@ -1,5 +1,4 @@
-﻿using AhorroLand.Domain.Usuarios.Events;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Domain.Usuarios;
@@ -44,9 +43,6 @@ public sealed class Usuario : AbsEntity
             tokenVO,
             activo: false
         );
-
-        // 3. Emitir evento
-        usuario.RaiseDomainEvent(new UsuarioCreatedDomainEvent(usuario.Id, usuario.Correo));
 
         return usuario;
     }

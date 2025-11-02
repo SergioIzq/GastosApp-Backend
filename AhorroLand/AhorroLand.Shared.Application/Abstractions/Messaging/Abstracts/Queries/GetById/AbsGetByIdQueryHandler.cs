@@ -13,7 +13,7 @@ public abstract class GetByIdQueryHandler<TEntity, TDto, TQuery>
     where TQuery : AbsGetByIdQuery<TEntity, TDto>
 {
     public GetByIdQueryHandler(
-        IReadOnlyRepository<TEntity> repository,
+        IReadRepository<TEntity> repository,
         ICacheService cacheService)
         : base(repository, cacheService)
     {

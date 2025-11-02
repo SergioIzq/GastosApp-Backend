@@ -1,6 +1,6 @@
 ﻿namespace AhorroLand.Shared.Domain.ValueObjects;
 
-public record struct Nombre
+public readonly record struct Nombre
 {
     // Constructor primario sin lógica
     public string Value { get; init; }

@@ -1,6 +1,6 @@
 ﻿namespace AhorroLand.Shared.Domain.ValueObjects;
 
-public record PasswordHash
+public readonly record struct PasswordHash
 {
     public string Value { get; }
 

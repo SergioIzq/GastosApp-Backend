@@ -15,7 +15,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         where TDto : class
     {
         public GetPagedListQueryHandler(
-            IReadOnlyRepository<TEntity> repository,
+            IReadRepository<TEntity> repository,
             ICacheService cacheService)
             : base(repository, cacheService)
         {

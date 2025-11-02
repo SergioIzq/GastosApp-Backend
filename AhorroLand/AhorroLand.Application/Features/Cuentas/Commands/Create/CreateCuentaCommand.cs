@@ -6,6 +6,7 @@ namespace AhorroLand.Application.Features.Cuentas.Commands;
 
 public sealed record CreateCuentaCommand : AbsCreateCommand<Cuenta, CuentaDto>
 {
- public required string Nombre { get; init; }
- public required decimal Saldo { get; init; }
+    public required string Nombre { get; init; }
+    public required decimal Saldo { get; init; }
+    public required Guid UsuarioId { get; init; }
 }

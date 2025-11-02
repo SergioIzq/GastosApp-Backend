@@ -9,6 +9,7 @@ namespace AhorroLand.Application.Features.Conceptos.Commands;
 /// </summary>
 public sealed record CreateConceptoCommand : AbsCreateCommand<Concepto, ConceptoDto>
 {
- public required string Nombre { get; init; }
- public required Guid CategoriaId { get; init; }
+    public required string Nombre { get; init; }
+    public required Guid CategoriaId { get; init; }
+    public required Guid UsuarioId { get; init; }
 }

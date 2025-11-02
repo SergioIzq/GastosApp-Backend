@@ -21,7 +21,9 @@ public sealed class CreateFormaPagoCommandHandler : AbsCreateCommandHandler<Form
     protected override FormaPago CreateEntity(CreateFormaPagoCommand command)
     {
         var nombreVO = new Nombre(command.Nombre);
-        var newFormaPago = FormaPago.Create(Guid.NewGuid(), nombreVO);
+        var usuarioId = new UsuarioId(command.UsuarioId);
+
+        var newFormaPago = FormaPago.Create(nombreVO, usuarioId);
         return newFormaPago;
     }
 }

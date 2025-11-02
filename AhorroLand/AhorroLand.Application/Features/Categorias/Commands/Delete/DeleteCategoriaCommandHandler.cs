@@ -16,7 +16,7 @@ public sealed class DeleteCategoriaCommandHandler
     public DeleteCategoriaCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<Categoria> writeRepository,
-        IReadOnlyRepository<Categoria> readOnlyRepository,
+        IReadRepository<Categoria> readOnlyRepository,
         ICacheService cacheService)
         : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
     {

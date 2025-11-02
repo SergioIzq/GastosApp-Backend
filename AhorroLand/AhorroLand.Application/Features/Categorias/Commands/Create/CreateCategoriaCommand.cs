@@ -14,6 +14,7 @@ public sealed record CreateCategoriaCommand : AbsCreateCommand<Categoria, Catego
     /// Nombre de la nueva categoría.
     /// </summary>
     public required string Nombre { get; init; }
+    public required Guid UsuarioId { get; init; }
 
     /// <summary>
     /// Descripción opcional de la categoría.

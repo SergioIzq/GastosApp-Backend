@@ -15,6 +15,7 @@
         Guid CuentaOrigenId,
         string CuentaOrigenNombre,
         Guid CuentaDestinoId,
-        string CuentaDestinoNombre
+        string CuentaDestinoNombre,
+        Guid UsuarioId
     );
 }
