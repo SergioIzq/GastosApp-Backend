@@ -12,7 +12,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         : AbsQueryHandler<TEntity>, IRequestHandler<TQuery, Result<PagedList<TDto>>>
         where TEntity : AbsEntity
         where TQuery : AbsGetPagedListQuery<TEntity, TDto>
-        where TDto : class // Se requiere que el DTO sea una clase para IQueryable
+        where TDto : class
     {
         public GetPagedListQueryHandler(
             IReadOnlyRepository<TEntity> repository,

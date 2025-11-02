@@ -15,13 +15,13 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
 /// <typeparam name="TEntity">La Entidad de Dominio.</typeparam>
 /// <typeparam name="TDto">El DTO de respuesta.</typeparam>
 /// <typeparam name="TCommand">El tipo de comando concreto que hereda de AbsCreateTCommand.</typeparam>
-public abstract class CreateCommandHandler<TEntity, TDto, TCommand>
+public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
 // Heredamos funcionalidad de persistencia y caché
     : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result<TDto>>
     where TEntity : AbsEntity
     where TCommand : AbsCreateCommand<TEntity, TDto>
 {
-    public CreateCommandHandler(
+    public AbsCreateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity> writeRepository,
         ICacheService cacheService)
