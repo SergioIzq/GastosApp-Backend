@@ -8,15 +8,13 @@ using AhorroLand.Domain.Personas;
 using AhorroLand.Domain.Proveedores;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
-using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
-using Mapster;
 
 public sealed class CreateGastoCommandHandler
-    : AbsCreateCommandHandler<Gasto, GastoDto, CreateGastoCommand>
+    : AbsCreateCommandHandler<Gasto, Guid, CreateGastoCommand>
 {
     private readonly IDomainValidator _validator;
 
@@ -30,7 +28,7 @@ public sealed class CreateGastoCommandHandler
         _validator = validator;
     }
 
-    public override async Task<Result<GastoDto>> Handle(
+    public override async Task<Result<Guid>> Handle(
         CreateGastoCommand command, CancellationToken cancellationToken)
     {
         var existenceTasks = new List<Task<bool>>
@@ -47,7 +45,7 @@ public sealed class CreateGastoCommandHandler
 
         if (results.Any(r => !r))
         {
-            return Result.Failure<GastoDto>(
+            return Result.Failure<Guid>(
                 Error.NotFound("Una o más entidades referenciadas no existen o el ID es incorrecto."));
         }
 
@@ -85,25 +83,23 @@ public sealed class CreateGastoCommandHandler
 
             // 4. PERSISTENCIA
             _writeRepository.Add(gasto);
-            var entityResult = await base.CreateAsync(gasto, cancellationToken);
+            var entityResultGuid = await CreateAsync(gasto, cancellationToken);
 
-            if (entityResult.IsFailure)
+            if (entityResultGuid.IsFailure)
             {
-                return Result.Failure<GastoDto>(entityResult.Error);
+                return Result.Failure<Guid>(entityResultGuid.Error);
             }
 
-            // 5. MAPEO Y ÉXITO
-            var dto = entityResult.Value.Adapt<GastoDto>();
-            return Result.Success(dto);
+            return Result.Success(entityResultGuid.Value);
         }
         catch (ArgumentException ex)
         {
             // Captura de errores de validación de Value Objects
-            return Result.Failure<GastoDto>(Error.Validation(ex.Message));
+            return Result.Failure<Guid>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {
-            return Result.Failure<GastoDto>(Error.Failure("Error.Unexpected", "Error Inesperado", ex.Message));
+            return Result.Failure<Guid>(Error.Failure("Error.Unexpected", "Error Inesperado", ex.Message));
         }
     }
 

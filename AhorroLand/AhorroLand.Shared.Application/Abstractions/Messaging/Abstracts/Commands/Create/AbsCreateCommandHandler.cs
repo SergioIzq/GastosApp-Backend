@@ -15,11 +15,11 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
 /// <typeparam name="TEntity">La Entidad de Dominio.</typeparam>
 /// <typeparam name="TDto">El DTO de respuesta.</typeparam>
 /// <typeparam name="TCommand">El tipo de comando concreto que hereda de AbsCreateTCommand.</typeparam>
-public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
+public abstract class AbsCreateCommandHandler<TEntity, Guid, TCommand>
 // Heredamos funcionalidad de persistencia y caché
-    : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result<TDto>>
+    : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result<Guid>>
     where TEntity : AbsEntity
-    where TCommand : AbsCreateCommand<TEntity, TDto>
+    where TCommand : AbsCreateCommand<TEntity, Guid>
 {
     public AbsCreateCommandHandler(
         IUnitOfWork unitOfWork,
@@ -35,7 +35,7 @@ public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
     /// </summary>
     protected abstract TEntity CreateEntity(TCommand command);
 
-    public virtual async Task<Result<TDto>> Handle(TCommand command, CancellationToken cancellationToken)
+    public virtual async Task<Result<Guid>> Handle(TCommand command, CancellationToken cancellationToken)
     {
         // 1. Lógica de Negocio: Crear la entidad (provista por la clase concreta)
         TEntity entity;
@@ -45,7 +45,7 @@ public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
         }
         catch (Exception ex)
         {
-            return Result.Failure<TDto>(
+            return Result.Failure<Guid>(
                 Error.Validation($"Error al crear {typeof(TEntity).Name}: {ex.Message}")
             );
         }
@@ -55,11 +55,11 @@ public abstract class AbsCreateCommandHandler<TEntity, TDto, TCommand>
 
         if (result.IsFailure)
         {
-            return Result.Failure<TDto>(result.Error);
+            return Result.Failure<Guid>(result.Error);
         }
 
         // 3. Mapeo: Mapear la entidad persistida a DTO (Usando Mapster)
-        var dto = result.Value.Adapt<TDto>();
+        var dto = result.Value.Adapt<Guid>();
 
         return Result.Success(dto);
     }

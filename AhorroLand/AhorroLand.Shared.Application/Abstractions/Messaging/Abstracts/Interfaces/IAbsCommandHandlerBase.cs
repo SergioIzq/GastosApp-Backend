@@ -14,12 +14,12 @@ public interface IAbsCommandHandlerBase<TEntity>
     /// <summary>
     /// Crea una nueva entidad y persiste los cambios.
     /// </summary>
-    Task<Result<TEntity>> CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
+    Task<Result<Guid>> CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Marca la entidad como modificada y persiste los cambios.
     /// </summary>
-    Task<Result> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+    Task<Result<Guid>> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Marca la entidad para su eliminación y persiste los cambios.

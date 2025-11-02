@@ -43,7 +43,7 @@ public abstract class AbsCommandHandler<TEntity> : IAbsCommandHandlerBase<TEntit
     /// <param name="entity">La entidad a crear.</param>
     /// <param name="cancellationToken">Token para monitorear peticiones de cancelación.</param>
     /// <returns>Un Result que contiene la entidad creada en caso de éxito, o Error.Conflict si falla.</returns>
-    public async Task<Result<TEntity>> CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<Result<Guid>> CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -53,12 +53,12 @@ public abstract class AbsCommandHandler<TEntity> : IAbsCommandHandlerBase<TEntit
 
             await InvalidateIndividualCacheAsync(entity.Id);
 
-            return Result.Success(entity);
+            return Result.Success(entity.Id);
         }
         catch (Exception ex)
         {
             string detail = $"Error inesperado al crear {typeof(TEntity).Name}: {ex.Message}";
-            return Result.Failure<TEntity>(Error.Conflict(detail));
+            return Result.Failure<Guid>(Error.Conflict(detail));
         }
     }
 
@@ -68,7 +68,7 @@ public abstract class AbsCommandHandler<TEntity> : IAbsCommandHandlerBase<TEntit
     /// <param name="entity">La entidad a actualizar.</param>
     /// <param name="cancellationToken">Token para monitorear peticiones de cancelación.</param>
     /// <returns>Un Result de éxito si la actualización fue exitosa, o Error.UpdateFailure si falla.</returns>
-    public async Task<Result> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<Result<Guid>> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -77,12 +77,12 @@ public abstract class AbsCommandHandler<TEntity> : IAbsCommandHandlerBase<TEntit
 
             await InvalidateIndividualCacheAsync(entity.Id);
 
-            return Result.Success();
+            return Result.Success(entity.Id);
         }
         catch (Exception ex)
         {
             string detail = $"Error al actualizar {typeof(TEntity).Name}: {ex.Message}";
-            return Result.Failure(Error.UpdateFailure(detail));
+            return Result.Failure<Guid>(Error.UpdateFailure(detail));
         }
     }
 
