@@ -1,24 +1,24 @@
-﻿using AhorroLand.Domain.Cuentas.Events;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 namespace AhorroLand.Domain.Cuentas;
 
 public sealed class Cuenta : AbsEntity
 {
-    private Cuenta(Guid id, Nombre nombre, Cantidad saldo) : base(id)
+    private Cuenta(Guid id, Nombre nombre, Cantidad saldo, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;
         Saldo = saldo;
+        UsuarioId = usuarioId;
+
     }
 
     public Nombre Nombre { get; private set; }
     public Cantidad Saldo { get; private set; }
+    public UsuarioId UsuarioId { get;private set; }
 
-    public static Cuenta Create(Guid id, Nombre nombre, Cantidad saldo)
+    public static Cuenta Create(Nombre nombre, Cantidad saldo, UsuarioId usuarioId)
     {
-        var cuenta = new Cuenta(id, nombre, saldo);
-
-        cuenta.RaiseDomainEvent(new CuentaCreatedDomainEvent(cuenta.Id));
+        var cuenta = new Cuenta(Guid.NewGuid(), nombre, saldo, usuarioId);
 
         return cuenta;
     }

@@ -6,5 +6,6 @@ namespace AhorroLand.Application.Features.FormasPago.Commands;
 
 public sealed record CreateFormaPagoCommand : AbsCreateCommand<FormaPago, FormaPagoDto>
 {
- public required string Nombre { get; init; }
+    public required string Nombre { get; init; }
+    public required Guid UsuarioId { get; init; }
 }

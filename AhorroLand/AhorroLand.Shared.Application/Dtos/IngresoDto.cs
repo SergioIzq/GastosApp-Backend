@@ -15,8 +15,8 @@
         Guid CategoriaId,
         string CategoriaNombre,
 
-        Guid ProveedorId,
-        string ProveedorNombre,
+        Guid ClienteId,
+        string ClienteNombre,
 
         Guid PersonaId,
         string PersonaNombre,
@@ -25,6 +25,7 @@
         string CuentaNombre,
 
         Guid FormaPagoId,
-        string FormaPagoNombre
+        string FormaPagoNombre,
+        Guid UsuarioId
     );
 }

@@ -16,12 +16,12 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
         where TEntity : AbsEntity
         where TCommand : AbsDeleteCommand<TEntity>
     {
-        private readonly IReadOnlyRepository<TEntity> _readOnlyRepository;
+        private readonly IReadRepository<TEntity> _readOnlyRepository;
         // Se inyectan las mismas dependencias que el AbsCommandHandler
         public DeleteCommandHandler(
             IUnitOfWork unitOfWork,
             IWriteRepository<TEntity> writeRepository,
-            IReadOnlyRepository<TEntity> readOnlyRepository,
+            IReadRepository<TEntity> readOnlyRepository,
             ICacheService cacheService)
             : base(unitOfWork, writeRepository, cacheService)
         {
@@ -31,7 +31,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Command
         public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
         {
             // 1. Buscar la entidad usando el Write Repository (asumiendo que tiene GetByIdAsync)
-            // NOTA: Si no existe GetByIdAsync en IWriteRepository, usa el IReadOnlyRepository inyectado.
+            // NOTA: Si no existe GetByIdAsync en IWriteRepository, usa el IReadRepository inyectado.
             var entity = await _readOnlyRepository.GetByIdAsync(command.Id, asNoTracking: false, cancellationToken);
 
             if (entity is null)

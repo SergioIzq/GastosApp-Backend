@@ -5,6 +5,7 @@
     /// </summary>
     public record ProveedorDto(
         Guid Id,
-        string Nombre
+        string Nombre,
+        Guid UsuarioId
     );
 }

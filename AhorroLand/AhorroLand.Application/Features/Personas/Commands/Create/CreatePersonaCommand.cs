@@ -6,5 +6,6 @@ namespace AhorroLand.Application.Features.Personas.Commands;
 
 public sealed record CreatePersonaCommand : AbsCreateCommand<Persona, PersonaDto>
 {
- public required string Nombre { get; init; }
+    public required string Nombre { get; init; }
+    public required Guid UsuarioId { get; init; }
 }

@@ -5,6 +5,7 @@
     /// </summary>
     public record PersonaDto(
         Guid Id,
-        string Nombre
+        string Nombre,
+        Guid UsuarioId
     );
 }

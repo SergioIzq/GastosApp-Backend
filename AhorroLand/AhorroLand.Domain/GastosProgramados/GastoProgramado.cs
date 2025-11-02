@@ -1,0 +1,122 @@
+﻿using AhorroLand.Shared.Domain.Abstractions;
+using AhorroLand.Shared.Domain.Abstractions.Results;
+using AhorroLand.Shared.Domain.ValueObjects;
+
+namespace AhorroLand.Domain.GastosProgramados;
+
+public sealed class GastoProgramado : AbsEntity
+{
+    private GastoProgramado(
+        Guid id,
+        Cantidad importe,
+        DateTime fechaEjecucion,
+        ConceptoId conceptoId,
+        CategoriaId categoriaId,
+        ProveedorId proveedorId,
+        PersonaId personaId,
+        CuentaId cuentaId,
+        FormaPagoId formaPagoId,
+        Frecuencia frecuencia,
+        string hangfireJobId,
+        Descripcion? descripcion = null) : base(id)
+    {
+        Importe = importe;
+        FechaEjecucion = fechaEjecucion;
+
+        ConceptoId = conceptoId;
+        CategoriaId = categoriaId;
+        ProveedorId = proveedorId;
+        PersonaId = personaId;
+        CuentaId = cuentaId;
+        FormaPagoId = formaPagoId;
+
+        Frecuencia = frecuencia;
+        Descripcion = descripcion;
+        Activo = true;
+        HangfireJobId = hangfireJobId;
+    }
+
+    public Cantidad Importe { get; private set; }
+    public Frecuencia Frecuencia { get; private set; }
+    public Descripcion? Descripcion { get; private set; }
+    public DateTime FechaEjecucion { get; private set; }
+    public bool Activo { get; private set; }
+    public CategoriaId CategoriaId { get; private set; }
+    public ConceptoId ConceptoId { get; private set; }
+    public ProveedorId ProveedorId { get; private set; }
+    public PersonaId PersonaId { get; private set; }
+    public CuentaId CuentaId { get; private set; }
+    public UsuarioId UsuarioId { get; private set; }
+    public FormaPagoId FormaPagoId { get; private set; }
+    public string HangfireJobId { get; private set; }
+
+    public static GastoProgramado Create(
+        Cantidad importe,
+        DateTime fechaEjecucion,
+        ConceptoId conceptoId,
+        CategoriaId categoriaId,
+        ProveedorId proveedorId,
+        Frecuencia frecuencia,
+        PersonaId personaId,
+        CuentaId cuentaId,
+        FormaPagoId formaPagoId,
+        string hangfireJobId,
+        Descripcion? descripcion = null)
+    {
+        var Gasto = new GastoProgramado(
+            Guid.NewGuid(),
+            importe,
+            fechaEjecucion,
+            conceptoId,
+            categoriaId,
+            proveedorId,
+            personaId,
+            cuentaId,
+            formaPagoId,
+            frecuencia,
+            hangfireJobId,
+            descripcion);
+
+        return Gasto;
+    }
+
+    /// <summary>
+    /// Cambia los detalles de la programación.
+    /// </summary>
+    public Result Reprogramar(DateTime nuevaFecha, Frecuencia nuevaFrecuencia)
+    {
+        // ⭐ Aplica reglas de negocio aquí (ej: la nueva fecha debe ser futura)
+        if (nuevaFecha < DateTime.Today)
+        {
+            return Result.Failure(Error.Validation("La reprogramación debe ser para una fecha futura."));
+        }
+        FechaEjecucion = nuevaFecha;
+        Frecuencia = nuevaFrecuencia;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Marca el Gasto como inactivo.
+    /// </summary>
+    public void Desactivar()
+    {
+        // ⭐ Aplica reglas de negocio aquí (ej: solo si no está ya ejecutado)
+        Activo = false;
+        // Opcional: Levantar un evento de dominio
+    }
+
+    /// <summary>
+    /// Asigna el ID del Job de Hangfire después de la creación/actualización.
+    /// </summary>
+    public Result AsignarJobId(string jobId)
+    {
+        if (string.IsNullOrWhiteSpace(jobId))
+        {
+            return Result.Failure(Error.Validation("El Job ID no puede ser vacío."));
+        }
+        HangfireJobId = jobId;
+
+        return Result.Success();
+    }
+}

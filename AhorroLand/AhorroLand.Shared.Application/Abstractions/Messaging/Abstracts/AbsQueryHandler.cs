@@ -10,20 +10,20 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts;
 
 /// <summary>
 /// Proporciona métodos base para manejar consultas de solo lectura (Queries).
-/// Este handler prioriza la velocidad inyectando solo el IReadOnlyRepository y utilizando IQueryable.
+/// Este handler prioriza la velocidad inyectando solo el IReadRepository y utilizando IQueryable.
 /// </summary>
 /// <typeparam name="TEntity">El tipo de entidad que el query handler consulta, debe heredar de AbsEntity.</typeparam>
 public abstract class AbsQueryHandler<TEntity> : IQueryHandlerBase<TEntity>
     where TEntity : AbsEntity
 {
-    protected readonly IReadOnlyRepository<TEntity> _repository;
+    protected readonly IReadRepository<TEntity> _repository;
     protected readonly ICacheService _cacheService;
 
     /// <summary>
     /// Inicializa una nueva instancia de la clase AbsQueryHandler.
     /// </summary>
-    /// <param name="repository">El repositorio con métodos de solo lectura (IReadOnlyRepository).</param>
-    public AbsQueryHandler(IReadOnlyRepository<TEntity> repository, ICacheService cacheService)
+    /// <param name="repository">El repositorio con métodos de solo lectura (IReadRepository).</param>
+    public AbsQueryHandler(IReadRepository<TEntity> repository, ICacheService cacheService)
     {
         _repository = repository;
         _cacheService = cacheService;

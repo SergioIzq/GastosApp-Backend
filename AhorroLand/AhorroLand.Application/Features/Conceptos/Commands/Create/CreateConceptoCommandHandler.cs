@@ -1,38 +1,90 @@
-using AhorroLand.Domain.Categorias;
+﻿using AhorroLand.Domain.Categorias;
 using AhorroLand.Domain.Conceptos;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
+using Mapster;
 
 namespace AhorroLand.Application.Features.Conceptos.Commands;
 
-public sealed class CreateConceptoCommandHandler : AbsCreateCommandHandler<Concepto, ConceptoDto, CreateConceptoCommand>
+public sealed class CreateConceptoCommandHandler
+    : AbsCreateCommandHandler<Concepto, ConceptoDto, CreateConceptoCommand>
 {
-    private readonly IReadOnlyRepository<Categoria> _categoriaRepository;
+    // ⭐ Inyectamos IDomainValidator para las consultas rápidas
+    private readonly IDomainValidator _validator;
 
     public CreateConceptoCommandHandler(
-    IUnitOfWork unitOfWork,
-    IWriteRepository<Concepto> writeRepository,
-    ICacheService cacheService,
-    IReadOnlyRepository<Categoria> categoriaRepository)
+        IUnitOfWork unitOfWork,
+        IWriteRepository<Concepto> writeRepository,
+        ICacheService cacheService,
+        IDomainValidator validator) // Recibimos el validador
     : base(unitOfWork, writeRepository, cacheService)
     {
-        _categoriaRepository = categoriaRepository;
+        _validator = validator;
     }
 
+    // ⭐ CAMBIO CLAVE: Mover la lógica a Handle para hacerlo ASÍNCRONO y eficiente.
+    public override async Task<Result<ConceptoDto>> Handle(
+        CreateConceptoCommand command, CancellationToken cancellationToken)
+    {
+        // 1. VALIDACIÓN ASÍNCRONA DE EXISTENCIA (SELECT 1)
+        var categoriaExists = await _validator.ExistsAsync<Categoria>(command.CategoriaId);
+
+        if (!categoriaExists)
+        {
+            // Devolvemos un Result.Failure si la referencia no es válida.
+            return Result.Failure<ConceptoDto>(
+                Error.NotFound($"Categoria con id {command.CategoriaId} no fue encontrada."));
+        }
+
+        // 2. CREACIÓN DE VALUE OBJECTS (VOs)
+        try
+        {
+            var nombreVO = new Nombre(command.Nombre);
+            var usuarioId = new UsuarioId(command.UsuarioId);
+
+            // Creamos el VO de Identidad para la referencia
+            var categoriaId = new CategoriaId(command.CategoriaId);
+
+            // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO
+            // ⭐ NOTA: Concepto.Create debe aceptar CategoriaId en lugar de la entidad Categoria
+            var newConcepto = Concepto.Create(
+                nombreVO,
+                categoriaId, // Usamos el ID validado
+                usuarioId);
+
+            // 4. PERSISTENCIA
+            _writeRepository.Add(newConcepto);
+            var entityResult = await CreateAsync(newConcepto, cancellationToken);
+
+            if (entityResult.IsFailure)
+            {
+                return Result.Failure<ConceptoDto>(entityResult.Error);
+            }
+
+            // 5. MAPEO Y ÉXITO
+            var dto = entityResult.Value.Adapt<ConceptoDto>();
+
+            return Result.Success(dto);
+        }
+        catch (ArgumentException ex)
+        {
+            // Captura de errores de validación de Value Objects
+            return Result.Failure<ConceptoDto>(Error.Validation(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<ConceptoDto>(Error.Failure("Error.Unexpected", "Error Inesperado", ex.Message));
+        }
+    }
+
+    // ⭐ OPTIMIZACIÓN: Lanzar excepción para asegurar que la abstracción base síncrona no se use.
     protected override Concepto CreateEntity(CreateConceptoCommand command)
     {
-        var nombreVO = new Nombre(command.Nombre);
-
-        var categoria = _categoriaRepository.GetByIdAsync(command.CategoriaId).ConfigureAwait(false).GetAwaiter().GetResult();
-        if (categoria is null)
-            throw new InvalidOperationException($"Categoria con id {command.CategoriaId} no encontrada.");
-
-        var newConcepto = Concepto.Create(Guid.NewGuid(), nombreVO, categoria);
-
-        return newConcepto;
+        throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
     }
 }

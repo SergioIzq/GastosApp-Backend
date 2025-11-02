@@ -6,6 +6,7 @@
     public record CuentaDto(
         Guid Id,
         string Nombre,
-        decimal Saldo
+        decimal Saldo,
+        Guid UsuarioId
     );
 }

@@ -32,10 +32,11 @@ public sealed class CreateCategoriaCommandHandler
     {
         var nombreVO = new Nombre(command.Nombre);
         var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
-        // 2. Creación de la Entidad (Usando el constructor o factory method de la entidad)
+        var usuarioId = new UsuarioId(command.UsuarioId);
+
         var newCategoria = Categoria.Create(
-            Guid.NewGuid(),
             nombreVO,
+            usuarioId,
             descripcionVO
         );
 

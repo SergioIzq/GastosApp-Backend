@@ -1,25 +1,24 @@
-﻿using AhorroLand.Domain.Categorias.Events;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Domain.Categorias;
 
 public sealed class Categoria : AbsEntity
 {
-    private Categoria(Guid id, Nombre nombre, Descripcion? descripcion = null) : base(id)
+    private Categoria(Guid id, Nombre nombre, UsuarioId idUsuario, Descripcion? descripcion = null) : base(id)
     {
         Nombre = nombre;
+        IdUsuario = idUsuario;
         Descripcion = descripcion;
     }
 
     public Nombre Nombre { get; private set; }
     public Descripcion? Descripcion { get; private set; }
+    public UsuarioId IdUsuario { get; private set; }
 
-    public static Categoria Create(Guid id, Nombre nombre, Descripcion? descripcion = null)
+    public static Categoria Create(Nombre nombre, UsuarioId usuarioId, Descripcion? descripcion = null)
     {
-        var categoria = new Categoria(id, nombre, descripcion);
-
-        categoria.RaiseDomainEvent(new CategoriaCreatedDomainEvent(categoria.Id));
+        var categoria = new Categoria(Guid.NewGuid(), nombre, usuarioId, descripcion);
 
         return categoria;
     }
@@ -33,8 +32,5 @@ public sealed class Categoria : AbsEntity
     {
         Nombre = nombre;
         Descripcion = descripcion;
-
-        // 3. Opcional: Levantar un evento de dominio si la actualización es significativa.
-        RaiseDomainEvent(new CategoriaUpdatedDomainEvent(Id));
     }
 }

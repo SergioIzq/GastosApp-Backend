@@ -1,71 +1,114 @@
+﻿using AhorroLand.Application.Features.Ingresos.Commands;
+using AhorroLand.Domain.Categorias;
+using AhorroLand.Domain.Clientes;
 using AhorroLand.Domain.Conceptos;
 using AhorroLand.Domain.Cuentas;
 using AhorroLand.Domain.FormasPago;
 using AhorroLand.Domain.Ingresos;
 using AhorroLand.Domain.Personas;
-using AhorroLand.Domain.Proveedores;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.ValueObjects;
+using Mapster;
 
-namespace AhorroLand.Application.Features.Ingresos.Commands;
-
-public sealed class CreateIngresoCommandHandler : AbsCreateCommandHandler<Ingreso, IngresoDto, CreateIngresoCommand>
+public sealed class CreateIngresoCommandHandler
+    : AbsCreateCommandHandler<Ingreso, IngresoDto, CreateIngresoCommand>
 {
-    private readonly IReadOnlyRepository<Concepto> _conceptoRepo;
-    private readonly IReadOnlyRepository<Cuenta> _cuentaRepo;
-    private readonly IReadOnlyRepository<FormaPago> _formaPagoRepo;
-    private readonly IReadOnlyRepository<Proveedor> _proveedorRepo;
-    private readonly IReadOnlyRepository<Persona> _personaRepo;
+    private readonly IDomainValidator _validator;
 
     public CreateIngresoCommandHandler(
-    IUnitOfWork unitOfWork,
-    IWriteRepository<Ingreso> writeRepository,
-    ICacheService cacheService,
-    IReadOnlyRepository<Concepto> conceptoRepo,
-    IReadOnlyRepository<Cuenta> cuentaRepo,
-    IReadOnlyRepository<FormaPago> formaPagoRepo,
-    IReadOnlyRepository<Proveedor> proveedorRepo,
-    IReadOnlyRepository<Persona> personaRepo)
+        IUnitOfWork unitOfWork,
+        IWriteRepository<Ingreso> writeRepository,
+        ICacheService cacheService,
+        IDomainValidator validator)
     : base(unitOfWork, writeRepository, cacheService)
     {
-        _conceptoRepo = conceptoRepo;
-        _cuentaRepo = cuentaRepo;
-        _formaPagoRepo = formaPagoRepo;
-        _proveedorRepo = proveedorRepo;
-        _personaRepo = personaRepo;
+        _validator = validator;
+    }
+
+    public override async Task<Result<IngresoDto>> Handle(
+        CreateIngresoCommand command, CancellationToken cancellationToken)
+    {
+        var existenceTasks = new List<Task<bool>>
+        {
+            _validator.ExistsAsync<Concepto>(command.ConceptoId),
+            _validator.ExistsAsync<Categoria>(command.CategoriaId),
+            _validator.ExistsAsync<Cuenta>(command.CuentaId),
+            _validator.ExistsAsync<FormaPago>(command.FormaPagoId),
+            _validator.ExistsAsync<Cliente>(command.ClienteId),
+            _validator.ExistsAsync<Persona>(command.PersonaId)
+        };
+
+        var results = await Task.WhenAll(existenceTasks);
+
+        if (results.Any(r => !r))
+        {
+            return Result.Failure<IngresoDto>(
+                Error.NotFound("Una o más entidades referenciadas no existen o el ID es incorrecto."));
+        }
+
+        try
+        {
+            // VOs de Valor
+            var importeVO = new Cantidad(command.Importe);
+            var descripcionVO = new Descripcion(command.Descripcion ?? string.Empty);
+            var fechaVO = new FechaRegistro(command.Fecha);
+
+            // VOs de Identidad y Nombre (Aplanados)
+            var conceptoId = new ConceptoId(command.ConceptoId);
+            var categoriaId = new CategoriaId(command.CategoriaId);
+
+            var clienteId = new ClienteId(command.ClienteId);
+            var personaId = new PersonaId(command.PersonaId);
+
+            var cuentaId = new CuentaId(command.CuentaId);
+            var formaPagoId = new FormaPagoId(command.FormaPagoId);
+
+            var usuarioId = new UsuarioId(command.UsuarioId);
+
+            // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO (Ingreso)
+            var ingreso = Ingreso.Create(
+                importeVO,
+                fechaVO,
+                conceptoId,
+                categoriaId,
+                clienteId,
+                personaId,
+                cuentaId,
+                formaPagoId,
+                usuarioId,
+                descripcionVO);
+
+            // 4. PERSISTENCIA
+            _writeRepository.Add(ingreso);
+            var entityResult = await base.CreateAsync(ingreso, cancellationToken);
+
+            if (entityResult.IsFailure)
+            {
+                return Result.Failure<IngresoDto>(entityResult.Error);
+            }
+
+            // 5. MAPEO Y ÉXITO
+            var dto = entityResult.Value.Adapt<IngresoDto>();
+            return Result.Success(dto);
+        }
+        catch (ArgumentException ex)
+        {
+            // Captura de errores de validación de Value Objects
+            return Result.Failure<IngresoDto>(Error.Validation(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<IngresoDto>(Error.Failure("Error.Unexpected", "Error Inesperado", ex.Message));
+        }
     }
 
     protected override Ingreso CreateEntity(CreateIngresoCommand command)
     {
-        var concepto = _conceptoRepo.GetByIdAsync(command.ConceptoId).ConfigureAwait(false).GetAwaiter().GetResult();
-        var cuenta = _cuentaRepo.GetByIdAsync(command.CuentaId).ConfigureAwait(false).GetAwaiter().GetResult();
-        var formaPago = _formaPagoRepo.GetByIdAsync(command.FormaPagoId).ConfigureAwait(false).GetAwaiter().GetResult();
-        Proveedor? proveedor = null;
-        Persona? persona = null;
-
-        if (command.ProveedorId.HasValue)
-            proveedor = _proveedorRepo.GetByIdAsync(command.ProveedorId.Value).ConfigureAwait(false).GetAwaiter().GetResult();
-        if (command.PersonaId.HasValue)
-            persona = _personaRepo.GetByIdAsync(command.PersonaId.Value).ConfigureAwait(false).GetAwaiter().GetResult();
-
-        if (concepto is null || cuenta is null || formaPago is null)
-            throw new InvalidOperationException("Concepto, Cuenta o FormaPago no encontrados.");
-
-        var ingreso = Ingreso.Create(
-        Guid.NewGuid(),
-        command.Importe,
-        command.Fecha,
-        concepto,
-        proveedor!,
-        persona!,
-        cuenta,
-        formaPago,
-        command.Descripcion);
-
-        return ingreso;
+        throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
     }
 }

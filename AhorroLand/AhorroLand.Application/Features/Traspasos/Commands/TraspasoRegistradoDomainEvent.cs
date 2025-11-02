@@ -1,0 +1,61 @@
+﻿using AhorroLand.Application.Interfaces;
+using AhorroLand.Domain.Cuentas;
+using AhorroLand.Domain.Traspasos;
+using AhorroLand.Shared.Domain.Interfaces.Repositories;
+
+// ⭐ Este Event Handler maneja la lógica de actualización de saldos.
+public sealed class ActualizarSaldosCuentaOnTraspasoRegistrado : IDomainEventHandler<TraspasoRegistradoDomainEvent>
+{
+    // ⭐ ELIMINAMOS IReadRepository<Traspaso> de las inyecciones
+    private readonly IReadRepository<Cuenta> _cuentaReadRepo;
+    private readonly IWriteRepository<Cuenta> _cuentaWriteRepo;
+
+    public ActualizarSaldosCuentaOnTraspasoRegistrado(
+        IReadRepository<Cuenta> cuentaReadRepo,
+        IWriteRepository<Cuenta> cuentaWriteRepo
+        )
+    {
+        _cuentaReadRepo = cuentaReadRepo;
+        _cuentaWriteRepo = cuentaWriteRepo;
+    }
+
+    public async Task Handle(TraspasoRegistradoDomainEvent notification, CancellationToken cancellationToken)
+    {
+        // 1. CARGA DE CUENTAS EN PARALELO (Máxima Optimización I/O)
+        // No necesitamos cargar el Traspaso, usamos los datos del evento.
+        var origenTask = _cuentaReadRepo.GetByIdAsync(notification.CuentaOrigenId);
+        var destinoTask = _cuentaReadRepo.GetByIdAsync(notification.CuentaDestinoId);
+
+        // Espera a que ambas tareas finalicen y asigna los resultados.
+        var (cuentaOrigen, cuentaDestino) = await GetParallelResultsAsync(origenTask, destinoTask);
+
+        if (cuentaOrigen is null || cuentaDestino is null)
+        {
+
+            return;
+        }
+
+        // 2. Ejecutar la lógica de negocio (Métodos de dominio)
+        try
+        {
+            cuentaOrigen.Retirar(notification.Importe);
+            cuentaDestino.Depositar(notification.Importe);
+
+            // 3. Persistencia transaccional
+            _cuentaWriteRepo.Update(cuentaOrigen);
+            _cuentaWriteRepo.Update(cuentaDestino);
+        }
+        catch (InvalidOperationException)
+        {
+
+        }
+    }
+
+    // ⭐ Helper para simplificar Task.WhenAll y el manejo de resultados
+    private static async Task<(T? Result1, T? Result2)> GetParallelResultsAsync<T>(
+        Task<T?> task1, Task<T?> task2) where T : class
+    {
+        await Task.WhenAll(task1, task2);
+        return (task1.Result, task2.Result);
+    }
+}

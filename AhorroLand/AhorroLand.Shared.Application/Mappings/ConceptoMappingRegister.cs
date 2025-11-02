@@ -12,8 +12,7 @@ namespace AhorroLand.Shared.Application.Mappings
             config.ForType<Concepto, ConceptoDto>()
 
                 // Mapeo de Relaciones Aplanadas
-                .Map(dest => dest.CategoriaId, src => src.Categoria.Id)
-                .Map(dest => dest.CategoriaNombre, src => src.Categoria.Nombre.Value);
+                .Map(dest => dest.CategoriaId, src => src.CategoriaId);
         }
     }
 }

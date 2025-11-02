@@ -1,6 +1,6 @@
 ﻿namespace AhorroLand.Shared.Domain.ValueObjects;
 
-public record ConfirmationToken
+public readonly record struct ConfirmationToken
 {
     public string Value { get; }
 

@@ -1,23 +1,22 @@
-﻿using AhorroLand.Domain.Clientes.Events;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Domain.Clientes;
 
 public sealed class Cliente : AbsEntity
 {
-    private Cliente(Guid id, Nombre nombre) : base(id)
+    private Cliente(Guid id, Nombre nombre, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;
+        UsuarioId = usuarioId;
     }
 
     public Nombre Nombre { get; private set; }
+    public UsuarioId UsuarioId { get; private set; }
 
-    public static Cliente Create(Guid id, Nombre nombre)
+    public static Cliente Create(Nombre nombre, UsuarioId usuarioId)
     {
-        var cliente = new Cliente(id, nombre);
-
-        cliente.RaiseDomainEvent(new ClienteCreatedDomainEvent(cliente.Id));
+        var cliente = new Cliente(Guid.NewGuid(), nombre, usuarioId);
 
         return cliente;
     }
@@ -25,7 +24,5 @@ public sealed class Cliente : AbsEntity
     public void Update(Nombre nombre)
     {
         Nombre = nombre;
-
-        RaiseDomainEvent(new ClienteUpdatedDomainEvent(Id));
     }
 }

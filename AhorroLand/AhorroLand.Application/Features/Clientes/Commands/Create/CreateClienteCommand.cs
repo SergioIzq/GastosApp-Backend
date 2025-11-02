@@ -14,4 +14,6 @@ public sealed record CreateClienteCommand : AbsCreateCommand<Cliente, ClienteDto
     /// Nombre de la nueva categoría.
     /// </summary>
     public required string Nombre { get; init; }
+    public required Guid UsuarioId { get; init; }
+
 }

@@ -6,7 +6,7 @@ namespace AhorroLand.Shared.Domain.Interfaces.Repositories
     /// Define operaciones de lectura.
     /// Prioriza la velocidad usando AsNoTracking().
     /// </summary>
-    public interface IReadOnlyRepository<T> where T : AbsEntity
+    public interface IReadRepository<T> where T : AbsEntity
     {
         // Permite al QueryHandler aplicar proyecciones (Select) antes de ejecutar.
         IQueryable<T> GetAll(bool asNoTracking = true);
