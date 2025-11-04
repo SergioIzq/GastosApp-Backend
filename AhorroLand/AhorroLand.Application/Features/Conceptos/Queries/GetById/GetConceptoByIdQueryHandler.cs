@@ -4,17 +4,17 @@ using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.Conceptos.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Categoria.
+/// Maneja la creación de una nueva entidad Concepto.
 /// </summary>
-public sealed class GetClienteByIdQueryHandler
-    : GetByIdQueryHandler<Cliente, ClienteDto, GetClienteByIdQuery>
+public sealed class GetConceptoByIdQueryHandler
+    : GetByIdQueryHandler<Concepto, ConceptoDto, GetConceptoByIdQuery>
 {
-    public GetClienteByIdQueryHandler(
+    public GetConceptoByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepository<Cliente> readOnlyRepository
+        IReadRepository<Concepto> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

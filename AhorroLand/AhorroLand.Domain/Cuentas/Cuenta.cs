@@ -24,6 +24,8 @@ public sealed class Cuenta : AbsEntity
         return cuenta;
     }
 
+    public void Update(Nombre nombre) => Nombre = nombre;
+
     /// <summary>
     /// Deposita una cantidad en la cuenta, aumentando el saldo.
     /// </summary>

@@ -2,12 +2,12 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Dtos;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.Cuentas.Commands;
 
 /// <summary>
-/// Representa la solicitud para crear un nuevo Cliente.
+/// Representa la solicitud para crear un nuevo Cuenta.
 /// </summary>
 // Hereda de AbsCreateCommand<Entidad, DTO de Respuesta>
-public sealed record GetClienteByIdQuery(Guid Id) : AbsGetByIdQuery<Cliente, ClienteDto>(Id)
+public sealed record GetCuentaByIdQuery(Guid Id) : AbsGetByIdQuery<Cuenta, CuentaDto>(Id)
 {
 }

@@ -15,7 +15,7 @@ public sealed class Concepto : AbsEntity
     public Nombre Nombre { get; private set; }
     public CategoriaId CategoriaId { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
-    public Categoria Categoria { get; private set; } = null!;
+    public Categoria? Categoria { get; private set; } = null!;
 
     public static Concepto Create(Nombre nombre, CategoriaId categoriaId, UsuarioId usuarioId)
     {
@@ -24,8 +24,9 @@ public sealed class Concepto : AbsEntity
         return concepto;
     }
 
-    public void CambiarCategoria(CategoriaId nuevaCategoriaId)
+    public void Update(Nombre nombre, CategoriaId categoriaId)
     {
-        CategoriaId = nuevaCategoriaId;
+        Nombre = nombre;
+        CategoriaId = categoriaId;
     }
 }

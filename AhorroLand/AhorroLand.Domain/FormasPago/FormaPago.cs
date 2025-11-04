@@ -20,4 +20,6 @@ public sealed class FormaPago : AbsEntity
 
         return formaPago;
     }
+
+    public void Update(Nombre nombre) => Nombre = nombre;
 }

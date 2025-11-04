@@ -56,8 +56,6 @@ public sealed class CreateConceptoCommandHandler
                 categoriaId, // Usamos el ID validado
                 usuarioId);
 
-            // 4. PERSISTENCIA
-            _writeRepository.Add(newConcepto);
             var entityResult = await CreateAsync(newConcepto, cancellationToken);
 
             if (entityResult.IsFailure)

@@ -1,7 +1,7 @@
 ﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 
-namespace AhorroLand.Application.Features.Categorias.Commands;
+namespace AhorroLand.Application.Features.Clientes.Commands;
 
 /// <summary>
 /// Representa la solicitud para eliminar un Cliente por su identificador.
