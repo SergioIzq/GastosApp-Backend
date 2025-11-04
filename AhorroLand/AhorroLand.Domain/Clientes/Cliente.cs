@@ -21,8 +21,5 @@ public sealed class Cliente : AbsEntity
         return cliente;
     }
 
-    public void Update(Nombre nombre)
-    {
-        Nombre = nombre;
-    }
+    public void Update(Nombre nombre) => Nombre = nombre;
 }

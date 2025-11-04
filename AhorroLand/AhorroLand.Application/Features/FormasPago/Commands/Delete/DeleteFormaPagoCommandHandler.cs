@@ -4,19 +4,19 @@ using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.FormasPago.Commands;
 
 /// <summary>
-/// Manejador concreto para eliminar un Cliente.
+/// Manejador concreto para eliminar una FormaPago.
 /// Hereda toda la lógica de la clase base genérica.
 /// </summary>
-public sealed class DeleteClienteCommandHandler
-    : DeleteCommandHandler<Cliente, DeleteClienteCommand>
+public sealed class DeleteFormaPagoCommandHandler
+    : DeleteCommandHandler<FormaPago, DeleteFormaPagoCommand>
 {
-    public DeleteClienteCommandHandler(
+    public DeleteFormaPagoCommandHandler(
         IUnitOfWork unitOfWork,
-        IWriteRepository<Cliente> writeRepository,
-        IReadRepository<Cliente> readOnlyRepository,
+        IWriteRepository<FormaPago> writeRepository,
+        IReadRepository<FormaPago> readOnlyRepository,
         ICacheService cacheService)
         : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
     {

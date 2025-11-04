@@ -4,17 +4,17 @@ using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.FormasPago.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Categoria.
+/// Maneja la creación de una nueva entidad FormaPago.
 /// </summary>
-public sealed class GetClienteByIdQueryHandler
-    : GetByIdQueryHandler<Cliente, ClienteDto, GetClienteByIdQuery>
+public sealed class GetFormaPagoByIdQueryHandler
+    : GetByIdQueryHandler<FormaPago, FormaPagoDto, GetFormaPagoByIdQuery>
 {
-    public GetClienteByIdQueryHandler(
+    public GetFormaPagoByIdQueryHandler(
         ICacheService cacheService,
-        IReadRepository<Cliente> readOnlyRepository
+        IReadRepository<FormaPago> readOnlyRepository
         )
         : base(readOnlyRepository, cacheService)
     {

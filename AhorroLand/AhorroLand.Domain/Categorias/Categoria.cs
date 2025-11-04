@@ -28,9 +28,5 @@ public sealed class Categoria : AbsEntity
     /// </summary>
     /// <param name="nombre">El nuevo Value Object Nombre (ya validado).</param>
     /// <param name="descripcion">El nuevo Value Object Descripcion.</param>
-    public void Update(Nombre nombre, Descripcion? descripcion)
-    {
-        Nombre = nombre;
-        Descripcion = descripcion;
-    }
+    public void Update(Nombre nombre, Descripcion? descripcion) => (Nombre, Descripcion) = (nombre, descripcion);
 }
