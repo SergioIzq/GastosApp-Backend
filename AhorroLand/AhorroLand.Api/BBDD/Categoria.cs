@@ -4,7 +4,7 @@
     public class Categoria : Entidad
     {
         public Categoria()
-        {          
+        {
         }
 
         public virtual string Nombre { get; set; } = string.Empty;

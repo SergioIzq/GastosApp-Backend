@@ -2,7 +2,8 @@
 
 namespace AppG.Servicio
 {
-    public interface IProveedorServicio : IBaseServicio<Proveedor> {
+    public interface IProveedorServicio : IBaseServicio<Proveedor>
+    {
 
     }
 

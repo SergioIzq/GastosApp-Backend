@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Application.Interfaces;
-using AhorroLand.Domain.Cuentas;
-using AhorroLand.Domain.Traspasos;
+using AhorroLand.Domain;
+using AhorroLand.Domain.Traspasos.Eventos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 // ⭐ Este Event Handler maneja la lógica de actualización de saldos.

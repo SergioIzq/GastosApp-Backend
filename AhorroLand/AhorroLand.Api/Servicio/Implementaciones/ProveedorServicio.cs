@@ -96,7 +96,7 @@ namespace AppG.Servicio
         }
 
         public override async Task DeleteAsync(int id)
-        {            
+        {
             using (var session = _sessionFactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {

@@ -1,7 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Proveedores;
+namespace AhorroLand.Domain;
 
 public sealed class Proveedor : AbsEntity
 {

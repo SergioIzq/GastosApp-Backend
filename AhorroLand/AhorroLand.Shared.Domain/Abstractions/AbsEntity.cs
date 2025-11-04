@@ -1,6 +1,4 @@
-﻿using AhorroLand.Shared.Domain.Interfaces;
-
-namespace AhorroLand.Shared.Domain.Abstractions;
+﻿namespace AhorroLand.Shared.Domain.Abstractions;
 
 public abstract class AbsEntity
 {

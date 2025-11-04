@@ -119,7 +119,7 @@
                         {
                             Succeeded = false,
                             e.Message,
-                            Errors =  new List<string> { "Debe confirmar su correo antes de iniciar sesión." }
+                            Errors = new List<string> { "Debe confirmar su correo antes de iniciar sesión." }
                         };
                         break;
                     default:

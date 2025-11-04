@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Traspasos
+namespace AhorroLand.Domain
 {
     public interface ITraspasoReadRepository : IReadRepository<Traspaso>
     {

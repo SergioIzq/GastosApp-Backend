@@ -301,7 +301,7 @@ namespace AppG.Servicio
                     gasto.FormaPago = gastoP.FormaPago;
                     gasto.IdUsuario = gastoP.IdUsuario;
                     gasto.Importe = gastoP.Importe;
-                    gasto.Persona = gastoP.Persona;                    
+                    gasto.Persona = gastoP.Persona;
 
                     await _gastoServicio.CreateAsync(gasto, true);
                     await transaction.CommitAsync();
@@ -489,7 +489,7 @@ namespace AppG.Servicio
                 }
             }
             catch (Exception ex)
-            {                
+            {
                 await DeleteAsync(createdEntity.Id);
                 throw new Exception("No se ha podido programar el gasto. " + ex.Message);
             }

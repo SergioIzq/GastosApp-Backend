@@ -1,4 +1,4 @@
-using AhorroLand.Domain.Clientes;
+using AhorroLand.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

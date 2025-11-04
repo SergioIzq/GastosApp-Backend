@@ -3,7 +3,6 @@ using AppG.Entidades.BBDD;
 using AppG.Servicio;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static AppG.Servicio.CategoriaServicio;
 
 namespace AppG.Controllers
 {

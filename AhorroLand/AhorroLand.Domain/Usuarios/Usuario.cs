@@ -1,7 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Usuarios;
+namespace AhorroLand.Domain;
 
 // Usuario es la Raíz del Agregado de Identidad
 public sealed class Usuario : AbsEntity

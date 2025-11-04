@@ -8,7 +8,7 @@
         }
 
         public virtual Cuenta CuentaOrigen { get; set; } = new Cuenta();
-        public virtual Cuenta CuentaDestino { get; set; } = new Cuenta();        
+        public virtual Cuenta CuentaDestino { get; set; } = new Cuenta();
         public virtual decimal Importe { get; set; }
         public virtual string? Descripcion { get; set; }
         public virtual decimal SaldoCuentaOrigen { get; set; }

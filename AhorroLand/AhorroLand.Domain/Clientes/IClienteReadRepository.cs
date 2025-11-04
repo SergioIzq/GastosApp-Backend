@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Clientes;
+namespace AhorroLand.Domain;
 
 public interface IClienteReadRepository : IReadRepository<Cliente>
 {

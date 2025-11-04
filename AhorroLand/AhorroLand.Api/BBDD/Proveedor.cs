@@ -9,7 +9,7 @@
 
         }
 
-        public virtual string Nombre {  get; set; } = string.Empty;
-        }
+        public virtual string Nombre { get; set; } = string.Empty;
     }
+}
 

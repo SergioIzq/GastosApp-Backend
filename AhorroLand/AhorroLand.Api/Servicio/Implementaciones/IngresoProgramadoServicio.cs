@@ -1,9 +1,9 @@
-﻿using AppG.Entidades.BBDD;
+﻿using AppG.BBDD.Respuestas.Ingresos;
+using AppG.Entidades.BBDD;
 using AppG.Exceptions;
+using Hangfire;
 using NHibernate;
 using NHibernate.Linq;
-using AppG.BBDD.Respuestas.Ingresos;
-using Hangfire;
 using System.Globalization;
 
 namespace AppG.Servicio
@@ -303,7 +303,7 @@ namespace AppG.Servicio
                     ingreso.Importe = ingresoP.Importe;
                     ingreso.Persona = ingresoP.Persona;
 
-                    await _ingresoServicio.CreateAsync(ingreso, true);                    
+                    await _ingresoServicio.CreateAsync(ingreso, true);
                     await transaction.CommitAsync();
                     await session.FlushAsync();
 

@@ -1,36 +1,35 @@
-using AhorroLand.Domain.Conceptos;
-using AhorroLand.Infrastructure.Persistence.Command.Configurations;
+using AhorroLand.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AhorroLand.Infrastructure.Persistence.Command.Configurations.Configurations
 {
- public class ConceptoConfiguration : IEntityTypeConfiguration<Concepto>
- {
- public void Configure(EntityTypeBuilder<Concepto> builder)
- {
- builder.ToTable("concepto");
- builder.HasKey(e => e.Id);
- builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+    public class ConceptoConfiguration : IEntityTypeConfiguration<Concepto>
+    {
+        public void Configure(EntityTypeBuilder<Concepto> builder)
+        {
+            builder.ToTable("concepto");
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
 
- builder.Property(e => e.Nombre)
- .HasColumnName("nombre")
- .HasColumnType("varchar")
- .HasMaxLength(100)
- .IsRequired();
+            builder.Property(e => e.Nombre)
+            .HasColumnName("nombre")
+            .HasColumnType("varchar")
+            .HasMaxLength(100)
+            .IsRequired();
 
- builder.Property(e => e.UsuarioId)
- .HasColumnName("id_usuario")
- .IsRequired();
+            builder.Property(e => e.UsuarioId)
+            .HasColumnName("id_usuario")
+            .IsRequired();
 
- builder.Property(e => e.FechaCreacion)
- .HasColumnName("fecha_creacion")
- .IsRequired()
- .ValueGeneratedOnAdd();
+            builder.Property(e => e.FechaCreacion)
+            .HasColumnName("fecha_creacion")
+            .IsRequired()
+            .ValueGeneratedOnAdd();
 
- builder.Property(e => e.FechaCreacion)
- .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
- }
- }
+            builder.Property(e => e.FechaCreacion)
+            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+        }
+    }
 }

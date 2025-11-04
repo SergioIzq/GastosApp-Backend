@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+using AppG.BBDD.Respuestas;
 using AppG.Entidades.BBDD;
 using AppG.Servicio;
-using static AppG.Servicio.GastoServicio;
 using Microsoft.AspNetCore.Authorization;
-using AppG.BBDD.Respuestas;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AppG.Controllers
 {
@@ -32,7 +31,7 @@ namespace AppG.Controllers
             return Ok(result);
         }
 
-        
+
         [HttpPost]
         public override async Task<IActionResult> Create([FromBody] Gasto entity)
         {
@@ -57,7 +56,7 @@ namespace AppG.Controllers
         [HttpGet("getNewGasto/{idUsuario}")]
         public async Task<IActionResult> GetNewGasto(int idUsuario)
         {
-            var newGasto = await _gastoService.GetNewGastoAsync(idUsuario);            
+            var newGasto = await _gastoService.GetNewGastoAsync(idUsuario);
 
             return Ok(newGasto);
         }

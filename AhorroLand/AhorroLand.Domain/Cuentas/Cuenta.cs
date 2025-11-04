@@ -1,6 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
-namespace AhorroLand.Domain.Cuentas;
+
+namespace AhorroLand.Domain;
 
 public sealed class Cuenta : AbsEntity
 {
@@ -14,7 +15,7 @@ public sealed class Cuenta : AbsEntity
 
     public Nombre Nombre { get; private set; }
     public Cantidad Saldo { get; private set; }
-    public UsuarioId UsuarioId { get;private set; }
+    public UsuarioId UsuarioId { get; private set; }
 
     public static Cuenta Create(Nombre nombre, Cantidad saldo, UsuarioId usuarioId)
     {

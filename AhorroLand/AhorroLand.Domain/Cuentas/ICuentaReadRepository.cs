@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Cuentas;
+namespace AhorroLand.Domain;
 
 public interface ICuentaReadRepository : IReadRepository<Cuenta>
 {

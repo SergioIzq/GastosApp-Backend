@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Gastos
+namespace AhorroLand.Domain
 {
     public interface IGastoReadRepository : IReadRepository<Gasto>
     {

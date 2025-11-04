@@ -63,7 +63,7 @@ namespace AppG.Servicio
 
                     if (cuenta == null)
                     {
-                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");                        
+                        errorMessages.Add($"La cuenta '{entity.Cuenta.Nombre}' no existe.");
                     }
 
                     if (errorMessages.Count > 0)
@@ -89,7 +89,7 @@ namespace AppG.Servicio
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();                    
+                    await transaction.RollbackAsync();
                     throw new Exception(ex.Message);
                 }
             }
@@ -212,7 +212,7 @@ namespace AppG.Servicio
                     if (errorMessages.Count > 0)
                     {
                         throw new ValidationException(errorMessages);
-                    }                    
+                    }
 
                     cuenta!.Saldo -= existingEntity.Importe;
 

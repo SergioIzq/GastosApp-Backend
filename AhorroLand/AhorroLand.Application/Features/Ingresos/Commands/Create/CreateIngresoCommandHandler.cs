@@ -1,11 +1,5 @@
 ﻿using AhorroLand.Application.Features.Ingresos.Commands;
-using AhorroLand.Domain.Categorias;
-using AhorroLand.Domain.Clientes;
-using AhorroLand.Domain.Conceptos;
-using AhorroLand.Domain.Cuentas;
-using AhorroLand.Domain.FormasPago;
-using AhorroLand.Domain.Ingresos;
-using AhorroLand.Domain.Personas;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;

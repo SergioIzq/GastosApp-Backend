@@ -36,7 +36,7 @@ namespace AppG.Controllers
         [HttpGet("{id}")]
         public override Task<IActionResult> GetById(int id)
         {
-            return base.GetById(id);  
+            return base.GetById(id);
         }
     }
 }

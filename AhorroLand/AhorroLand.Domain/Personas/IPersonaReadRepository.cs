@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Personas
+namespace AhorroLand.Domain
 {
     public interface IPersonaReadRepository : IReadRepository<Persona>
     {
