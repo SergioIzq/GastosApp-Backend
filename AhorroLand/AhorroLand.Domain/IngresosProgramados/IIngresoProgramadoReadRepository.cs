@@ -1,6 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.IngresosProgramados
+namespace AhorroLand.Domain
 {
     public interface IIngresoProgramadoReadRepository : IReadRepository<IngresoProgramado>
     {

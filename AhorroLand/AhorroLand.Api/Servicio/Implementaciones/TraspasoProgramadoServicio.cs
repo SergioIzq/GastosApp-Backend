@@ -305,7 +305,7 @@ namespace AppG.Servicio
                     // Guardar los cambios en las cuentas
                     await session.SaveOrUpdateAsync(cuentaOrigen);
                     await session.SaveOrUpdateAsync(cuentaDestino);
-                    
+
                     await _traspasoServicio.RealizarTraspaso(traspaso, true);
                     await transaction.CommitAsync();
                     await session.FlushAsync();

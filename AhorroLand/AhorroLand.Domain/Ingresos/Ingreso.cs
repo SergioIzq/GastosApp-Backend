@@ -1,15 +1,8 @@
 ﻿// Asumo que estos 'usings' son necesarios
-using AhorroLand.Domain.Conceptos;
-using AhorroLand.Domain.Categorias;
-using AhorroLand.Domain.Proveedores;
-using AhorroLand.Domain.Personas;
-using AhorroLand.Domain.Cuentas;
-using AhorroLand.Domain.FormasPago;
-using AhorroLand.Domain.Usuarios;
 using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Ingresos;
+namespace AhorroLand.Domain;
 
 public sealed class Ingreso : AbsEntity
 {

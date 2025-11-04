@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain.Gastos;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Dtos;
 using Mapster;
 

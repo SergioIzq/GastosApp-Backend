@@ -8,7 +8,8 @@ namespace AppG.Servicio
     public class ConceptoServicio : BaseServicio<Concepto>, IConceptoServicio
     {
         private readonly ICategoriaServicio _categoriaServicio;
-        public ConceptoServicio(ISessionFactory sessionFactory, ICategoriaServicio categoriaServicio) : base(sessionFactory) { 
+        public ConceptoServicio(ISessionFactory sessionFactory, ICategoriaServicio categoriaServicio) : base(sessionFactory)
+        {
             _categoriaServicio = categoriaServicio;
         }
 
@@ -57,7 +58,7 @@ namespace AppG.Servicio
 
                 // Verificar si la categoría existe en la base de datos
                 var existingConcepto = await session.Query<Concepto>()
-                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id && c.IdUsuario == entity.IdUsuario )
+                    .Where(c => c.Nombre == entity.Nombre && c.Id != entity.Id && c.IdUsuario == entity.IdUsuario)
                     .SingleOrDefaultAsync();
 
                 if (existingConcepto != null && existingConcepto.Nombre.ToLower() == entity.Nombre.ToLower())

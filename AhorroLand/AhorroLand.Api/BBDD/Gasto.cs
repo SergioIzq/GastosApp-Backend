@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace AppG.Entidades.BBDD
+﻿namespace AppG.Entidades.BBDD
 {
     public class Gasto : Entidad
     {

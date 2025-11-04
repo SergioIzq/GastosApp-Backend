@@ -2,7 +2,7 @@
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Traspasos;
+namespace AhorroLand.Domain;
 
 public sealed class Traspaso : AbsEntity, IDomainEvent
 {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AppG.Exceptions
+﻿namespace AppG.Exceptions
 {
     public class ValidationException : Exception
     {

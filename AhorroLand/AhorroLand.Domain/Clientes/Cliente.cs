@@ -1,7 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Clientes;
+namespace AhorroLand.Domain;
 
 public sealed class Cliente : AbsEntity
 {

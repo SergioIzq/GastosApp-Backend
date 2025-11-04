@@ -1,7 +1,6 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions; // Asegúrate de que esta asamblea sea accesible
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using System.Linq;
 
 namespace AhorroLand.Infrastructure.Persistence.Command;
 

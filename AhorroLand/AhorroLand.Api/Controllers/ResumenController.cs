@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AppG.BBDD;
 using AppG.Servicio;
-using AppG.BBDD;
 using Microsoft.AspNetCore.Authorization;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AppG.Controllers
 {
@@ -17,7 +17,7 @@ namespace AppG.Controllers
 
         public ResumenController(IResumenServicio resumenService)
         {
-            _resumenService = resumenService;            
+            _resumenService = resumenService;
             _jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,

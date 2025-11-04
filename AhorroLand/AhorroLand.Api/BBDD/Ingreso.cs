@@ -6,10 +6,10 @@
         public Ingreso()
         {
 
-          
+
         }
         public virtual decimal Importe { get; set; }
-        public virtual DateTime Fecha { get;set; }
+        public virtual DateTime Fecha { get; set; }
 
         public virtual Concepto Concepto { get; set; } = new Concepto();
         public virtual Cliente Cliente { get; set; } = new Cliente();

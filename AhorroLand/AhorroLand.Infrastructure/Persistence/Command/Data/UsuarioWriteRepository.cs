@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain.Usuarios;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
 namespace AhorroLand.Infrastructure.Persistence.Command.Data

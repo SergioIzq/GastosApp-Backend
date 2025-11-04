@@ -1,4 +1,4 @@
-using AhorroLand.Domain.Ingresos;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Dtos;
 

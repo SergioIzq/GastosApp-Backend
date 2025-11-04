@@ -1,14 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
-using AhorroLand.Domain.Conceptos;
-using AhorroLand.Domain.Categorias;
-using AhorroLand.Domain.Proveedores;
-using AhorroLand.Domain.Personas;
-using AhorroLand.Domain.Cuentas;
-using AhorroLand.Domain.FormasPago;
-using AhorroLand.Domain.Usuarios;
 
-namespace AhorroLand.Domain.Gastos;
+namespace AhorroLand.Domain;
 
 public sealed class Gasto : AbsEntity
 {

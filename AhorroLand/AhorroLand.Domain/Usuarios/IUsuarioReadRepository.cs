@@ -1,8 +1,7 @@
 ﻿using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Domain.Usuarios
+namespace AhorroLand.Domain;
+
+public interface IUsuarioReadRepository : IReadRepository<Usuario>
 {
-    public interface IUsuarioReadRepository : IReadRepository<Usuario>
-    {
-    }
 }

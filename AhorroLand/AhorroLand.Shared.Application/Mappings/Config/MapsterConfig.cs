@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain.Clientes;
+﻿using AhorroLand.Domain;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;

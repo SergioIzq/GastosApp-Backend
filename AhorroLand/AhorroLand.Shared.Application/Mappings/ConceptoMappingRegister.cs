@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain.Conceptos;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Dtos;
 using Mapster;
 

@@ -1,5 +1,4 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
+﻿using AppG.Entidades.BBDD;
 using AppG.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using NHibernate;
@@ -47,10 +46,10 @@ namespace AppG.Servicio
 
                 // Verificar y actualizar la contraseña si es necesario
                 if (entity.Contrasena != entidadExistente.Contrasena)
-                {                    
+                {
                     entidadExistente.Contrasena = hasher.HashPassword(entity, entity.Contrasena);
                 }
-                entidadExistente.Correo = entity.Correo;                
+                entidadExistente.Correo = entity.Correo;
 
                 // Guardar los cambios en la base de datos
                 session.Update(entidadExistente);

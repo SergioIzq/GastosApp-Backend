@@ -1,5 +1,4 @@
-﻿using AppG.Controllers;
-using AppG.Entidades.BBDD;
+﻿using AppG.Entidades.BBDD;
 
 namespace AppG.Servicio
 {

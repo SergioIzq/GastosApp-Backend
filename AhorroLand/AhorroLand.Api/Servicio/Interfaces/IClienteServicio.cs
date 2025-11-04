@@ -2,8 +2,9 @@
 
 namespace AppG.Servicio
 {
-    public interface IClienteServicio : IBaseServicio<Cliente> {
-        
+    public interface IClienteServicio : IBaseServicio<Cliente>
+    {
+
 
     }
 

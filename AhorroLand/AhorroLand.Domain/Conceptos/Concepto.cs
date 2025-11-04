@@ -1,8 +1,7 @@
-﻿using AhorroLand.Domain.Categorias;
-using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.Conceptos;
+namespace AhorroLand.Domain;
 
 public sealed class Concepto : AbsEntity
 {

@@ -2,7 +2,7 @@
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.ValueObjects;
 
-namespace AhorroLand.Domain.IngresosProgramados;
+namespace AhorroLand.Domain;
 
 public sealed class IngresoProgramado : AbsEntity
 {

@@ -9,9 +9,9 @@
 
         public virtual decimal IngresosTotales { get; set; }
 
-        public virtual decimal GastosTotales{get; set; }
-        
-        public virtual DateTime Periodo{get; set; }
+        public virtual decimal GastosTotales { get; set; }
+
+        public virtual DateTime Periodo { get; set; }
     }
 
 }
