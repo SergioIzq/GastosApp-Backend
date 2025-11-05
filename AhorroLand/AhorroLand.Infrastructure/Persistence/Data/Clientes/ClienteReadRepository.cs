@@ -7,7 +7,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Clientes
     public class ClienteReadRepository : AbsReadRepository<Cliente, ClienteDto>, IClienteReadRepository
     {
         public ClienteReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Clientes")
+            : base(dbConnectionFactory, "clientes")
         {
         }
 

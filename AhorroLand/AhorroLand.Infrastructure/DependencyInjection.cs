@@ -5,13 +5,12 @@ using AhorroLand.Infrastructure.Persistence.Query;
 using AhorroLand.Infrastructure.Servicies;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MySql.Data.MySqlClient;
 using System.Data;
-using System.Data.Entity.Infrastructure;
 using System.Reflection;
 
 namespace AhorroLand.Infrastructure
@@ -22,16 +21,19 @@ namespace AhorroLand.Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
             // 1️⃣ DbContext
             services.AddDbContext<AhorroLandDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseMySql(connectionString, serverVersion));
 
             // 2️⃣ Cache distribuida
             services.AddDistributedMemoryCache();
 
             // 3️⃣ Dapper
             services.AddScoped<IDbConnection>(sp =>
-                new SqlConnection(configuration.GetConnectionString("DefaultConnection")));
+                new MySqlConnection(configuration.GetConnectionString("DefaultConnection")));
 
             // 4️⃣ Email settings
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
