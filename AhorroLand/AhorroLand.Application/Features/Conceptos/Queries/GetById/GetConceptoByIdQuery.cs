@@ -2,7 +2,7 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Dtos;
 
-namespace AhorroLand.Application.Features.Conceptos.Commands;
+namespace AhorroLand.Application.Features.Conceptos.Queries;
 
 /// <summary>
 /// Representa la solicitud para crear un nuevo Concepto.

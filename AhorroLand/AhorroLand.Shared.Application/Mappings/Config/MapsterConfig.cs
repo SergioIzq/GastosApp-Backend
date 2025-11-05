@@ -1,4 +1,6 @@
 ﻿using AhorroLand.Domain;
+using AhorroLand.Shared.Application.Dtos;
+using AhorroLand.Shared.Domain.ValueObjects;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +12,8 @@ public static class MapsterConfig
 {
     public static void RegisterMapsterConfiguration(this IServiceCollection services)
     {
+        var config = TypeAdapterConfig.GlobalSettings;
+
         TypeAdapterConfig.GlobalSettings.Default.PreserveReference(true);
 
         // 2. Aplicar Configuraciones (Mapas Específicos)
@@ -18,6 +22,15 @@ public static class MapsterConfig
             Assembly.GetExecutingAssembly(),
             Assembly.GetAssembly(typeof(Cliente))!
         );
+
+        config.NewConfig<ClienteDto, Cliente>()
+                        .MapWith(src => Cliente.Create(new Nombre(src.Nombre)));
+
+        config.NewConfig<UsuarioId, Guid>()
+    .MapWith(src => src.Value);
+
+        config.NewConfig<Guid, UsuarioId>()
+            .MapWith(src => new UsuarioId(src));
 
         // 3. Registrar la configuración como Singleton
         services.AddSingleton(TypeAdapterConfig.GlobalSettings);

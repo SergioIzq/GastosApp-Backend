@@ -5,18 +5,22 @@ namespace AhorroLand.Domain;
 
 public sealed class Cliente : AbsEntity
 {
-    private Cliente(Guid id, Nombre nombre, UsuarioId usuarioId) : base(id)
+    public Cliente() : base(Guid.Empty)
+    {
+
+    }
+
+    private Cliente(Guid id, Nombre nombre) : base(id)
     {
         Nombre = nombre;
-        UsuarioId = usuarioId;
     }
 
     public Nombre Nombre { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
-    public static Cliente Create(Nombre nombre, UsuarioId usuarioId)
+    public static Cliente Create(Nombre nombre)
     {
-        var cliente = new Cliente(Guid.NewGuid(), nombre, usuarioId);
+        var cliente = new Cliente(Guid.NewGuid(), nombre);
 
         return cliente;
     }

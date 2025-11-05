@@ -1,0 +1,86 @@
+﻿using AhorroLand.Infrastructure.Configuration.Settings;
+using AhorroLand.Infrastructure.DataAccess;
+using AhorroLand.Infrastructure.Persistence.Command;
+using AhorroLand.Infrastructure.Persistence.Query;
+using AhorroLand.Infrastructure.Servicies;
+using AhorroLand.Shared.Domain.Interfaces;
+using AhorroLand.Shared.Domain.Interfaces.Repositories;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data;
+using System.Data.Entity.Infrastructure;
+using System.Reflection;
+
+namespace AhorroLand.Infrastructure
+{
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
+            // 1️⃣ DbContext
+            services.AddDbContext<AhorroLandDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            // 2️⃣ Cache distribuida
+            services.AddDistributedMemoryCache();
+
+            // 3️⃣ Dapper
+            services.AddScoped<IDbConnection>(sp =>
+                new SqlConnection(configuration.GetConnectionString("DefaultConnection")));
+
+            // 4️⃣ Email settings
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+
+            // 5️⃣ Registro explícito de dependencias críticas
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddSingleton<QueuedEmailService>();
+
+            // 👉 Agrega esta línea clave:
+            services.Scan(scan => scan
+                .FromAssemblies(Assembly.GetExecutingAssembly())
+                .AddClasses(classes => classes.AssignableTo(typeof(IWriteRepository<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            );
+
+            services.Scan(scan => scan
+                .FromAssemblies(Assembly.GetExecutingAssembly())
+                .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
+                    .AsImplementedInterfaces()
+                    .WithScopedLifetime()
+            );
+
+
+            services.AddScoped<IDomainValidator, DapperDomainValidator>();
+
+
+            // 6️⃣ Registro automático con Scrutor
+            services.Scan(scan => scan
+                .FromAssemblies(Assembly.GetExecutingAssembly())
+
+                // A) Servicios normales
+                .AddClasses(classes => classes
+                    .InNamespaces("AhorroLand.Infrastructure.Servicies")
+                    .Where(c => !typeof(BackgroundService).IsAssignableFrom(c) && c.GetInterfaces().Length > 0)
+                )
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+
+                // B) BackgroundServices
+                .AddClasses(classes => classes.AssignableTo<BackgroundService>())
+                    .AsSelf()
+                    .As<IHostedService>()
+                    .WithSingletonLifetime()
+            );
+
+            services.AddScoped<Persistence.Query.IDbConnectionFactory, SqlDbConnectionFactory>();
+
+            return services;
+        }
+    }
+}

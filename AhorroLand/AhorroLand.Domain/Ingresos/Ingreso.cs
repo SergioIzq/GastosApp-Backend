@@ -79,4 +79,31 @@ public sealed class Ingreso : AbsEntity
 
         return Ingreso;
     }
+
+    public void Update(
+        Cantidad importe,
+        FechaRegistro fecha,
+        ConceptoId conceptoId,
+        CategoriaId categoriaId,
+        ClienteId clienteId,
+        PersonaId personaId,
+        CuentaId cuentaId,
+        FormaPagoId formaPagoId,
+        UsuarioId usuarioId,
+        Descripcion? descripcion)
+    {
+        Importe = importe;
+        Fecha = fecha;
+        ConceptoId = conceptoId;
+        CategoriaId = categoriaId;
+        ClienteId = clienteId;
+        PersonaId = personaId;
+        CuentaId = cuentaId;
+        FormaPagoId = formaPagoId;
+        PersonaId = personaId;
+        CuentaId = cuentaId;
+        UsuarioId = usuarioId;
+        Descripcion = descripcion;
+
+    }
 }

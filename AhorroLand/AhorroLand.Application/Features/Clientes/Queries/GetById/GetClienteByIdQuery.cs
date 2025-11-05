@@ -2,7 +2,7 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Dtos;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.Clientes.Queries;
 
 /// <summary>
 /// Representa la solicitud para crear un nuevo Cliente.

@@ -4,11 +4,11 @@ using System.Data;
 
 namespace AhorroLand.Infrastructure.Persistence.Query;
 
-public class SqlConnectionFactory : IDbConnectionFactory
+public class SqlDbConnectionFactory : IDbConnectionFactory
 {
     private readonly string _connectionString;
 
-    public SqlConnectionFactory(IConfiguration configuration)
+    public SqlDbConnectionFactory(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection")
                             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

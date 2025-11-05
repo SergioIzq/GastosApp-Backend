@@ -19,4 +19,6 @@ public sealed class Persona : AbsEntity
 
         return persona;
     }
+
+    public void Update(Nombre nombre) => Nombre = nombre;
 }

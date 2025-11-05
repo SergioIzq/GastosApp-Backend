@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
-namespace AhorroLand.Infrastructure.Services
+namespace AhorroLand.Infrastructure.Servicies
 {
     // Clase de implementación en la capa de Infraestructura
     public class DistributedCacheService : ICacheService

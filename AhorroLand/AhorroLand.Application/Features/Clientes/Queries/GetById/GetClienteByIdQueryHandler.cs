@@ -4,7 +4,7 @@ using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 
-namespace AhorroLand.Application.Features.Clientes.Commands;
+namespace AhorroLand.Application.Features.Clientes.Queries;
 
 /// <summary>
 /// Maneja la creación de una nueva entidad Categoria.
