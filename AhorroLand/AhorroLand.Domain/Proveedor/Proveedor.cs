@@ -21,4 +21,6 @@ public sealed class Proveedor : AbsEntity
 
         return proveedor;
     }
+
+    public void Update(Nombre nombre) => Nombre = (nombre);
 }

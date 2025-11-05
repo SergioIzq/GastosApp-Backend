@@ -75,8 +75,6 @@ public sealed class CreateGastoCommandHandler
                 usuarioId,
                 descripcionVO);
 
-            // 4. PERSISTENCIA
-            _writeRepository.Add(gasto);
             var entityResultGuid = await CreateAsync(gasto, cancellationToken);
 
             if (entityResultGuid.IsFailure)

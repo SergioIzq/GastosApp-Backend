@@ -15,7 +15,7 @@ namespace AhorroLand.Shared.Application.Mappings
                   .MapWith(src => src.Valor);
 
             config.ForType<Descripcion, string?>()
-                  .MapWith(src => src.Value);
+                  .MapWith(src => src._Value);
 
             config.ForType<FechaRegistro, DateTime>()
                   .MapWith(src => src.Valor);

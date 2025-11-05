@@ -116,15 +116,4 @@ public abstract class AbsQueryHandler<TEntity> : IQueryHandlerBase<TEntity>
             return Result.Failure<PagedList<TResult>>(Error.Failure("Error.Paging", "Fallo de paginación", detail));
         }
     }
-
-    /// <summary>
-    /// Devuelve la base de la consulta como IQueryable con AsNoTracking aplicado.
-    /// Esto permite a los handlers concretos aplicar Where, OrderBy y Select (proyecciones) 
-    /// de forma diferida antes de ejecutar la consulta en la base de datos.
-    /// </summary>
-    /// <returns>Una interfaz IQueryable que puede ser compuesta.</returns>
-    protected IQueryable<TEntity> GetQueryBase()
-    {
-        return _repository.GetAll(asNoTracking: true);
-    }
 }

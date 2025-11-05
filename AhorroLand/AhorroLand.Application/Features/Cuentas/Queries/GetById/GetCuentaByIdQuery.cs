@@ -2,7 +2,7 @@
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Dtos;
 
-namespace AhorroLand.Application.Features.Cuentas.Commands;
+namespace AhorroLand.Application.Features.Cuentas.Queries;
 
 /// <summary>
 /// Representa la solicitud para crear un nuevo Cuenta.

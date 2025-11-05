@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9973C0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AhorroLand.Shared.Application", "AhorroLand.Shared.Application\AhorroLand.Shared.Application.csproj", "{ED7FC635-F090-47CF-98AD-D2CFCB4A29BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AhorroLand.NuevaApi", "AhorroLand.NuevaApi\AhorroLand.NuevaApi.csproj", "{0C181944-E46C-40C2-A7B2-5AC889E1D794}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{ED7FC635-F090-47CF-98AD-D2CFCB4A29BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED7FC635-F090-47CF-98AD-D2CFCB4A29BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED7FC635-F090-47CF-98AD-D2CFCB4A29BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C181944-E46C-40C2-A7B2-5AC889E1D794}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C181944-E46C-40C2-A7B2-5AC889E1D794}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C181944-E46C-40C2-A7B2-5AC889E1D794}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C181944-E46C-40C2-A7B2-5AC889E1D794}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

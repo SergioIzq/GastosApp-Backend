@@ -21,31 +21,34 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         {
         }
 
-        // 🔑 MÉTODO ABSTRACTO: Obliga al handler concreto a aplicar filtros y proyecciones
-        protected abstract IQueryable<TEntity> ApplyQuery(TQuery query);
+        //// 🔑 MÉTODO ABSTRACTO: Obliga al handler concreto a aplicar filtros y proyecciones
+        //protected abstract IQueryable<TEntity> ApplyQuery(TQuery query);
 
         public async Task<Result<PagedList<TDto>>> Handle(TQuery query, CancellationToken cancellationToken)
         {
-            // 1. Obtener la consulta base IQueryable (AsNoTracking)
-            IQueryable<TEntity> baseQuery = GetQueryBase();
+            // 1. ¡ADVERTENCIA! Esto trae TODA la tabla a la memoria.
+            IEnumerable<TEntity> baseQuery = await _repository.GetAllAsync();
 
-            // 2. Aplicar filtros/orden/Eager Loading (Definido por la clase concreta)
-            IQueryable<TEntity> filteredQuery = ApplyQuery(query);
+            // 2. Usa .Adapt<T>() para mapear la lista en memoria (no .ProjectToType)
+            IEnumerable<TDto> projectedList = baseQuery.Adapt<IEnumerable<TDto>>();
 
-            // 3. Proyección a DTO (Mapster puede proyectar en IQueryable)
-            // Esto convierte el IQueryable<TEntity> en IQueryable<TDto> en el servidor.
-            IQueryable<TDto> projectedQuery = filteredQuery.ProjectToType<TDto>();
-
-            // 4. Usar el método base para aplicar la paginación eficiente
-            var pagedResult = await GetPagedListAsync(
-                projectedQuery,
+            // 3. Debes crear un método 'GetPagedListFromMemory' que pagine
+            //    una lista 'IEnumerable' en lugar de un 'IQueryable'.
+            var pagedResult = GetPagedListFromMemory(
+                projectedList,
                 query.Page,
-                query.PageSize,
-                cancellationToken
+                query.PageSize
             );
 
-            // El resultado ya es Result<PagedList<TDto>>
-            return pagedResult;
+            return Result.Success(pagedResult);
+        }
+
+        // Necesitarás un helper como este:
+        private PagedList<TDto> GetPagedListFromMemory(IEnumerable<TDto> source, int page, int pageSize)
+        {
+            var totalCount = source.Count();
+            var items = source.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return new PagedList<TDto>(items, totalCount, page, pageSize);
         }
     }
 }

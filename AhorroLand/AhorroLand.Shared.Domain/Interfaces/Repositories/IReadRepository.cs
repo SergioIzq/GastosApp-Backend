@@ -9,7 +9,7 @@ namespace AhorroLand.Shared.Domain.Interfaces.Repositories
     public interface IReadRepository<T> where T : AbsEntity
     {
         // Permite al QueryHandler aplicar proyecciones (Select) antes de ejecutar.
-        IQueryable<T> GetAll(bool asNoTracking = true);
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
 
         // Obtener por ID con opción a AsNoTracking.
         Task<T?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken cancellationToken = default);
