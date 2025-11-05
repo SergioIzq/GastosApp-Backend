@@ -1,5 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
 using System.Data;
 
 namespace AhorroLand.Infrastructure.Persistence.Query;
@@ -16,6 +16,6 @@ public class SqlDbConnectionFactory : IDbConnectionFactory
 
     public IDbConnection CreateConnection()
     {
-        return new SqlConnection(_connectionString);
+        return new MySqlConnection(_connectionString);
     }
 }
