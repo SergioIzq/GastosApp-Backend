@@ -17,7 +17,7 @@ obj/
 .env.*.local
 
 # Ignorar archivos de configuración locales sensibles
-AppG/appsettings.Development.json
+AhorroLand/**/appsettings.Development.json
 
 # Ignorar carpetas de resultados de build para configuraciones específicas
 **/Debug/
@@ -47,4 +47,4 @@ jspm_packages/
 bower_components/
 
 
-AhorroLand/appsettings*.json
+AhorroLand/**/appsettings*.json
