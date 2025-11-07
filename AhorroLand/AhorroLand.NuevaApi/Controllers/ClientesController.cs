@@ -32,7 +32,8 @@ public class ClientesController : AbsController
     {
         // 1. Mapeas el Request (DTO de API) a un Command (de Application)
         var command = new CreateClienteCommand(
-            request.Nombre
+            request.Nombre,
+            request.UsuarioId
         );
 
         // 2. Lo envías
@@ -60,5 +61,6 @@ public class ClientesController : AbsController
 
 // Este es el DTO que recibe la API, NO la entidad de dominio
 public record CreateClienteRequest(
-    string Nombre
+    string Nombre,
+    Guid UsuarioId
 );

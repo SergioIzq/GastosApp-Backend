@@ -5,9 +5,8 @@ using AhorroLand.Shared.Application.Dtos;
 namespace AhorroLand.Application.Features.Clientes.Commands;
 
 /// <summary>
-/// Representa la solicitud para crear una nueva Categoría.
+/// Representa la solicitud para crear una nueva Cliente.
 /// </summary>
-// Hereda de AbsCreateCommand<Entidad, DTO de Respuesta>
-public sealed record CreateClienteCommand(string Nombre) : AbsCreateCommand<Cliente, ClienteDto>
+public sealed record CreateClienteCommand(string Nombre, Guid UsuarioId) : AbsCreateCommand<Cliente, ClienteDto>
 {
 }

@@ -2,6 +2,7 @@
 using AhorroLand.Infrastructure.DataAccess;
 using AhorroLand.Infrastructure.Persistence.Command;
 using AhorroLand.Infrastructure.Persistence.Query;
+using AhorroLand.Infrastructure.Persistence.Warmup;
 using AhorroLand.Infrastructure.Servicies;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
@@ -28,7 +29,7 @@ namespace AhorroLand.Infrastructure
             services.AddDbContext<AhorroLandDbContext>(options =>
                 options.UseMySql(connectionString, serverVersion));
 
-            // 2️⃣ Cache distribuida
+            // 2️⃣ Cache distribuida (MemoryCache para desarrollo)
             services.AddDistributedMemoryCache();
 
             // 3️⃣ Dapper
@@ -53,8 +54,8 @@ namespace AhorroLand.Infrastructure
             services.Scan(scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())
                 .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
             );
 
 
@@ -80,7 +81,10 @@ namespace AhorroLand.Infrastructure
                     .WithSingletonLifetime()
             );
 
-            services.AddScoped<Persistence.Query.IDbConnectionFactory, SqlDbConnectionFactory>();
+            services.AddScoped<IDbConnectionFactory, SqlDbConnectionFactory>();
+
+            // 🔥 Warm-up de conexiones al iniciar
+            services.AddHostedService<DatabaseWarmupService>();
 
             return services;
         }
