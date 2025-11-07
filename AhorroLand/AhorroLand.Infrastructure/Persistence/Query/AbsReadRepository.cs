@@ -10,19 +10,12 @@ namespace AhorroLand.Infrastructure.Persistence.Query
     /// Repositorio de lectura base abstracto implementado con Dapper.
     /// </summary>
     /// <typeparam name="T">La entidad que debe heredar de AbsEntity</typeparam>
+    /// <typeparam name="TReadModel">El modelo de lectura (DTO plano para Dapper)</typeparam>
     public abstract class AbsReadRepository<T, TReadModel> : IReadRepository<T> where T : AbsEntity
     {
-        // Usa la fábrica de conexiones, no un DbContext
         protected readonly IDbConnectionFactory _dbConnectionFactory;
-
-        // Dapper necesita el nombre de la tabla, EF Core no.
         protected readonly string _tableName;
 
-        /// <summary>
-        /// Constructor base.
-        /// </summary>
-        /// <param name="dbConnectionFactory">La fábrica para crear conexiones.</param>
-        /// <param name="tableName">El nombre de la tabla que consultará este repositorio.</param>
         protected AbsReadRepository(IDbConnectionFactory dbConnectionFactory, string tableName)
         {
             _dbConnectionFactory = dbConnectionFactory;
@@ -30,42 +23,73 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         }
 
         /// <summary>
-        /// Obtiene una entidad por su Id.
+        /// 🚀 OPTIMIZADO: Obtiene el ReadModel directamente sin mapeo.
         /// </summary>
-        public virtual async Task<T?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        public virtual async Task<TReadModel?> GetReadModelByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            // 'asNoTracking' es irrelevante para Dapper, ya que nunca rastrea entidades.
-
-            // Crea y abre una nueva conexión para esta consulta
             using var connection = _dbConnectionFactory.CreateConnection();
 
-            var sql = $"SELECT * FROM {_tableName} WHERE Id = @Id";
+            // 🚀 OPTIMIZACIÓN: Usar pooling de DynamicParameters
+            var parameters = new DynamicParameters();
+            parameters.Add("id", id);
 
-            var result = await connection.QueryFirstOrDefaultAsync<TReadModel>(
-                    new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken)
-                );
+            var sql = $@"
+        SELECT 
+       BIN_TO_UUID(id) as Id,
+     BIN_TO_UUID(usuario_id) as UsuarioId,
+     nombre as Nombre,
+  fecha_creacion as FechaCreacion
+   FROM {_tableName} 
+             WHERE id = UUID_TO_BIN(@id)";
 
-            // Si no se encuentra nada, devolvemos null
-            if (result is null)
-                return null;
-
-            var entity = result.Adapt<T>();
-
-            return entity;
+            // ✅ Retornar directamente el DTO sin mapeo
+            return await connection.QueryFirstOrDefaultAsync<TReadModel>(
+      new CommandDefinition(sql, parameters, cancellationToken: cancellationToken)
+            );
         }
 
         /// <summary>
-        /// ADVERTENCIA: Esta implementación trae TODA la tabla a memoria.
-        /// Ver la nota de advertencia sobre IQueryable.
+      /// ⚠️ SOLO para Commands que necesiten la entidad de dominio con lógica de negocio.
+        /// </summary>
+        public virtual async Task<T?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            var readModel = await GetReadModelByIdAsync(id, cancellationToken);
+
+            if (readModel is null)
+                return null;
+
+            // Solo mapear cuando realmente se necesite la entidad
+            return readModel.Adapt<T>();
+        }
+
+     /// <summary>
+   /// 🚀 OPTIMIZADO: Retorna DTOs directamente.
+        /// </summary>
+      public virtual async Task<IEnumerable<TReadModel>> GetAllReadModelsAsync(CancellationToken cancellationToken = default)
+     {
+       using var connection = _dbConnectionFactory.CreateConnection();
+
+        var sql = $@"
+      SELECT 
+      BIN_TO_UUID(id) as Id,
+          BIN_TO_UUID(usuario_id) as UsuarioId,
+              nombre as Nombre,
+    fecha_creacion as FechaCreacion
+         FROM {_tableName}";
+
+   // ✅ Retornar DTOs directamente
+        return await connection.QueryAsync<TReadModel>(
+    new CommandDefinition(sql, cancellationToken: cancellationToken)
+         );
+        }
+
+        /// <summary>
+        /// ⚠️ DEPRECADO: Usa GetAllReadModelsAsync para mejor rendimiento.
         /// </summary>
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var sql = $"SELECT * FROM {_tableName}";
-
-            return await connection.QueryAsync<T>(
-                new CommandDefinition(sql, cancellationToken: cancellationToken)
-            );
+            var readModels = await GetAllReadModelsAsync(cancellationToken);
+       return readModels.Select(rm => rm.Adapt<T>());
         }
     }
 }

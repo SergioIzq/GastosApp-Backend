@@ -20,14 +20,17 @@ public static class MapsterConfig
         // Escanea las asambleas donde defines tus mapeos específicos (si usas IRegister)
         TypeAdapterConfig.GlobalSettings.Scan(
             Assembly.GetExecutingAssembly(),
-            Assembly.GetAssembly(typeof(Cliente))!
+            Assembly.GetAssembly(typeof(Cliente))!,
+            Assembly.GetAssembly(typeof(ClienteDto))! // Escanear también donde están los DTOs
         );
 
-        config.NewConfig<ClienteDto, Cliente>()
-                        .MapWith(src => Cliente.Create(new Nombre(src.Nombre)));
+        // ❌ ELIMINADO: Ya está configurado en ClienteMappingRegister
+        // config.NewConfig<ClienteDto, Cliente>()
+        //   .MapWith(src => Cliente.Create(new Nombre(src.Nombre), new UsuarioId(src.UsuarioId)));
 
+        // ✅ Mapeo global para Value Objects → Guid
         config.NewConfig<UsuarioId, Guid>()
-    .MapWith(src => src.Value);
+            .MapWith(src => src.Value);
 
         config.NewConfig<Guid, UsuarioId>()
             .MapWith(src => new UsuarioId(src));

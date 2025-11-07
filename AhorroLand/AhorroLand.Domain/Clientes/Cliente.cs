@@ -10,17 +10,18 @@ public sealed class Cliente : AbsEntity
 
     }
 
-    private Cliente(Guid id, Nombre nombre) : base(id)
+    private Cliente(Guid id, Nombre nombre, UsuarioId usuarioId) : base(id)
     {
         Nombre = nombre;
+        UsuarioId = usuarioId;
     }
 
     public Nombre Nombre { get; private set; }
     public UsuarioId UsuarioId { get; private set; }
 
-    public static Cliente Create(Nombre nombre)
+    public static Cliente Create(Nombre nombre, UsuarioId usuarioId)
     {
-        var cliente = new Cliente(Guid.NewGuid(), nombre);
+        var cliente = new Cliente(Guid.NewGuid(), nombre, usuarioId);
 
         return cliente;
     }

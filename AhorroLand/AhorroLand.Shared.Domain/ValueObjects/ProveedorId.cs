@@ -1,6 +1,8 @@
-﻿namespace AhorroLand.Shared.Domain.ValueObjects;
+﻿using AhorroLand.Shared.Domain.Interfaces;
 
-public readonly record struct ProveedorId
+namespace AhorroLand.Shared.Domain.ValueObjects;
+
+public readonly record struct ProveedorId : IGuidValueObject
 {
     // Constructor primario sin lógica
     public Guid Value { get; init; }
