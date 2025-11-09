@@ -23,11 +23,11 @@ RUN dotnet build "AppG.csproj" -c Release -o /app/build --no-restore
 # ETAPA 2: PUBLISH - Publicar la aplicación
 # ============================================
 FROM build AS publish
+WORKDIR "/src/AppG"
 RUN dotnet publish "AppG.csproj" \
     -c Release \
     -o /app/publish \
     --no-restore \
-    --no-build \
     /p:UseAppHost=false
 
 # ============================================
