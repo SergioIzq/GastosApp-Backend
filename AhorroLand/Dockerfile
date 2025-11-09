@@ -10,6 +10,7 @@ COPY AhorroLand.Domain/AhorroLand.Domain.csproj AhorroLand.Domain/
 COPY AhorroLand.Infrastructure/AhorroLand.Infrastructure.csproj AhorroLand.Infrastructure/
 COPY AhorroLand.Shared.Application/AhorroLand.Shared.Application.csproj AhorroLand.Shared.Application/
 COPY AhorroLand.Shared.Domain/AhorroLand.Shared.Domain.csproj AhorroLand.Shared.Domain/
+COPY AhorroLand.NuevaApi/AhorroLand.NuevaApi.csproj AhorroLand.NuevaApi/
 
 # Restaurar dependencias
 RUN dotnet restore
