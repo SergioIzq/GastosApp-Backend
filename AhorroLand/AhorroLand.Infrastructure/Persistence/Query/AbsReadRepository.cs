@@ -49,7 +49,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         }
 
         /// <summary>
-      /// ⚠️ SOLO para Commands que necesiten la entidad de dominio con lógica de negocio.
+        /// ⚠️ SOLO para Commands que necesiten la entidad de dominio con lógica de negocio.
         /// </summary>
         public virtual async Task<T?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
@@ -62,14 +62,14 @@ namespace AhorroLand.Infrastructure.Persistence.Query
             return readModel.Adapt<T>();
         }
 
-     /// <summary>
-   /// 🚀 OPTIMIZADO: Retorna DTOs directamente.
+        /// <summary>
+        /// 🚀 OPTIMIZADO: Retorna DTOs directamente.
         /// </summary>
-      public virtual async Task<IEnumerable<TReadModel>> GetAllReadModelsAsync(CancellationToken cancellationToken = default)
-     {
-       using var connection = _dbConnectionFactory.CreateConnection();
+        public virtual async Task<IEnumerable<TReadModel>> GetAllReadModelsAsync(CancellationToken cancellationToken = default)
+        {
+            using var connection = _dbConnectionFactory.CreateConnection();
 
-        var sql = $@"
+            var sql = $@"
       SELECT 
       BIN_TO_UUID(id) as Id,
           BIN_TO_UUID(usuario_id) as UsuarioId,
@@ -77,10 +77,10 @@ namespace AhorroLand.Infrastructure.Persistence.Query
     fecha_creacion as FechaCreacion
          FROM {_tableName}";
 
-   // ✅ Retornar DTOs directamente
-        return await connection.QueryAsync<TReadModel>(
-    new CommandDefinition(sql, cancellationToken: cancellationToken)
-         );
+            // ✅ Retornar DTOs directamente
+            return await connection.QueryAsync<TReadModel>(
+        new CommandDefinition(sql, cancellationToken: cancellationToken)
+             );
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             var readModels = await GetAllReadModelsAsync(cancellationToken);
-       return readModels.Select(rm => rm.Adapt<T>());
+            return readModels.Select(rm => rm.Adapt<T>());
         }
     }
 }

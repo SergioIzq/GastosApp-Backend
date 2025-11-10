@@ -9,6 +9,8 @@ public interface IWriteRepository<T> where T : AbsEntity
 {
     void Add(T entity);
 
+    Task CreateAsync(T entity, CancellationToken cancellationToken = default);
+
     void Update(T entity);
 
     void Delete(T entity);

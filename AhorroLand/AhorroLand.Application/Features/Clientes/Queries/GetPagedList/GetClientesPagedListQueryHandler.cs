@@ -1,11 +1,8 @@
-﻿using AhorroLand.Application.Features.Categorias.Queries;
-using AhorroLand.Domain;
+﻿using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace AhorroLand.Application.Features.Clientes.Queries;
 

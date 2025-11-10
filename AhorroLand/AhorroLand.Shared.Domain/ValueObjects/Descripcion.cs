@@ -6,7 +6,7 @@ public readonly record struct Descripcion
 
     public Descripcion(string? Value)
     {
-        if(!string.IsNullOrEmpty(Value))
+        if (!string.IsNullOrEmpty(Value))
             _Value = Value;
     }
 

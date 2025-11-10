@@ -13,5 +13,5 @@ public sealed record UpdateFormaPagoCommand : AbsUpdateCommand<FormaPago, FormaP
     /// <summary>
     /// Nombre de la nueva cuenta.
     /// </summary>
-    public required string Nombre { get; init; }   
+    public required string Nombre { get; init; }
 }

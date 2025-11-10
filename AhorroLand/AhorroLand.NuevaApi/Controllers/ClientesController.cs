@@ -2,10 +2,13 @@
 using AhorroLand.Application.Features.Clientes.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
+[Authorize]
+[ApiController]
 [Route("api/clientes")]
 public class ClientesController : AbsController
 {
@@ -14,6 +17,16 @@ public class ClientesController : AbsController
     {
     }
 
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new GetClientesPagedListQuery(page, pageSize);
+        var result = await _sender.Send(query);
+        return HandleResult(result);
+    }
+
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -27,6 +40,7 @@ public class ClientesController : AbsController
         return HandleResult(result);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateClienteRequest request)
     {
@@ -47,6 +61,21 @@ public class ClientesController : AbsController
         );
     }
 
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClienteRequest request)
+    {
+        var command = new UpdateClienteCommand
+        {
+            Id = id,
+            Nombre = request.Nombre
+        };
+
+        var result = await _sender.Send(command);
+        return HandleResult(result);
+    }
+
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -63,4 +92,8 @@ public class ClientesController : AbsController
 public record CreateClienteRequest(
     string Nombre,
     Guid UsuarioId
+);
+
+public record UpdateClienteRequest(
+    string Nombre
 );

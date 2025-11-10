@@ -3,7 +3,9 @@ using AhorroLand.Infrastructure.DataAccess;
 using AhorroLand.Infrastructure.Persistence.Command;
 using AhorroLand.Infrastructure.Persistence.Query;
 using AhorroLand.Infrastructure.Persistence.Warmup;
+using AhorroLand.Infrastructure.Services.Auth;
 using AhorroLand.Infrastructure.Servicies;
+using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +44,11 @@ namespace AhorroLand.Infrastructure
             // 5️⃣ Registro explícito de dependencias críticas
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddSingleton<QueuedEmailService>();
+
+            // 🔐 Servicios de autenticación
+            services.AddScoped<IPasswordHasher, PasswordHasherService>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.AddScoped<IEmailSender, EmailSenderService>();
 
             // 👉 Agrega esta línea clave:
             services.Scan(scan => scan

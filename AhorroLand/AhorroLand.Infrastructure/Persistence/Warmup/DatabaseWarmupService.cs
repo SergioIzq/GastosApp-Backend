@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using AhorroLand.Infrastructure.Persistence.Query;
+﻿using AhorroLand.Infrastructure.Persistence.Query;
 using Dapper;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace AhorroLand.Infrastructure.Persistence.Warmup
 {

@@ -4,8 +4,8 @@ using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.Results;
-using Microsoft.EntityFrameworkCore;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts;
 

@@ -6,7 +6,7 @@ public readonly record struct ConfirmationToken
 
     private const int TokenLength = 32;
 
-    private ConfirmationToken(string value)
+    public ConfirmationToken(string value)
     {
         // 🔑 Regla de Negocio: El token debe tener la longitud esperada.
         if (string.IsNullOrWhiteSpace(value) || value.Length != TokenLength)

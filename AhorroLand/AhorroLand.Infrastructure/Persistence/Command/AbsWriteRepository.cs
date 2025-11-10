@@ -19,6 +19,11 @@ public abstract class AbsWriteRepository<T> : IWriteRepository<T> where T : AbsE
         _context.Set<T>().Add(entity);
     }
 
+    public async Task CreateAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        await _context.Set<T>().AddAsync(entity, cancellationToken);
+    }
+
     public void Update(T entity)
     {
         _context.Set<T>().Update(entity);

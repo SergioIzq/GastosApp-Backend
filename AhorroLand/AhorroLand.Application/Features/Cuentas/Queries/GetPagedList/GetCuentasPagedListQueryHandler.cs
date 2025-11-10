@@ -3,8 +3,6 @@ using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace AhorroLand.Application.Features.Cuentas.Queries;
 
@@ -21,5 +19,5 @@ public sealed class GetCuentasPagedListQueryHandler
         : base(repository, cacheService)
     {
         // No se necesita lógica adicional en el constructor.
-    }    
+    }
 }
