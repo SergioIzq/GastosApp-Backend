@@ -77,13 +77,20 @@ public class Startup
             {
                 builder.SetIsOriginAllowed(origin =>
                 {
-                    // Permite localhost:4200
-                    if (origin == "http://localhost:4200") return true;
+                    // Intenta parsear el origen
+                    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                    {
+                        return false; // No es un origen válido
+                    }
 
-                    // Permite cualquier subdominio de sergioizq.es
-                    Uri uri = new(origin);
-                    // Permite el dominio raíz (sergioizq.es) O cualquier subdominio (.sergioizq.es)
-                    return uri.Host == "sergioizq.es" || uri.Host.EndsWith(".sergioizq.es");
+                    // Permite localhost:4200 para desarrollo
+                    if (uri.Host == "localhost" && uri.Port == 4200)
+                    {
+                        return true;
+                    }
+
+                    // Permite el dominio raíz (sergioizq.com) O cualquier subdominio (.sergioizq.com)
+                    return uri.Host == "sergioizq.com" || uri.Host.EndsWith(".sergioizq.com");
                 })
                 .AllowAnyMethod()
                 .AllowAnyHeader()
