@@ -1,5 +1,18 @@
 # 🖥️ Backend - Aplicación de Gestión de Gastos
 
+<div align="center">
+
+![CI/CD Pipeline](https://github.com/SergioIzq/AhorroLand-Backend/workflows/CI%2FCD%20Backend%20-%20Docker%20Build%20%26%20Push/badge.svg)
+![Docker Image Version](https://img.shields.io/docker/v/sergioizqdev/ahorroland-backend?sort=semver&logo=docker)
+![Docker Image Size](https://img.shields.io/docker/image-size/sergioizqdev/ahorroland-backend/latest)
+![Docker Pulls](https://img.shields.io/docker/pulls/sergioizqdev/ahorroland-backend)
+![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
+![License](https://img.shields.io/github/license/SergioIzq/AhorroLand-Backend)
+
+</div>
+
+---
+
 Este es el backend de la aplicación de gestión económica personal/profesional, diseñado para proporcionar los servicios necesarios para almacenar, consultar, modificar y eliminar información relacionada con **ingresos, gastos, cuentas, personas, clientes, proveedores y más**.
 
 ---
