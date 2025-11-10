@@ -38,8 +38,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 # Establecer el directorio de trabajo
 WORKDIR /app
 
-# Instalar curl para health checks (Alpine usa apk)
-RUN apk add --no-cache curl
+# Instalar curl para health checks e ICU para globalización (Alpine usa apk)
+RUN apk add --no-cache curl icu-libs icu-data-full
 
 # Exponer puertos
 EXPOSE 80
