@@ -18,11 +18,6 @@ public class Program
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.ConfigureKestrel(serverOptions =>
-                {
-                    // No usamos HTTPS en Kestrel, ya que Nginx lo manejará
-                    serverOptions.ListenAnyIP(5000); // Solo HTTP en el puerto 5000
-                });
 
                 // Configura la aplicación para usar Startup.cs
                 webBuilder.UseStartup<Startup>();
