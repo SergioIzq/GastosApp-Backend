@@ -1,5 +1,7 @@
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging;
+using AhorroLand.Shared.Application.Abstractions.Services;
+using AhorroLand.Shared.Application.Dtos;
 using AhorroLand.Shared.Application.Interfaces;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces;
@@ -13,20 +15,20 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
     private readonly IUsuarioReadRepository _usuarioReadRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailService _emailService;
 
     public RegisterCommandHandler(
         IUsuarioWriteRepository usuarioWriteRepository,
         IUsuarioReadRepository usuarioReadRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
-        IEmailSender emailSender)
+        IEmailService emailService)
     {
         _usuarioWriteRepository = usuarioWriteRepository;
         _usuarioReadRepository = usuarioReadRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
-        _emailSender = emailSender;
+        _emailService = emailService;
     }
 
     public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -53,24 +55,26 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
             await _usuarioWriteRepository.CreateAsync(newUsuario, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 5. Enviar email de confirmación
+            // 5. Encolar email de confirmación (no bloqueante)
             var baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:4200";
             var confirmUrl = $"{baseUrl}/auth/confirmar-correo?token={newUsuario.TokenConfirmacion!.Value.Value}";
 
-            await _emailSender.SendEmailAsync(
-                        newUsuario.Correo.Value,
-              "Bienvenido a AhorroLand",
-                 $@"
-      <html>
-       <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
-     <h1>Gracias por registrarte en AhorroLand</h1>
-      <p>Estamos felices de tenerte aquí. Por favor accede al siguiente enlace para verificar y activar su cuenta:</p>
+            var emailBody = $@"
+    <html>
+              <body style='font-family: Arial, sans-serif; font-size: 16px; color: #333;'>
+       <h1>Gracias por registrarte en AhorroLand</h1>
+        <p>Estamos felices de tenerte aquí. Por favor accede al siguiente enlace para verificar y activar tu cuenta:</p>
          <p><a href='{confirmUrl}' target='_blank' style='color: #1a73e8; text-decoration: none;'>Confirmar mi cuenta</a></p>
-  </body>
-      </html>
-        ",
-                   cancellationToken
-                   );
+   </body>
+       </html>";
+
+            var emailMessage = new EmailMessage(
+                newUsuario.Correo.Value,
+                "Bienvenido a AhorroLand",
+                emailBody
+            );
+
+            _emailService.EnqueueEmail(emailMessage);
 
             return Result.Success(new RegisterResponse("Usuario registrado correctamente. Por favor, confirma tu correo."));
         }

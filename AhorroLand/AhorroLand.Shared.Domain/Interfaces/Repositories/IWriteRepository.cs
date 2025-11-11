@@ -13,5 +13,10 @@ public interface IWriteRepository<T> where T : AbsEntity
 
     void Update(T entity);
 
+    /// <summary>
+    /// Actualiza una entidad de forma asíncrona con validaciones.
+    /// </summary>
+    Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+
     void Delete(T entity);
 }

@@ -26,4 +26,8 @@
     <ProjectReference Include="..\AhorroLand.Shared.Application\AhorroLand.Shared.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Servicies\" />
+  </ItemGroup>
+
 </Project>

@@ -12,8 +12,8 @@ namespace AhorroLand.Shared.Application.Mappings
             // Mapeo de Entidad a DTO (Lectura)
             config.ForType<Cliente, ClienteDto>()
                 .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.Nombre, src => src.Nombre != null ? src.Nombre.Value : null)
-                .Map(dest => dest.UsuarioId, src => src.UsuarioId != null ? src.UsuarioId.Value : Guid.Empty);
+                .Map(dest => dest.Nombre, src => src.Nombre.Value)
+                .Map(dest => dest.UsuarioId, src => src.UsuarioId.Value);
 
             // Mapeo de DTO a Entidad (para reconstituir desde DB)
             config.ForType<ClienteDto, Cliente>()

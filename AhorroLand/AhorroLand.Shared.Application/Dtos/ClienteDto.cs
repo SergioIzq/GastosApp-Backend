@@ -7,7 +7,7 @@
     public record ClienteDto
     {
         public Guid Id { get; init; }
-        public string Nombre { get; init; }
+        public required string Nombre { get; init; }
         public Guid UsuarioId { get; init; }
         // Dapper ahora ignorará 'fecha_creacion' y otras columnas
         // porque no hay una propiedad aquí con ese nombre.
