@@ -101,7 +101,6 @@ public sealed class TraspasoProgramado : AbsEntity
     public void Desactivar()
     {
         Activo = false;
-        // opcional: emitir evento de dominio TraspasoDesactivado
     }
 
     /// <summary>

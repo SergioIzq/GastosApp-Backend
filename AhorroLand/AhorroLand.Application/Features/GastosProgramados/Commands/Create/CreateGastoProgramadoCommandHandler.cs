@@ -99,18 +99,14 @@ public sealed class CreateGastoProgramadoCommandHandler
         }
         catch (ArgumentException ex)
         {
-            // Captura de errores de validación de Value Objects (ej: Importe <= 0, Frecuencia inválida)
-            // Se usa Error.Validation ya que Error.Multiple no existe.
             return Result.Failure<GastoProgramadoDto>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {
-            // Captura de cualquier otra excepción inesperada.
             return Result.Failure<GastoProgramadoDto>(Error.Failure("Error.Unexpected", "Error Inesperado", ex.Message));
         }
     }
 
-    // ⭐ OPTIMIZACIÓN: Lanzar excepción para asegurar que la abstracción base síncrona no se use.
     protected override GastoProgramado CreateEntity(CreateGastoProgramadoCommand command)
     {
         throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
