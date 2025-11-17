@@ -46,17 +46,16 @@ public class TraspasosProgramadosController : AbsController
             FechaEjecucion = request.FechaEjecucion,
             Frecuencia = request.Frecuencia,
             UsuarioId = request.UsuarioId,
-            HangfireJobId = request.HangfireJobId,
             Descripcion = request.Descripcion
         };
 
         var result = await _sender.Send(command);
 
         return HandleResultForCreation(
- result,
-         nameof(GetById),
-      new { id = result.Value.Id }
-     );
+            result,
+            nameof(GetById),
+            new { id = result.Value.Id }
+        );
     }
 
     [Authorize]
@@ -97,17 +96,16 @@ public record CreateTraspasoProgramadoRequest(
     DateTime FechaEjecucion,
     string Frecuencia,
     Guid UsuarioId,
-    string HangfireJobId,
     string? Descripcion
 );
 
 public record UpdateTraspasoProgramadoRequest(
-  Guid CuentaOrigenId,
-Guid CuentaDestinoId,
+    Guid CuentaOrigenId,
+    Guid CuentaDestinoId,
     decimal Importe,
     DateTime FechaEjecucion,
     string Frecuencia,
     Guid UsuarioId,
-string HangfireJobId,
- string? Descripcion
+    string HangfireJobId,
+    string? Descripcion
 );

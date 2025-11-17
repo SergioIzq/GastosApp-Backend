@@ -12,6 +12,5 @@ public sealed record CreateTraspasoProgramadoCommand : AbsCreateCommand<Traspaso
     public required DateTime FechaEjecucion { get; init; }
     public required string Frecuencia { get; init; }
     public required Guid UsuarioId { get; init; }
-    public required string HangfireJobId { get; init; }
     public string? Descripcion { get; init; }
 }

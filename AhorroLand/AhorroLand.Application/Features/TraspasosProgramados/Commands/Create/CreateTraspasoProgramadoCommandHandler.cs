@@ -14,15 +14,18 @@ public sealed class CreateTraspasoProgramadoCommandHandler
     : AbsCreateCommandHandler<TraspasoProgramado, TraspasoProgramadoDto, CreateTraspasoProgramadoCommand>
 {
     private readonly IDomainValidator _validator;
+    private readonly IJobSchedulingService _jobSchedulingService;
 
     public CreateTraspasoProgramadoCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TraspasoProgramado> writeRepository,
         ICacheService cacheService,
-        IDomainValidator validator)
+        IDomainValidator validator,
+        IJobSchedulingService jobSchedulingService)
     : base(unitOfWork, writeRepository, cacheService)
     {
         _validator = validator;
+        _jobSchedulingService = jobSchedulingService;
     }
 
     public override async Task<Result<TraspasoProgramadoDto>> Handle(
@@ -61,6 +64,9 @@ public sealed class CreateTraspasoProgramadoCommandHandler
             var cuentaDestinoId = new CuentaId(command.CuentaDestinoId);
             var usuarioId = new UsuarioId(command.UsuarioId);
 
+            // Uso del servicio de infraestructura para generar el JobId
+            var hangfireJobId = _jobSchedulingService.GenerateJobId();
+
             // 4. CREACIÓN DE LA ENTIDAD DE DOMINIO (TraspasoProgramado)
             var traspasoProgramadoResult = TraspasoProgramado.Create(
                 cuentaOrigenId,
@@ -69,7 +75,7 @@ public sealed class CreateTraspasoProgramadoCommandHandler
                 command.FechaEjecucion,
                 frecuencia,
                 usuarioId,
-                command.HangfireJobId,
+                hangfireJobId,
                 descripcion
             );
 

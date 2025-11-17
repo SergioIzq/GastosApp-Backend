@@ -11,12 +11,16 @@ namespace AhorroLand.Application.Features.IngresosProgramados.Commands;
 public sealed class CreateIngresoProgramadoCommandHandler
     : AbsCreateCommandHandler<IngresoProgramado, IngresoProgramadoDto, CreateIngresoProgramadoCommand>
 {
+    private readonly IJobSchedulingService _jobSchedulingService;
+
     public CreateIngresoProgramadoCommandHandler(
-          IUnitOfWork unitOfWork,
+        IUnitOfWork unitOfWork,
         IWriteRepository<IngresoProgramado> writeRepository,
-      ICacheService cacheService)
-   : base(unitOfWork, writeRepository, cacheService)
+        ICacheService cacheService,
+        IJobSchedulingService jobSchedulingService)
+    : base(unitOfWork, writeRepository, cacheService)
     {
+        _jobSchedulingService = jobSchedulingService;
     }
 
     protected override IngresoProgramado CreateEntity(CreateIngresoProgramadoCommand command)
@@ -31,22 +35,22 @@ public sealed class CreateIngresoProgramadoCommandHandler
         var cuentaIdVO = new CuentaId(command.CuentaId);
         var formaPagoIdVO = new FormaPagoId(command.FormaPagoId);
 
-        // Nota: El hangfireJobId debería generarse en un servicio de dominio o infraestructura
-        var hangfireJobId = Guid.NewGuid().ToString();
+        // Uso del servicio de infraestructura para generar el JobId
+        var hangfireJobId = _jobSchedulingService.GenerateJobId();
 
         var newIngresoProgramado = IngresoProgramado.Create(
-               importeVO,
-      command.FechaEjecucion,
-               conceptoIdVO,
-               categoriaIdVO,
-          clienteIdVO,
-      frecuenciaVO,
-     personaIdVO,
-               cuentaIdVO,
-         formaPagoIdVO,
-         hangfireJobId,
-        descripcionVO
-           );
+            importeVO,
+            command.FechaEjecucion,
+            conceptoIdVO,
+            categoriaIdVO,
+            clienteIdVO,
+            frecuenciaVO,
+            personaIdVO,
+            cuentaIdVO,
+            formaPagoIdVO,
+            hangfireJobId,
+            descripcionVO
+        );
 
         return newIngresoProgramado;
     }

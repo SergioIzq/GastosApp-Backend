@@ -14,15 +14,18 @@ public sealed class CreateGastoProgramadoCommandHandler
     : AbsCreateCommandHandler<GastoProgramado, GastoProgramadoDto, CreateGastoProgramadoCommand>
 {
     private readonly IDomainValidator _validator;
+    private readonly IJobSchedulingService _jobSchedulingService;
 
     public CreateGastoProgramadoCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<GastoProgramado> writeRepository,
         ICacheService cacheService,
-        IDomainValidator validator)
+        IDomainValidator validator,
+        IJobSchedulingService jobSchedulingService)
     : base(unitOfWork, writeRepository, cacheService)
     {
         _validator = validator;
+        _jobSchedulingService = jobSchedulingService;
     }
 
     public override async Task<Result<GastoProgramadoDto>> Handle(
@@ -68,6 +71,9 @@ public sealed class CreateGastoProgramadoCommandHandler
             var categoriaId = new CategoriaId(command.CategoriaId);
             var personaId = new PersonaId(command.PersonaId);
 
+            // Uso del servicio de infraestructura para generar el JobId
+            var hangfireJobId = _jobSchedulingService.GenerateJobId();
+
             // 4. CREACIÓN DE LA ENTIDAD DE DOMINIO (GastoProgramado)
             var gastoProgramado = GastoProgramado.Create(
                 importe,
@@ -79,7 +85,7 @@ public sealed class CreateGastoProgramadoCommandHandler
                 personaId,
                 cuentaId,
                 formaPagoId,
-                "hangfire-job-pending",
+                hangfireJobId,
                 descripcion
             );
 
