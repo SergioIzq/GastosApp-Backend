@@ -9,7 +9,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Conceptos
     public class ConceptoReadRepository : AbsReadRepository<Concepto, ConceptoDto>, IConceptoReadRepository
     {
         public ConceptoReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Conceptos")
+            : base(dbConnectionFactory, "conceptos")
         {
         }
 

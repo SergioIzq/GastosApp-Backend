@@ -7,7 +7,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Ingresos
     public class IngresoReadRepository : AbsReadRepository<Ingreso, IngresoDto>, IIngresoReadRepository
     {
         public IngresoReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Ingresos")
+            : base(dbConnectionFactory, "ingresos")
         {
         }
 

@@ -9,7 +9,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Proveedores
     public class ProveedorReadRepository : AbsReadRepository<Proveedor, ProveedorDto>, IProveedorReadRepository
     {
         public ProveedorReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Proveedores")
+            : base(dbConnectionFactory, "proveedores")
         {
         }
 

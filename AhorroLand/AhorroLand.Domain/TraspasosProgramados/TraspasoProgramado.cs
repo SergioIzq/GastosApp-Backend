@@ -1,4 +1,5 @@
-﻿using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Domain.TraspasosProgramados.Eventos;
+using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.ValueObjects;
 
@@ -73,6 +74,13 @@ public sealed class TraspasoProgramado : AbsEntity
             usuarioId,
             descripcion
         );
+
+        // 🔥 LANZAR EVENTO DE DOMINIO
+        traspaso.AddDomainEvent(new TraspasoProgramadoCreadoEvent(
+            traspaso.Id,
+            frecuencia,
+            fechaEjecucion
+        ));
 
         return Result.Success(traspaso);
     }

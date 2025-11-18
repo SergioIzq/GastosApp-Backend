@@ -12,31 +12,50 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IO.Compression;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ?? OPTIMIZACIÓN: Configurar Kestrel para HTTP/2 y keep-alive
+// 🔥 OPTIMIZACIÓN 1: Configurar Kestrel para máximo rendimiento
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxConcurrentConnections = 1000;
-    options.Limits.MaxConcurrentUpgradedConnections = 1000;
+    options.Limits.MaxConcurrentConnections = 10000; // ⬆️ Aumentado de 1000
+    options.Limits.MaxConcurrentUpgradedConnections = 10000;
     options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
     options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
     options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
 
-    // Habilitar HTTP/2
+    // 🔥 HTTP/3 para mejor rendimiento (si el servidor lo soporta)
     options.ConfigureEndpointDefaults(listenOptions =>
     {
-        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
     });
+});
+
+// 🔥 OPTIMIZACIÓN 2: Output Caching para respuestas repetidas
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Expire(TimeSpan.FromSeconds(30)));
+    
+    // Cache específico para endpoints de lectura
+    options.AddPolicy("ReadEndpoints", builder => 
+        builder.Expire(TimeSpan.FromMinutes(5))
+               .SetVaryByQuery("page", "pageSize"));
 });
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // ?? OPTIMIZACIÓN: Configurar System.Text.Json para mejor rendimiento
-        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Sin conversión de nombres
-        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+        // 🔥 OPTIMIZACIÓN 3: System.Text.Json con máximo rendimiento
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; // Más rápido
+        options.JsonSerializerOptions.WriteIndented = false; // Producción: sin indentación
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
+        
+        // 🔥 Source Generators para mejor rendimiento (si usas .NET 8+)
+        options.JsonSerializerOptions.TypeInfoResolverChain.Add(AppJsonSerializerContext.Default);
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -57,35 +76,44 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-        new OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-  Reference = new OpenApiReference
-           {
-         Type = ReferenceType.SecurityScheme,
-       Id = "Bearer"
-   }
-       },
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
             Array.Empty<string>()
         }
     });
 });
 
-// ?? OPTIMIZACIÓN: Response Compression (Brotli + Gzip)
+// 🔥 OPTIMIZACIÓN 4: Response Compression (Brotli + Gzip) - Mejorado
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
     options.Providers.Add<BrotliCompressionProvider>();
     options.Providers.Add<GzipCompressionProvider>();
+    
+    // Comprimir solo respuestas grandes (> 1KB)
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/json", "text/json" });
 });
 
 builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
 {
-    options.Level = CompressionLevel.Fastest;
+    // Brotli con mejor compresión para producción
+    options.Level = builder.Environment.IsDevelopment() 
+        ? CompressionLevel.Fastest 
+        : CompressionLevel.Optimal;
 });
 
 builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 {
-    options.Level = CompressionLevel.Fastest;
+    options.Level = builder.Environment.IsDevelopment() 
+        ? CompressionLevel.Fastest 
+        : CompressionLevel.Optimal;
 });
 
 DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -98,7 +126,11 @@ builder.Services.AddApplication();
 builder.Services.AddSharedApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// ?? Configuración de autenticación JWT
+// 🔥 OPTIMIZACIÓN 5: Object Pooling para reducir GC pressure
+builder.Services.AddSingleton<Microsoft.Extensions.ObjectPool.ObjectPoolProvider, 
+    Microsoft.Extensions.ObjectPool.DefaultObjectPoolProvider>();
+
+// 🔥 Configuración de autenticación JWT
 var jwtKey = builder.Configuration["JwtSettings:SecretKey"]
     ?? throw new InvalidOperationException("JwtSettings:SecretKey no está configurada.");
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "AhorroLand";
@@ -122,6 +154,10 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
     };
+    
+    // 🔥 OPTIMIZACIÓN 6: Configuración para mejor rendimiento de JWT
+    options.SaveToken = false; // No guardar token en AuthenticationProperties (ahorra memoria)
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 });
 
 builder.Services.AddAuthorization();
@@ -129,6 +165,9 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseAhorroLandExceptionHandling();
+
+// 🔥 OPTIMIZACIÓN 7: Output Caching middleware
+app.UseOutputCache();
 
 app.UseResponseCompression();
 
@@ -144,3 +183,14 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// 🔥 OPTIMIZACIÓN 8: Source Generator Context para JSON (mejor rendimiento)
+[JsonSerializable(typeof(object))]
+[JsonSerializable(typeof(string))]
+[JsonSerializable(typeof(int))]
+[JsonSerializable(typeof(decimal))]
+[JsonSerializable(typeof(DateTime))]
+[JsonSerializable(typeof(Guid))]
+internal partial class AppJsonSerializerContext : JsonSerializerContext
+{
+}

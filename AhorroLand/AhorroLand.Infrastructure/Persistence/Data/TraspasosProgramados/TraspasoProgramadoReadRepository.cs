@@ -7,7 +7,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.TraspasoProgramados
     public class TraspasoProgramadoReadRepository : AbsReadRepository<TraspasoProgramado, TraspasoProgramadoDto>, ITraspasoProgramadoReadRepository
     {
         public TraspasoProgramadoReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "TraspasoProgramados")
+            : base(dbConnectionFactory, "traspasoProgramados")
         {
         }
 

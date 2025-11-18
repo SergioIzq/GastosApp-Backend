@@ -9,7 +9,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
     public class CategoriaReadRepository : AbsReadRepository<Categoria, CategoriaDto>, ICategoriaReadRepository
     {
         public CategoriaReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Categorias")
+            : base(dbConnectionFactory, "categorias")
         {
         }
 

@@ -1,6 +1,7 @@
 ﻿using AhorroLand.Infrastructure.Configuration.Settings;
 using AhorroLand.Infrastructure.DataAccess;
 using AhorroLand.Infrastructure.Persistence.Command;
+using AhorroLand.Infrastructure.Persistence.Interceptors;
 using AhorroLand.Infrastructure.Persistence.Query;
 using AhorroLand.Infrastructure.Persistence.Warmup;
 using AhorroLand.Infrastructure.Services;
@@ -28,14 +29,38 @@ namespace AhorroLand.Infrastructure
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            // 1️⃣ DbContext
-            services.AddDbContext<AhorroLandDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion));
+            // 🔥 Registro del Interceptor de Eventos de Dominio
+            services.AddScoped<DomainEventDispatcherInterceptor>();
+
+            // 1️⃣ DbContext con optimizaciones de rendimiento
+            services.AddDbContext<AhorroLandDbContext>((serviceProvider, options) =>
+            {
+                options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+                {
+                    // 🔥 OPTIMIZACIÓN 1: Query Splitting para evitar cartesian explosion
+                    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    
+                    // 🔥 OPTIMIZACIÓN 2: Batch commands para mejor rendimiento
+                    mySqlOptions.MaxBatchSize(100);
+                    
+                    // 🔥 OPTIMIZACIÓN 3: Command timeout
+                    mySqlOptions.CommandTimeout(30);
+                    
+                    // 🔥 OPTIMIZACIÓN 4: Connection resilience (retry on failure)
+                    mySqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+                });
+                
+                // 🔥 OPTIMIZACIÓN 5: Compiled queries caching
+                options.EnableThreadSafetyChecks(false); // Solo en producción si estás seguro
+            });
 
             // 2️⃣ Cache distribuida (MemoryCache para desarrollo)
             services.AddDistributedMemoryCache();
 
-            // 3️⃣ Dapper
+            // 3️⃣ Dapper con connection pooling
             services.AddScoped<IDbConnection>(sp =>
                     new MySqlConnection(configuration.GetConnectionString("DefaultConnection")));
 

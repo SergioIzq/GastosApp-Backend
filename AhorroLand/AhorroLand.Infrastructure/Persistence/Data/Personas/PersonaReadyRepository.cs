@@ -9,7 +9,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Personas
     public class PersonaReadRepository : AbsReadRepository<Persona, PersonaDto>, IPersonaReadRepository
     {
         public PersonaReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Personas")
+            : base(dbConnectionFactory, "personas")
         {
         }
 

@@ -1,4 +1,5 @@
-﻿using AhorroLand.Shared.Domain.Abstractions;
+﻿using AhorroLand.Domain.IngresosProgramados.Eventos;
+using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.ValueObjects;
 
@@ -63,7 +64,7 @@ public sealed class IngresoProgramado : AbsEntity
         string hangfireJobId,
         Descripcion? descripcion = null)
     {
-        var Ingreso = new IngresoProgramado(
+        var ingreso = new IngresoProgramado(
             Guid.NewGuid(),
             importe,
             fechaEjecucion,
@@ -77,7 +78,14 @@ public sealed class IngresoProgramado : AbsEntity
             hangfireJobId,
             descripcion);
 
-        return Ingreso;
+        // 🔥 LANZAR EVENTO DE DOMINIO
+        ingreso.AddDomainEvent(new IngresoProgramadoCreadoEvent(
+            ingreso.Id,
+            frecuencia,
+            fechaEjecucion
+        ));
+
+        return ingreso;
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using AhorroLand.Shared.Domain.Abstractions; // Asegúrate de que esta asamblea sea accesible
+﻿using AhorroLand.Infrastructure.Persistence.Interceptors;
+using AhorroLand.Shared.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -6,15 +7,31 @@ namespace AhorroLand.Infrastructure.Persistence.Command;
 
 public class AhorroLandDbContext : DbContext
 {
-    public AhorroLandDbContext(DbContextOptions<AhorroLandDbContext> options)
+    private readonly DomainEventDispatcherInterceptor _domainEventDispatcher;
+
+    public AhorroLandDbContext(
+        DbContextOptions<AhorroLandDbContext> options,
+        DomainEventDispatcherInterceptor domainEventDispatcher)
         : base(options)
     {
+        _domainEventDispatcher = domainEventDispatcher;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(_domainEventDispatcher);
+        
+#if DEBUG
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.EnableDetailedErrors();
+#endif
+
+        base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. Obtener la assembly (proyecto) que contiene las entidades de dominio.
-        // Usamos typeof(AbsEntity) o typeof(Cliente) para obtener una referencia a esa assembly.
+        // 1. Obtener la assembly que contiene las entidades de dominio
         var domainAssembly = Assembly.GetAssembly(typeof(AbsEntity));
 
         if (domainAssembly == null)
@@ -22,12 +39,11 @@ public class AhorroLandDbContext : DbContext
             throw new InvalidOperationException("El assembly de Dominio no se pudo cargar.");
         }
 
-        // 2. Escanear la assembly para encontrar todas las clases que son Entidades.
-        // Filtramos por clases que no son abstractas y que heredan de AbsEntity.
         var entityTypes = domainAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(AbsEntity)));
+            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(AbsEntity)))
+            .ToArray(); // Materializar una sola vez
 
-        // 3. Registrar cada entidad encontrada en el modelo de EF Core.
+        // 3. Registrar cada entidad encontrada
         foreach (var type in entityTypes)
         {
             modelBuilder.Entity(type);
@@ -35,6 +51,48 @@ public class AhorroLandDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(domainAssembly);
 
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            // Ignorar DomainEvents de todas las entidades
+            var domainEventsProperty = entityType.FindProperty("_domainEvents");
+            if (domainEventsProperty != null)
+            {
+                entityType.RemoveProperty(domainEventsProperty);
+            }
+            
+            // Configurar índices por defecto en Id
+            var idProperty = entityType.FindProperty("Id");
+            if (idProperty != null)
+            {
+                var existingIndex = entityType.GetIndexes()
+                    .FirstOrDefault(i => i.Properties.Any(p => p.Name == "Id"));
+                    
+                if (existingIndex == null)
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .HasIndex("Id")
+                        .IsUnique();
+                }
+            }
+        }
+
         base.OnModelCreating(modelBuilder);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        // Optimizar detección de cambios
+        ChangeTracker.AutoDetectChangesEnabled = false;
+        
+        try
+        {
+            // Detectar cambios manualmente una sola vez
+            ChangeTracker.DetectChanges();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            ChangeTracker.AutoDetectChangesEnabled = true;
+        }
     }
 }

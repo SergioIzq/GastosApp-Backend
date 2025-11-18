@@ -7,7 +7,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Gastos
     public class GastoReadRepository : AbsReadRepository<Gasto, GastoDto>, IGastoReadRepository
     {
         public GastoReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Gastos")
+            : base(dbConnectionFactory, "gastos")
         {
         }
 

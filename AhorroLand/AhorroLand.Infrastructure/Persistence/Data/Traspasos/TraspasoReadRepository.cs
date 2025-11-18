@@ -7,7 +7,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Traspasos
     public class TraspasoReadRepository : AbsReadRepository<Traspaso, TraspasoDto>, ITraspasoReadRepository
     {
         public TraspasoReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "Traspasos")
+            : base(dbConnectionFactory, "traspasos")
         {
         }
 
