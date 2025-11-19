@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System.Data;
 
 namespace AhorroLand.Infrastructure.Persistence.Query;
