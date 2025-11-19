@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -9,7 +9,7 @@ using AhorroLand.Shared.Domain.ValueObjects;
 namespace AhorroLand.Application.Features.Ingresos.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Ingreso.
+/// Maneja la creaci�n de una nueva entidad Ingreso.
 /// </summary>
 public sealed class UpdateIngresoCommandHandler
     : AbsUpdateCommandHandler<Ingreso, IngresoDto, UpdateIngresoCommand>
@@ -22,7 +22,7 @@ public sealed class UpdateIngresoCommandHandler
         IReadRepository<Ingreso> readOnlyRepository,
         IDomainValidator validator
         )
-        : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+        : base(unitOfWork, writeRepository, cacheService)
     {
         _validator = validator;
     }

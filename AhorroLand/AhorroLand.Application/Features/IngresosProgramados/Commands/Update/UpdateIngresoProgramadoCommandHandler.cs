@@ -16,7 +16,7 @@ public sealed class UpdateIngresoProgramadoCommandHandler
         ICacheService cacheService,
         IReadRepository<IngresoProgramado> readOnlyRepository
         )
-     : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+     : base(unitOfWork, writeRepository, cacheService)
     {
     }
 
@@ -27,3 +27,4 @@ public sealed class UpdateIngresoProgramadoCommandHandler
         throw new NotSupportedException("La actualización de ingresos programados requiere implementación en el modelo de dominio.");
     }
 }
+

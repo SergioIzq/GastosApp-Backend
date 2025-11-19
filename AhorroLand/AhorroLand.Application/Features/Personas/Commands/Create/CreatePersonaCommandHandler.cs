@@ -27,3 +27,4 @@ public sealed class CreatePersonaCommandHandler : AbsCreateCommandHandler<Person
         return newPersona;
     }
 }
+

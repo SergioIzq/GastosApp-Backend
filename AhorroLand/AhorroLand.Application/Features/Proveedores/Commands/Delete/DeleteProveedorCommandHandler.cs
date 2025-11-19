@@ -1,4 +1,4 @@
-ï»¿using AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Domain.Interfaces;
@@ -8,7 +8,7 @@ namespace AhorroLand.Application.Features.Proveedores.Commands;
 
 /// <summary>
 /// Manejador concreto para eliminar una Proveedor.
-/// Hereda toda la lÃ³gica de la clase base genÃ©rica.
+/// Hereda toda la lógica de la clase base genérica.
 /// </summary>
 public sealed class DeleteProveedorCommandHandler
     : DeleteCommandHandler<Proveedor, DeleteProveedorCommand>
@@ -16,9 +16,10 @@ public sealed class DeleteProveedorCommandHandler
     public DeleteProveedorCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<Proveedor> writeRepository,
-        IReadRepository<Proveedor> readOnlyRepository,
         ICacheService cacheService)
-        : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
+        : base(unitOfWork, writeRepository, cacheService)
     {
     }
 }
+
+

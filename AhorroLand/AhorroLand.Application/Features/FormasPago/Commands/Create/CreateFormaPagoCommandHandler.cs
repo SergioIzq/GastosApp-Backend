@@ -27,3 +27,4 @@ public sealed class CreateFormaPagoCommandHandler : AbsCreateCommandHandler<Form
         return newFormaPago;
     }
 }
+

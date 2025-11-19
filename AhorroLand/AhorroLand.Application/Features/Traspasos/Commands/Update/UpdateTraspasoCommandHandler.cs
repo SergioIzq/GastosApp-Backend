@@ -16,7 +16,7 @@ public sealed class UpdateTraspasoCommandHandler
    ICacheService cacheService,
         IReadRepository<Traspaso> readOnlyRepository
         )
-        : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+        : base(unitOfWork, writeRepository, cacheService)
     {
     }
 
@@ -29,3 +29,4 @@ public sealed class UpdateTraspasoCommandHandler
         throw new NotSupportedException("La actualización de traspasos no está soportada por el modelo de dominio actual.");
     }
 }
+

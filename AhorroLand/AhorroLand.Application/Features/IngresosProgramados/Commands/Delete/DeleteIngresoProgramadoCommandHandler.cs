@@ -12,9 +12,11 @@ public sealed class DeleteIngresoProgramadoCommandHandler
     public DeleteIngresoProgramadoCommandHandler(
       IUnitOfWork unitOfWork,
         IWriteRepository<IngresoProgramado> writeRepository,
-        IReadRepository<IngresoProgramado> readOnlyRepository,
         ICacheService cacheService)
-        : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
+        : base(unitOfWork, writeRepository, cacheService)
     {
     }
 }
+
+
+

@@ -1,4 +1,4 @@
-ï»¿using AhorroLand.Application.Features.Ingresos.Commands;
+using AhorroLand.Application.Features.Ingresos.Commands;
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
@@ -42,7 +42,7 @@ public sealed class CreateIngresoCommandHandler
         if (results.Any(r => !r))
         {
             return Result.Failure<IngresoDto>(
-                Error.NotFound("Una o mÃ¡s entidades referenciadas no existen o el ID es incorrecto."));
+                Error.NotFound("Una o más entidades referenciadas no existen o el ID es incorrecto."));
         }
 
         try
@@ -64,7 +64,7 @@ public sealed class CreateIngresoCommandHandler
 
             var usuarioId = new UsuarioId(command.UsuarioId);
 
-            // 3. CREACIÃ“N DE LA ENTIDAD DE DOMINIO (Ingreso)
+            // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO (Ingreso)
             var ingreso = Ingreso.Create(
                 importeVO,
                 fechaVO,
@@ -86,13 +86,13 @@ public sealed class CreateIngresoCommandHandler
                 return Result.Failure<IngresoDto>(entityResult.Error);
             }
 
-            // 5. MAPEO Y Ã‰XITO
+            // 5. MAPEO Y ÉXITO
             var dto = entityResult.Value.Adapt<IngresoDto>();
             return Result.Success(dto);
         }
         catch (ArgumentException ex)
         {
-            // Captura de errores de validaciÃ³n de Value Objects
+            // Captura de errores de validación de Value Objects
             return Result.Failure<IngresoDto>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
@@ -103,6 +103,6 @@ public sealed class CreateIngresoCommandHandler
 
     protected override Ingreso CreateEntity(CreateIngresoCommand command)
     {
-        throw new NotImplementedException("CreateEntity no debe usarse. La lÃ³gica de creaciÃ³n asÃ­ncrona reside en el mÃ©todo Handle.");
+        throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
     }
 }

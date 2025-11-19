@@ -12,9 +12,11 @@ public sealed class DeleteTraspasoCommandHandler
     public DeleteTraspasoCommandHandler(
         IUnitOfWork unitOfWork,
   IWriteRepository<Traspaso> writeRepository,
-        IReadRepository<Traspaso> readOnlyRepository,
         ICacheService cacheService)
-      : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
+      : base(unitOfWork, writeRepository, cacheService)
     {
     }
 }
+
+
+

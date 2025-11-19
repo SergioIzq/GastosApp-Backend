@@ -3,6 +3,9 @@ using AhorroLand.Shared.Domain.ValueObjects;
 
 namespace AhorroLand.Domain;
 
+/// <summary>
+/// Interfaz para el repositorio de lectura de Clientes.
+/// </summary>
 public interface IClienteReadRepository : IReadRepository<Cliente>
 {
     /// <summary>

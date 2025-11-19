@@ -1,4 +1,4 @@
-Ôªøusing AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -13,7 +13,7 @@ namespace AhorroLand.Application.Features.Conceptos.Commands;
 public sealed class CreateConceptoCommandHandler
     : AbsCreateCommandHandler<Concepto, ConceptoDto, CreateConceptoCommand>
 {
-    // ‚≠ê Inyectamos IDomainValidator para las consultas r√°pidas
+    // ? Inyectamos IDomainValidator para las consultas r·pidas
     private readonly IDomainValidator _validator;
 
     public CreateConceptoCommandHandler(
@@ -26,21 +26,21 @@ public sealed class CreateConceptoCommandHandler
         _validator = validator;
     }
 
-    // ‚≠ê CAMBIO CLAVE: Mover la l√≥gica a Handle para hacerlo AS√çNCRONO y eficiente.
+    // ? CAMBIO CLAVE: Mover la lÛgica a Handle para hacerlo ASÕNCRONO y eficiente.
     public override async Task<Result<ConceptoDto>> Handle(
         CreateConceptoCommand command, CancellationToken cancellationToken)
     {
-        // 1. VALIDACI√ìN AS√çNCRONA DE EXISTENCIA (SELECT 1)
+        // 1. VALIDACI”N ASÕNCRONA DE EXISTENCIA (SELECT 1)
         var categoriaExists = await _validator.ExistsAsync<Categoria>(command.CategoriaId);
 
         if (!categoriaExists)
         {
-            // Devolvemos un Result.Failure si la referencia no es v√°lida.
+            // Devolvemos un Result.Failure si la referencia no es v·lida.
             return Result.Failure<ConceptoDto>(
                 Error.NotFound($"Categoria con id {command.CategoriaId} no fue encontrada."));
         }
 
-        // 2. CREACI√ìN DE VALUE OBJECTS (VOs)
+        // 2. CREACI”N DE VALUE OBJECTS (VOs)
         try
         {
             var nombreVO = new Nombre(command.Nombre);
@@ -49,8 +49,8 @@ public sealed class CreateConceptoCommandHandler
             // Creamos el VO de Identidad para la referencia
             var categoriaId = new CategoriaId(command.CategoriaId);
 
-            // 3. CREACI√ìN DE LA ENTIDAD DE DOMINIO
-            // ‚≠ê NOTA: Concepto.Create debe aceptar CategoriaId en lugar de la entidad Categoria
+            // 3. CREACI”N DE LA ENTIDAD DE DOMINIO
+            // ? NOTA: Concepto.Create debe aceptar CategoriaId en lugar de la entidad Categoria
             var newConcepto = Concepto.Create(
                 nombreVO,
                 categoriaId, // Usamos el ID validado
@@ -63,14 +63,14 @@ public sealed class CreateConceptoCommandHandler
                 return Result.Failure<ConceptoDto>(entityResult.Error);
             }
 
-            // 5. MAPEO Y √âXITO
+            // 5. MAPEO Y …XITO
             var dto = entityResult.Value.Adapt<ConceptoDto>();
 
             return Result.Success(dto);
         }
         catch (ArgumentException ex)
         {
-            // Captura de errores de validaci√≥n de Value Objects
+            // Captura de errores de validaciÛn de Value Objects
             return Result.Failure<ConceptoDto>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
@@ -79,9 +79,9 @@ public sealed class CreateConceptoCommandHandler
         }
     }
 
-    // ‚≠ê OPTIMIZACI√ìN: Lanzar excepci√≥n para asegurar que la abstracci√≥n base s√≠ncrona no se use.
+    // ? OPTIMIZACI”N: Lanzar excepciÛn para asegurar que la abstracciÛn base sÌncrona no se use.
     protected override Concepto CreateEntity(CreateConceptoCommand command)
     {
-        throw new NotImplementedException("CreateEntity no debe usarse. La l√≥gica de creaci√≥n as√≠ncrona reside en el m√©todo Handle.");
+        throw new NotImplementedException("CreateEntity no debe usarse. La lÛgica de creaciÛn asÌncrona reside en el mÈtodo Handle.");
     }
 }

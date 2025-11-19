@@ -113,3 +113,4 @@ public sealed class CreateTraspasoProgramadoCommandHandler
         throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
     }
 }
+

@@ -7,21 +7,22 @@ using Mapster;
 using MediatR;
 
 namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
+
+/// <summary>
+/// Handler base para comandos de actualización.
+/// ✅ OPTIMIZADO: Usa el repositorio de escritura para obtener la entidad con tracking.
+/// </summary>
 public abstract class AbsUpdateCommandHandler<TEntity, TDto, TCommand>
     : AbsCommandHandler<TEntity>, IRequestHandler<TCommand, Result<TDto>>
     where TEntity : AbsEntity
     where TCommand : AbsUpdateCommand<TEntity, TDto>
 {
-    private readonly IReadRepository<TEntity> _readRepository;
-
     public AbsUpdateCommandHandler(
         IUnitOfWork unitOfWork,
         IWriteRepository<TEntity> writeRepository,
-        ICacheService cacheService,
-        IReadRepository<TEntity> readRepository)
+        ICacheService cacheService)
         : base(unitOfWork, writeRepository, cacheService)
     {
-        _readRepository = readRepository;
     }
 
     // 🔑 MÉTODO ABSTRACTO: Obliga al Command Handler concreto a implementar la lógica de actualización
@@ -29,8 +30,8 @@ public abstract class AbsUpdateCommandHandler<TEntity, TDto, TCommand>
 
     public async Task<Result<TDto>> Handle(TCommand command, CancellationToken cancellationToken)
     {
-        // 1. Buscar la entidad existente (debe ser trackeada por EF para actualizar)
-        var entity = await _readRepository.GetByIdAsync(command.Id, asNoTracking: false, cancellationToken);
+        // 1. 🔧 FIX: Usar el repositorio de escritura para obtener la entidad con tracking
+        var entity = await _writeRepository.GetByIdAsync(command.Id, cancellationToken);
 
         if (entity is null)
         {

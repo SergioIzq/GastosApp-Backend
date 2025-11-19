@@ -79,7 +79,7 @@ namespace AhorroLand.Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasherService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-            // 👉 Registro automático de repositorios
+            // 👉 Registro automático de repositorios de ESCRITURA
             services.Scan(scan => scan
                     .FromAssemblies(Assembly.GetExecutingAssembly())
                     .AddClasses(classes => classes.AssignableTo(typeof(IWriteRepository<>)))
@@ -87,11 +87,13 @@ namespace AhorroLand.Infrastructure
                    .WithScopedLifetime()
                   );
 
+            // 👉 🔧 FIX: Registro automático de repositorios de LECTURA
+            // Registra tanto IReadRepository<T> como IReadRepositoryWithDto<T, TDto>
             services.Scan(scan => scan
                  .FromAssemblies(Assembly.GetExecutingAssembly())
-                        .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
-                      .AsImplementedInterfaces()
-                  .WithScopedLifetime()
+                 .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
+                 .AsImplementedInterfaces() // Registra TODAS las interfaces implementadas
+                 .WithScopedLifetime()
                 );
 
             services.AddScoped<IDomainValidator, DapperDomainValidator>();

@@ -14,6 +14,17 @@ public abstract class AbsWriteRepository<T> : IWriteRepository<T> where T : AbsE
         _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
 
+    /// <summary>
+    /// Obtiene una entidad por ID con tracking habilitado para Commands.
+    /// </summary>
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Buscar la entidad con tracking habilitado para que los cambios se detecten
+        return await _context.Set<T>()
+            .AsTracking()
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
+
     public virtual void Add(T entity)
     {
         _context.Set<T>().Add(entity);

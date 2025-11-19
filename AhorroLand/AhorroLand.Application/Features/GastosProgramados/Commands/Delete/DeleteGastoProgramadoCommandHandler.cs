@@ -12,9 +12,11 @@ public sealed class DeleteGastoProgramadoCommandHandler
     public DeleteGastoProgramadoCommandHandler(
      IUnitOfWork unitOfWork,
    IWriteRepository<GastoProgramado> writeRepository,
-        IReadRepository<GastoProgramado> readOnlyRepository,
         ICacheService cacheService)
-  : base(unitOfWork, writeRepository, readOnlyRepository, cacheService)
+  : base(unitOfWork, writeRepository, cacheService)
     {
     }
 }
+
+
+

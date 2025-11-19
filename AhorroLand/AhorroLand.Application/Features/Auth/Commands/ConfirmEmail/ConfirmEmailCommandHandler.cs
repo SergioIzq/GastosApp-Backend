@@ -48,3 +48,4 @@ public sealed class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCom
         }
     }
 }
+

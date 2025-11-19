@@ -1,4 +1,4 @@
-锘縰sing AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -9,7 +9,7 @@ using AhorroLand.Shared.Domain.ValueObjects;
 namespace AhorroLand.Application.Features.Categorias.Commands;
 
 /// <summary>
-/// Maneja la creaci贸n de una nueva entidad Categoria.
+/// Maneja la creaci髇 de una nueva entidad Categoria.
 /// </summary>
 public sealed class CreateCategoriaCommandHandler
     : AbsCreateCommandHandler<Categoria, CategoriaDto, CreateCategoriaCommand>
@@ -23,10 +23,10 @@ public sealed class CreateCategoriaCommandHandler
     }
 
     /// <summary>
-    /// **Implementaci贸n de la l贸gica de negocio**: Crea la entidad Categoria.
-    /// Este es el 煤nico m茅todo que tienes que implementar y donde se aplica el DDD.
+    /// **Implementaci髇 de la l骻ica de negocio**: Crea la entidad Categoria.
+    /// Este es el 鷑ico m閠odo que tienes que implementar y donde se aplica el DDD.
     /// </summary>
-    /// <param name="command">El comando con los datos de creaci贸n.</param>
+    /// <param name="command">El comando con los datos de creaci髇.</param>
     /// <returns>La nueva entidad Categoria creada.</returns>
     protected override Categoria CreateEntity(CreateCategoriaCommand command)
     {

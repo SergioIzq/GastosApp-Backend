@@ -16,7 +16,7 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
     ICacheService cacheService,
  IReadRepository<TraspasoProgramado> readOnlyRepository
 )
- : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+ : base(unitOfWork, writeRepository, cacheService)
     {
     }
 
@@ -27,3 +27,4 @@ public sealed class UpdateTraspasoProgramadoCommandHandler
         throw new NotSupportedException("La actualización de traspasos programados requiere implementación en el modelo de dominio.");
     }
 }
+

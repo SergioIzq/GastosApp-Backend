@@ -1,4 +1,4 @@
-锘縰sing AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -31,7 +31,7 @@ public sealed class CreateGastoProgramadoCommandHandler
     public override async Task<Result<GastoProgramadoDto>> Handle(
         CreateGastoProgramadoCommand command, CancellationToken cancellationToken)
     {
-        // 1. VALIDACI脫N AS脥NCRONA EN PARALELO (M谩xima Optimizaci贸n I/O)
+        // 1. VALIDACI覰 AS蚇CRONA EN PARALELO (M醲ima Optimizaci髇 I/O)
         var validationTasks = new[]
         {
             // Validaciones obligatorias
@@ -46,19 +46,19 @@ public sealed class CreateGastoProgramadoCommandHandler
         // Espera a que todas las consultas terminen al mismo tiempo.
         var results = await Task.WhenAll(validationTasks);
 
-        // 2. CHEQUEO R脕PIDO DE ERRORES DE EXISTENCIA
+        // 2. CHEQUEO R罰IDO DE ERRORES DE EXISTENCIA
         if (results.Any(r => !r))
         {
             // Retorno de error con el mensaje de Error.NotFound
             return Result.Failure<GastoProgramadoDto>(
-                Error.NotFound("Una o m谩s entidades referenciadas (Concepto, Cuenta, Proveedor, etc.) no existen."));
+                Error.NotFound("Una o m醩 entidades referenciadas (Concepto, Cuenta, Proveedor, etc.) no existen."));
         }
 
-        // 3. CREACI脫N DE VALUE OBJECTS (VOs) DENTRO DE UN TRY-CATCH
+        // 3. CREACI覰 DE VALUE OBJECTS (VOs) DENTRO DE UN TRY-CATCH
         // Volvemos al try-catch para manejar las ArgumentException lanzadas por los VOs.
         try
         {
-            // Creaci贸n de VOs, que ahora son los que lanzan ArgumentException
+            // Creaci髇 de VOs, que ahora son los que lanzan ArgumentException
             var importe = new Cantidad(command.Importe);
             var frecuencia = new Frecuencia(command.Frecuencia);
             var descripcion = new Descripcion(command.Descripcion ?? string.Empty);
@@ -74,7 +74,7 @@ public sealed class CreateGastoProgramadoCommandHandler
             // Uso del servicio de infraestructura para generar el JobId
             var hangfireJobId = _jobSchedulingService.GenerateJobId();
 
-            // 4. CREACI脫N DE LA ENTIDAD DE DOMINIO (GastoProgramado)
+            // 4. CREACI覰 DE LA ENTIDAD DE DOMINIO (GastoProgramado)
             var gastoProgramado = GastoProgramado.Create(
                 importe,
                 command.FechaEjecucion!.Value,
@@ -98,7 +98,7 @@ public sealed class CreateGastoProgramadoCommandHandler
                 return Result.Failure<GastoProgramadoDto>(entityResult.Error);
             }
 
-            // 6. MAPEO Y 脡XITO
+            // 6. MAPEO Y 蒟ITO
             var dto = entityResult.Value.Adapt<GastoProgramadoDto>();
 
             return Result.Success(dto);
@@ -115,6 +115,6 @@ public sealed class CreateGastoProgramadoCommandHandler
 
     protected override GastoProgramado CreateEntity(CreateGastoProgramadoCommand command)
     {
-        throw new NotImplementedException("CreateEntity no debe usarse. La l贸gica de creaci贸n as铆ncrona reside en el m茅todo Handle.");
+        throw new NotImplementedException("CreateEntity no debe usarse. La l骻ica de creaci髇 as韓crona reside en el m閠odo Handle.");
     }
 }

@@ -84,3 +84,4 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         }
     }
 }
+

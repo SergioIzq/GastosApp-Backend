@@ -1,4 +1,4 @@
-Ôªøusing AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Domain.Traspasos.Eventos;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
@@ -28,16 +28,16 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
     public override async Task<Result<TraspasoDto>> Handle(
         CreateTraspasoCommand command, CancellationToken cancellationToken)
     {
-        // 1. VALIDACI√ìN EN PARALELO de existencia (SELECT 1)
+        // 1. VALIDACI”N EN PARALELO de existencia (SELECT 1)
         var validationTasks = new[]
         {
             _validator.ExistsAsync<Cuenta>(command.CuentaOrigenId),
             _validator.ExistsAsync<Cuenta>(command.CuentaDestinoId),
         };
 
-        // Espera de forma as√≠ncrona y eficiente
+        // Espera de forma asÌncrona y eficiente
         var results = await Task.WhenAll(validationTasks);
-        // ‚≠ê OPTIMIZACI√ìN: results ahora es un array de bool (bool[]), eliminando GetAwaiter().GetResult()
+        // ? OPTIMIZACI”N: results ahora es un array de bool (bool[]), eliminando GetAwaiter().GetResult()
 
         // 2. CHEQUEO DE ERRORES DE EXISTENCIA
         // results[0] es la existencia de CuentaOrigen, results[1] es CuentaDestino
@@ -47,14 +47,14 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
                 Error.NotFound("Cuenta origen o destino no encontrada."));
         }
 
-        // 3. VALIDACI√ìN DE DOMINIO INTR√çNSECA
+        // 3. VALIDACI”N DE DOMINIO INTRÕNSECA
         if (command.CuentaOrigenId == command.CuentaDestinoId)
         {
             return Result.Failure<TraspasoDto>(
                 Error.Validation("La cuenta origen y destino no pueden ser la misma."));
         }
 
-        // 4. CREACI√ìN DE VALUE OBJECTS y la ENTIDAD
+        // 4. CREACI”N DE VALUE OBJECTS y la ENTIDAD
         try
         {
             // Creamos VOs de valor
@@ -67,7 +67,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
             var cuentaOrigenId = new CuentaId(command.CuentaOrigenId);
             var cuentaDestinoId = new CuentaId(command.CuentaDestinoId);
 
-            // Creaci√≥n de la Entidad (solo con VOs de identidad y valor)
+            // CreaciÛn de la Entidad (solo con VOs de identidad y valor)
             var traspaso = Traspaso.Create(cuentaOrigenId, cuentaDestinoId, importeVO, fechaVO, usuarioIdVO, descripcionVO);
 
             // 5. PERSISTENCIA
@@ -79,7 +79,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
                 return Result.Failure<TraspasoDto>(entityResult.Error);
             }
 
-            // 6. MAPEO Y √âXITO
+            // 6. MAPEO Y …XITO
             var dto = entityResult.Value.Adapt<TraspasoDto>();
 
             traspaso.RaiseDomainEvent(new TraspasoRegistradoDomainEvent(traspaso.Id, cuentaOrigenId.Value, cuentaDestinoId.Value, importeVO));
@@ -88,7 +88,7 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
         }
         catch (ArgumentException ex)
         {
-            // Captura de errores de validaci√≥n de Value Objects (ej: Importe <= 0)
+            // Captura de errores de validaciÛn de Value Objects (ej: Importe <= 0)
             return Result.Failure<TraspasoDto>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
@@ -97,10 +97,10 @@ public sealed class CreateTraspasoCommandHandler : AbsCreateCommandHandler<Trasp
         }
     }
 
-    // ‚≠ê Asegurar que el m√©todo s√≠ncrono no se usa
+    // ? Asegurar que el mÈtodo sÌncrono no se usa
     protected override Traspaso CreateEntity(CreateTraspasoCommand command)
     {
-        throw new NotImplementedException("CreateEntity no debe usarse. La l√≥gica de creaci√≥n as√≠ncrona reside en el m√©todo Handle.");
+        throw new NotImplementedException("CreateEntity no debe usarse. La lÛgica de creaciÛn asÌncrona reside en el mÈtodo Handle.");
     }
 
 }

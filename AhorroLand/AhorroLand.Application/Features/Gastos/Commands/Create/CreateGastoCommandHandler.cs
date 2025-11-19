@@ -1,4 +1,4 @@
-ï»¿using AhorroLand.Application.Features.Gastos.Commands;
+using AhorroLand.Application.Features.Gastos.Commands;
 using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
@@ -40,7 +40,7 @@ public sealed class CreateGastoCommandHandler
         if (results.Any(r => !r))
         {
             return Result.Failure<Guid>(
-                Error.NotFound("Una o mÃ¡s entidades referenciadas no existen o el ID es incorrecto."));
+                Error.NotFound("Una o más entidades referenciadas no existen o el ID es incorrecto."));
         }
 
         try
@@ -62,7 +62,7 @@ public sealed class CreateGastoCommandHandler
 
             var usuarioId = new UsuarioId(command.UsuarioId);
 
-            // 3. CREACIÃ“N DE LA ENTIDAD DE DOMINIO (Gasto)
+            // 3. CREACIÓN DE LA ENTIDAD DE DOMINIO (Gasto)
             var gasto = Gasto.Create(
                 importeVO,
                 fechaVO,
@@ -86,7 +86,7 @@ public sealed class CreateGastoCommandHandler
         }
         catch (ArgumentException ex)
         {
-            // Captura de errores de validaciÃ³n de Value Objects
+            // Captura de errores de validación de Value Objects
             return Result.Failure<Guid>(Error.Validation(ex.Message));
         }
         catch (Exception ex)
@@ -97,6 +97,6 @@ public sealed class CreateGastoCommandHandler
 
     protected override Gasto CreateEntity(CreateGastoCommand command)
     {
-        throw new NotImplementedException("CreateEntity no debe usarse. La lÃ³gica de creaciÃ³n asÃ­ncrona reside en el mÃ©todo Handle.");
+        throw new NotImplementedException("CreateEntity no debe usarse. La lógica de creación asíncrona reside en el método Handle.");
     }
 }

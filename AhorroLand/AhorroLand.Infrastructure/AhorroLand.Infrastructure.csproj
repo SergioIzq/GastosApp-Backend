@@ -34,4 +34,8 @@
     <ProjectReference Include="..\AhorroLand.Application\AhorroLand.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
+  </ItemGroup>
+
 </Project>

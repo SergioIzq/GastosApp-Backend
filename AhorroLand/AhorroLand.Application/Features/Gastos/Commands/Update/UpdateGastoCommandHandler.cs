@@ -1,4 +1,4 @@
-﻿using AhorroLand.Domain;
+using AhorroLand.Domain;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Commands;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -9,7 +9,7 @@ using AhorroLand.Shared.Domain.ValueObjects;
 namespace AhorroLand.Application.Features.Gastos.Commands;
 
 /// <summary>
-/// Maneja la creación de una nueva entidad Gasto.
+/// Maneja la creaci�n de una nueva entidad Gasto.
 /// </summary>
 public sealed class UpdateGastoCommandHandler
     : AbsUpdateCommandHandler<Gasto, GastoDto, UpdateGastoCommand>
@@ -22,7 +22,7 @@ public sealed class UpdateGastoCommandHandler
         IReadRepository<Gasto> readOnlyRepository,
         IDomainValidator validator
         )
-        : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+        : base(unitOfWork, writeRepository, cacheService)
     {
         _validator = validator;
     }

@@ -28,3 +28,4 @@ public sealed class CreateProveedorCommandHandler : AbsCreateCommandHandler<Prov
         return newProveedor;
     }
 }
+

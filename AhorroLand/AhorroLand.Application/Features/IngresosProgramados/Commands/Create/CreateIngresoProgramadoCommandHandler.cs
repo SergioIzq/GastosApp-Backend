@@ -55,3 +55,4 @@ public sealed class CreateIngresoProgramadoCommandHandler
         return newIngresoProgramado;
     }
 }
+

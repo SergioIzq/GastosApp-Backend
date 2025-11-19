@@ -16,7 +16,7 @@ public sealed class UpdateGastoProgramadoCommandHandler
         ICacheService cacheService,
         IReadRepository<GastoProgramado> readOnlyRepository
       )
-        : base(unitOfWork, writeRepository, cacheService, readOnlyRepository)
+        : base(unitOfWork, writeRepository, cacheService)
     {
     }
 
@@ -27,3 +27,4 @@ public sealed class UpdateGastoProgramadoCommandHandler
         throw new NotSupportedException("La actualización de gastos programados requiere implementación en el modelo de dominio.");
     }
 }
+
