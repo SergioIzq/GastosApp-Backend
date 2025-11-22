@@ -9,40 +9,83 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Categorias
     public class CategoriaReadRepository : AbsReadRepository<Categoria, CategoriaDto>, ICategoriaReadRepository
     {
         public CategoriaReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "categorias")
+        : base(dbConnectionFactory, "categorias")
         {
+   }
+
+        /// <summary>
+        /// 🔥 Query específico para Categoría con todas sus columnas.
+        /// </summary>
+        protected override string BuildGetByIdQuery()
+        {
+   return @"
+            SELECT 
+        id as Id,
+          nombre as Nombre,
+           id_usuario as UsuarioId,
+       fecha_creacion as FechaCreacion
+   FROM categorias 
+    WHERE id = @id";
+        }
+
+        /// <summary>
+     /// 🔥 Query para obtener todas las categorías.
+        /// </summary>
+      protected override string BuildGetAllQuery()
+ {
+ return @"
+            SELECT 
+         id as Id,
+        nombre as Nombre,
+       id_usuario as UsuarioId,
+       fecha_creacion as FechaCreacion
+              FROM categorias";
+}
+
+        /// <summary>
+        /// 🔥 ORDER BY por nombre ascendente.
+        /// </summary>
+        protected override string GetDefaultOrderBy()
+        {
+        return "ORDER BY nombre ASC";
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
         {
-            using var connection = _dbConnectionFactory.CreateConnection();
+ using var connection = _dbConnectionFactory.CreateConnection();
 
-            const string sql = @"
-         SELECT COUNT(1) 
-  FROM Categorias 
-    WHERE Nombre = @Nombre AND IdUsuario = @UsuarioId";
+   const string sql = @"
+      SELECT EXISTS(
+        SELECT 1 
+     FROM categorias 
+         WHERE nombre = @Nombre AND id_usuario = @UsuarioId
+      ) as Exists";
 
-            var count = await connection.ExecuteScalarAsync<int>(
-          sql,
-    new { Nombre = nombre.Value, UsuarioId = usuarioId.Value });
+            var exists = await connection.ExecuteScalarAsync<bool>(
+        new CommandDefinition(sql,
+         new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
+ cancellationToken: cancellationToken));
 
-            return count > 0;
+      return exists;
         }
 
-        public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
-        {
-            using var connection = _dbConnectionFactory.CreateConnection();
+    public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
+     {
+        using var connection = _dbConnectionFactory.CreateConnection();
 
             const string sql = @"
-     SELECT COUNT(1) 
-          FROM Categorias 
-    WHERE Nombre = @Nombre AND IdUsuario = @UsuarioId AND Id != @ExcludeId";
+     SELECT EXISTS(
+        SELECT 1 
+        FROM categorias 
+        WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
+ ) as Exists";
 
-            var count = await connection.ExecuteScalarAsync<int>(
-      sql,
-  new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId });
+var exists = await connection.ExecuteScalarAsync<bool>(
+                new CommandDefinition(sql,
+            new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
+            cancellationToken: cancellationToken));
 
-            return count > 0;
-        }
+            return exists;
+    }
     }
 }

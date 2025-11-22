@@ -1,4 +1,4 @@
-using AhorroLand.Shared.Application.Dtos;
+Ôªøusing AhorroLand.Shared.Application.Dtos;
 using Dapper;
 using System.Globalization;
 using ApplicationInterface = AhorroLand.Application.Interfaces;
@@ -6,7 +6,7 @@ using ApplicationInterface = AhorroLand.Application.Interfaces;
 namespace AhorroLand.Infrastructure.Persistence.Query;
 
 /// <summary>
-/// ImplementaciÛn del repositorio de dashboard con mÈtricas avanzadas y filtros.
+/// Implementaci√≥n del repositorio de dashboard con m√©tricas avanzadas y filtros.
 /// </summary>
 public sealed class DashboardRepository : ApplicationInterface.IDashboardRepository, IDashboardRepository
 {
@@ -21,386 +21,393 @@ public sealed class DashboardRepository : ApplicationInterface.IDashboardReposit
         Guid usuarioId,
       DateTime? fechaInicio = null,
      DateTime? fechaFin = null,
-   Guid? cuentaId = null,
+        Guid? cuentaId = null,
         Guid? categoriaId = null,
       CancellationToken cancellationToken = default)
     {
  using var connection = _dbConnectionFactory.CreateConnection();
 
-  // Establecer fechas del perÌodo (mes actual por defecto)
+  // Establecer fechas del per√≠odo (mes actual por defecto)
         var primerDiaMesActual = fechaInicio ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
         var ultimoDiaMesActual = fechaFin ?? primerDiaMesActual.AddMonths(1).AddDays(-1);
       var primerDiaMesAnterior = primerDiaMesActual.AddMonths(-1);
         var ultimoDiaMesAnterior = primerDiaMesActual.AddDays(-1);
 
-        // Calcular dÌas del mes
+        // Calcular d√≠as del mes
  var diasTranscurridos = (DateTime.Now - primerDiaMesActual).Days + 1;
         var diasRestantes = (ultimoDiaMesActual - DateTime.Now).Days;
       var diasTotalesMes = (ultimoDiaMesActual - primerDiaMesActual).Days + 1;
 
         // Construir filtros adicionales
-        var filtroCuenta = cuentaId.HasValue ? "AND cta.Id = @CuentaId" : "";
-    var filtroCategoria = categoriaId.HasValue ? "AND cat.Id = @CategoriaId" : "";
+        var filtroCuenta = cuentaId.HasValue ? "AND cta.id = @CuentaId" : "";
+        var filtroCategoria = categoriaId.HasValue ? "AND cat.id = @CategoriaId" : "";
 
    // 1. Balance total de cuentas (con filtro opcional)
    var sqlBalanceTotal = $@"
-            SELECT COALESCE(SUM(Saldo), 0) as Total
+            SELECT COALESCE(SUM(saldo), 0) as Total
             FROM cuentas cta
-          WHERE cta.UsuarioId = @UsuarioId
-   {(cuentaId.HasValue ? "AND cta.Id = @CuentaId" : "")}";
+          WHERE cta.id_usuario = @UsuarioId
+   {(cuentaId.HasValue ? "AND cta.id = @CuentaId" : "")}";
         var balanceTotal = await connection.ExecuteScalarAsync<decimal>(
          sqlBalanceTotal,
             new { UsuarioId = usuarioId, CuentaId = cuentaId });
 
      // 2. Ingresos del mes actual (con filtros)
     var sqlIngresosMesActual = $@"
-          SELECT COALESCE(SUM(i.Importe), 0) as Total
+          SELECT COALESCE(SUM(i.importe), 0) as Total
             FROM ingresos i
-   INNER JOIN cuentas cta ON i.CuentaId = cta.Id
-        INNER JOIN categorias cat ON i.CategoriaId = cat.Id
-            WHERE i.UsuarioId = @UsuarioId 
-    AND i.Fecha >= @FechaInicio 
- AND i.Fecha <= @FechaFin
+       INNER JOIN cuentas cta ON i.id_cuenta = cta.id
+  INNER JOIN conceptos con ON i.id_concepto = con.id
+ INNER JOIN categorias cat ON con.id_categoria = cat.id
+            WHERE i.id_usuario = @UsuarioId 
+   AND i.fecha >= @FechaInicio 
+            AND i.fecha <= @FechaFin
             {filtroCuenta}
-            {filtroCategoria}";
+    {filtroCategoria}";
      var ingresosMesActual = await connection.ExecuteScalarAsync<decimal>(
      sqlIngresosMesActual,
       new { UsuarioId = usuarioId, FechaInicio = primerDiaMesActual, FechaFin = ultimoDiaMesActual, CuentaId = cuentaId, CategoriaId = categoriaId });
 
         // 3. Gastos del mes actual (con filtros)
         var sqlGastosMesActual = $@"
-        SELECT COALESCE(SUM(g.Importe), 0) as Total
-  FROM gastos g
-            INNER JOIN cuentas cta ON g.CuentaId = cta.Id
-       INNER JOIN categorias cat ON g.CategoriaId = cat.Id
-     WHERE g.UsuarioId = @UsuarioId 
-      AND g.Fecha >= @FechaInicio 
-            AND g.Fecha <= @FechaFin
-    {filtroCuenta}
+     SELECT COALESCE(SUM(g.importe), 0) as Total
+            FROM gastos g
+            INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+   INNER JOIN conceptos con ON g.id_concepto = con.id
+      INNER JOIN categorias cat ON con.id_categoria = cat.id
+  WHERE g.id_usuario = @UsuarioId 
+  AND g.fecha >= @FechaInicio 
+  AND g.fecha <= @FechaFin
+       {filtroCuenta}
             {filtroCategoria}";
         var gastosMesActual = await connection.ExecuteScalarAsync<decimal>(
-            sqlGastosMesActual,
-            new { UsuarioId = usuarioId, FechaInicio = primerDiaMesActual, FechaFin = ultimoDiaMesActual, CuentaId = cuentaId, CategoriaId = categoriaId });
+  sqlGastosMesActual,
+       new { UsuarioId = usuarioId, FechaInicio = primerDiaMesActual, FechaFin = ultimoDiaMesActual, CuentaId = cuentaId, CategoriaId = categoriaId });
 
-        // ? NUEVO: C·lculo de mÈtricas avanzadas
+        // ‚ö° NUEVO: C√°lculo de m√©tricas avanzadas
         var gastoPromedioDiario = diasTranscurridos > 0 ? gastosMesActual / diasTranscurridos : 0;
-        var proyeccionGastosFinMes = gastoPromedioDiario * diasTotalesMes;
+    var proyeccionGastosFinMes = gastoPromedioDiario * diasTotalesMes;
 
         // 4. Resumen de cuentas
         var sqlCuentas = $@"
-            SELECT 
-  Id,
-                Nombre,
-           Saldo
-            FROM cuentas
-            WHERE UsuarioId = @UsuarioId
-   {(cuentaId.HasValue ? "AND Id = @CuentaId" : "")}
-     ORDER BY Saldo DESC";
+ SELECT 
+          id as Id,
+         nombre as Nombre,
+    saldo as Saldo
+   FROM cuentas
+            WHERE id_usuario = @UsuarioId
+  {(cuentaId.HasValue ? "AND id = @CuentaId" : "")}
+     ORDER BY saldo DESC";
         var cuentas = (await connection.QueryAsync<CuentaResumenDto>(
-       sqlCuentas,
-        new { UsuarioId = usuarioId, CuentaId = cuentaId })).ToList();
+            sqlCuentas,
+  new { UsuarioId = usuarioId, CuentaId = cuentaId })).ToList();
 
- // 5. Top 5 categorÌas con m·s gastos
-   var sqlTopCategorias = $@"
-       SELECT 
-    c.Id as CategoriaId,
-  c.Nombre as CategoriaNombre,
-SUM(g.Importe) as TotalGastado,
-     COUNT(*) as CantidadTransacciones,
-  (SUM(g.Importe) / NULLIF(@TotalGastos, 0) * 100) as PorcentajeDelTotal
+     // 5. Top 5 categor√≠as con m√°s gastos
+     var sqlTopCategorias = $@"
+            SELECT 
+    cat.id as CategoriaId,
+        cat.nombre as CategoriaNombre,
+SUM(g.importe) as TotalGastado,
+       COUNT(*) as CantidadTransacciones,
+         (SUM(g.importe) / NULLIF(@TotalGastos, 0) * 100) as PorcentajeDelTotal
             FROM gastos g
-            INNER JOIN categorias c ON g.CategoriaId = c.Id
- INNER JOIN cuentas cta ON g.CuentaId = cta.Id
-    WHERE g.UsuarioId = @UsuarioId 
-            AND g.Fecha >= @FechaInicio 
-            AND g.Fecha <= @FechaFin
+            INNER JOIN conceptos con ON g.id_concepto = con.id
+  INNER JOIN categorias cat ON con.id_categoria = cat.id
+    INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+          WHERE g.id_usuario = @UsuarioId 
+            AND g.fecha >= @FechaInicio 
+     AND g.fecha <= @FechaFin
             {filtroCuenta}
-            {(categoriaId.HasValue ? "AND c.Id = @CategoriaId" : "")}
-            GROUP BY c.Id, c.Nombre
-    ORDER BY TotalGastado DESC
-   LIMIT 5";
-  var topCategorias = (await connection.QueryAsync<CategoriaGastoDto>(
-        sqlTopCategorias,
-            new
-    {
-      UsuarioId = usuarioId,
-           FechaInicio = primerDiaMesActual,
+        {(categoriaId.HasValue ? "AND cat.id = @CategoriaId" : "")}
+       GROUP BY cat.id, cat.nombre
+     ORDER BY TotalGastado DESC
+    LIMIT 5";
+        var topCategorias = (await connection.QueryAsync<CategoriaGastoDto>(
+  sqlTopCategorias,
+  new
+  {
+              UsuarioId = usuarioId,
+        FechaInicio = primerDiaMesActual,
      FechaFin = ultimoDiaMesActual,
-            TotalGastos = gastosMesActual,
-       CuentaId = cuentaId,
-     CategoriaId = categoriaId
+   TotalGastos = gastosMesActual,
+     CuentaId = cuentaId,
+ CategoriaId = categoriaId
             })).ToList();
 
-        // 6. ⁄ltimos 10 movimientos
-      var sqlUltimosIngresos = $@"
-            SELECT 
-   i.Id,
-     'Ingreso' as Tipo,
-       i.Importe,
-          i.Fecha,
-        con.Nombre as Concepto,
-cat.Nombre as Categoria,
-      cta.Nombre as Cuenta
-  FROM ingresos i
-            INNER JOIN conceptos con ON i.ConceptoId = con.Id
-         INNER JOIN categorias cat ON i.CategoriaId = cat.Id
-          INNER JOIN cuentas cta ON i.CuentaId = cta.Id
-        WHERE i.UsuarioId = @UsuarioId
-      {filtroCuenta}
-        {filtroCategoria}
-            ORDER BY i.Fecha DESC
-         LIMIT 5";
+        // 6. √öltimos 10 movimientos
+        var sqlUltimosIngresos = $@"
+      SELECT 
+        i.id as Id,
+                'Ingreso' as Tipo,
+     i.importe as Importe,
+    i.fecha as Fecha,
+     con.nombre as Concepto,
+cat.nombre as Categoria,
+            cta.nombre as Cuenta
+            FROM ingresos i
+            INNER JOIN conceptos con ON i.id_concepto = con.id
+    INNER JOIN categorias cat ON con.id_categoria = cat.id
+         INNER JOIN cuentas cta ON i.id_cuenta = cta.id
+       WHERE i.id_usuario = @UsuarioId
+   {filtroCuenta}
+   {filtroCategoria}
+            ORDER BY i.fecha DESC
+     LIMIT 5";
         var sqlUltimosGastos = $@"
-   SELECT 
-  g.Id,
-       'Gasto' as Tipo,
-    g.Importe,
-        g.Fecha,
-             con.Nombre as Concepto,
-        cat.Nombre as Categoria,
-   cta.Nombre as Cuenta
-          FROM gastos g
-          INNER JOIN conceptos con ON g.ConceptoId = con.Id
-    INNER JOIN categorias cat ON g.CategoriaId = cat.Id
-            INNER JOIN cuentas cta ON g.CuentaId = cta.Id
-   WHERE g.UsuarioId = @UsuarioId
+            SELECT 
+              g.id as Id,
+    'Gasto' as Tipo,
+        g.importe as Importe,
+ g.fecha as Fecha,
+  con.nombre as Concepto,
+    cat.nombre as Categoria,
+cta.nombre as Cuenta
+     FROM gastos g
+            INNER JOIN conceptos con ON g.id_concepto = con.id
+            INNER JOIN categorias cat ON con.id_categoria = cat.id
+        INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+       WHERE g.id_usuario = @UsuarioId
             {filtroCuenta}
-        {filtroCategoria}
-            ORDER BY g.Fecha DESC
-            LIMIT 5";
- var ultimosIngresos = await connection.QueryAsync<MovimientoResumenDto>(
-            sqlUltimosIngresos,
-            new { UsuarioId = usuarioId, CuentaId = cuentaId, CategoriaId = categoriaId });
-  var ultimosGastos = await connection.QueryAsync<MovimientoResumenDto>(
-            sqlUltimosGastos,
-         new { UsuarioId = usuarioId, CuentaId = cuentaId, CategoriaId = categoriaId });
-    var ultimosMovimientos = ultimosIngresos
-      .Concat(ultimosGastos)
-            .OrderByDescending(m => m.Fecha)
- .Take(10)
-        .ToList();
+       {filtroCategoria}
+            ORDER BY g.fecha DESC
+         LIMIT 5";
+        var ultimosIngresos = await connection.QueryAsync<MovimientoResumenDto>(
+ sqlUltimosIngresos,
+  new { UsuarioId = usuarioId, CuentaId = cuentaId, CategoriaId = categoriaId });
+      var ultimosGastos = await connection.QueryAsync<MovimientoResumenDto>(
+      sqlUltimosGastos,
+  new { UsuarioId = usuarioId, CuentaId = cuentaId, CategoriaId = categoriaId });
+        var ultimosMovimientos = ultimosIngresos
+    .Concat(ultimosGastos)
+    .OrderByDescending(m => m.Fecha)
+  .Take(10)
+   .ToList();
 
-   // 7. Comparativa con mes anterior
- var sqlIngresosMesAnterior = $@"
-    SELECT COALESCE(SUM(i.Importe), 0) as Total
-         FROM ingresos i
-            INNER JOIN cuentas cta ON i.CuentaId = cta.Id
-            INNER JOIN categorias cat ON i.CategoriaId = cat.Id
-WHERE i.UsuarioId = @UsuarioId 
-            AND i.Fecha >= @FechaInicio 
-     AND i.Fecha <= @FechaFin
+        // 7. Comparativa con mes anterior
+        var sqlIngresosMesAnterior = $@"
+     SELECT COALESCE(SUM(i.importe), 0) as Total
+       FROM ingresos i
+            INNER JOIN cuentas cta ON i.id_cuenta = cta.id
+    INNER JOIN conceptos con ON i.id_concepto = con.id
+            INNER JOIN categorias cat ON con.id_categoria = cat.id
+    WHERE i.id_usuario = @UsuarioId 
+     AND i.fecha >= @FechaInicio 
+  AND i.fecha <= @FechaFin
     {filtroCuenta}
-       {filtroCategoria}";
+     {filtroCategoria}";
         var ingresosMesAnterior = await connection.ExecuteScalarAsync<decimal>(
-        sqlIngresosMesAnterior,
+            sqlIngresosMesAnterior,
             new { UsuarioId = usuarioId, FechaInicio = primerDiaMesAnterior, FechaFin = ultimoDiaMesAnterior, CuentaId = cuentaId, CategoriaId = categoriaId });
         var sqlGastosMesAnterior = $@"
-    SELECT COALESCE(SUM(g.Importe), 0) as Total
-FROM gastos g
-     INNER JOIN cuentas cta ON g.CuentaId = cta.Id
-   INNER JOIN categorias cat ON g.CategoriaId = cat.Id
-    WHERE g.UsuarioId = @UsuarioId 
-            AND g.Fecha >= @FechaInicio 
-          AND g.Fecha <= @FechaFin
-            {filtroCuenta}
-   {filtroCategoria}";
+    SELECT COALESCE(SUM(g.importe), 0) as Total
+    FROM gastos g
+            INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+         INNER JOIN conceptos con ON g.id_concepto = con.id
+  INNER JOIN categorias cat ON con.id_categoria = cat.id
+   WHERE g.id_usuario = @UsuarioId 
+        AND g.fecha >= @FechaInicio 
+AND g.fecha <= @FechaFin
+      {filtroCuenta}
+            {filtroCategoria}";
         var gastosMesAnterior = await connection.ExecuteScalarAsync<decimal>(
          sqlGastosMesAnterior,
-            new { UsuarioId = usuarioId, FechaInicio = primerDiaMesAnterior, FechaFin = ultimoDiaMesAnterior, CuentaId = cuentaId, CategoriaId = categoriaId });
+      new { UsuarioId = usuarioId, FechaInicio = primerDiaMesAnterior, FechaFin = ultimoDiaMesAnterior, CuentaId = cuentaId, CategoriaId = categoriaId });
         var diferenciaIngresos = ingresosMesActual - ingresosMesAnterior;
         var diferenciaGastos = gastosMesActual - gastosMesAnterior;
         var porcentajeCambioIngresos = ingresosMesAnterior > 0
  ? (diferenciaIngresos / ingresosMesAnterior) * 100
             : 0;
-        var porcentajeCambioGastos = gastosMesAnterior > 0
-       ? (diferenciaGastos / gastosMesAnterior) * 100
-   : 0;
+ var porcentajeCambioGastos = gastosMesAnterior > 0
+   ? (diferenciaGastos / gastosMesAnterior) * 100
+      : 0;
 
-        // ? NUEVO: 8. HistÛrico de los ˙ltimos 6 meses
-   var historicoUltimos6Meses = await ObtenerHistoricoUltimos6MesesAsync(
+        // ‚ö° NUEVO: 8. Hist√≥rico de los √∫ltimos 6 meses
+        var historicoUltimos6Meses = await ObtenerHistoricoUltimos6MesesAsync(
             connection, usuarioId, cuentaId, categoriaId, filtroCuenta, filtroCategoria);
-     // ? NUEVO: 9. Generar alertas
-     var alertas = GenerarAlertas(
+     // ‚ö° NUEVO: 9. Generar alertas
+        var alertas = GenerarAlertas(
             gastosMesActual,
- ingresosMesActual,
-       gastoPromedioDiario,
-            proyeccionGastosFinMes,
-  porcentajeCambioGastos,
+     ingresosMesActual,
+        gastoPromedioDiario,
+     proyeccionGastosFinMes,
+ porcentajeCambioGastos,
             balanceTotal);
-        // Construir el DTO de respuesta
+ // Construir el DTO de respuesta
         var resumen = new DashboardResumenDto
-      {
-  BalanceTotal = balanceTotal,
-            IngresosMesActual = ingresosMesActual,
-   GastosMesActual = gastosMesActual,
-            BalanceMesActual = ingresosMesActual - gastosMesActual,
-            TotalCuentas = cuentas.Count,
-            Cuentas = cuentas,
-  TopCategoriasGastos = topCategorias,
-   UltimosMovimientos = ultimosMovimientos,
-            ComparativaMesAnterior = new ComparativaMensualDto
   {
-      IngresosMesAnterior = ingresosMesAnterior,
-       GastosMesAnterior = gastosMesAnterior,
-      DiferenciaIngresos = diferenciaIngresos,
-   DiferenciaGastos = diferenciaGastos,
-     PorcentajeCambioIngresos = porcentajeCambioIngresos,
-           PorcentajeCambioGastos = porcentajeCambioGastos
-  },
-            // ? Nuevas propiedades
-            GastoPromedioDiario = gastoPromedioDiario,
-ProyeccionGastosFinMes = proyeccionGastosFinMes,
-DiasTranscurridosMes = diasTranscurridos,
-       DiasRestantesMes = diasRestantes,
-   HistoricoUltimos6Meses = historicoUltimos6Meses,
-    Alertas = alertas
-        };
-    return resumen;
+            BalanceTotal = balanceTotal,
+            IngresosMesActual = ingresosMesActual,
+            GastosMesActual = gastosMesActual,
+   BalanceMesActual = ingresosMesActual - gastosMesActual,
+    TotalCuentas = cuentas.Count,
+      Cuentas = cuentas,
+       TopCategoriasGastos = topCategorias,
+            UltimosMovimientos = ultimosMovimientos,
+    ComparativaMesAnterior = new ComparativaMensualDto
+            {
+           IngresosMesAnterior = ingresosMesAnterior,
+   GastosMesAnterior = gastosMesAnterior,
+    DiferenciaIngresos = diferenciaIngresos,
+                DiferenciaGastos = diferenciaGastos,
+ PorcentajeCambioIngresos = porcentajeCambioIngresos,
+                PorcentajeCambioGastos = porcentajeCambioGastos
+            },
+       // ‚ö° Nuevas propiedades
+ GastoPromedioDiario = gastoPromedioDiario,
+         ProyeccionGastosFinMes = proyeccionGastosFinMes,
+            DiasTranscurridosMes = diasTranscurridos,
+DiasRestantesMes = diasRestantes,
+HistoricoUltimos6Meses = historicoUltimos6Meses,
+            Alertas = alertas
+     };
+        return resumen;
   }
 
     /// <summary>
-    /// Obtiene el histÛrico de ingresos y gastos de los ˙ltimos 6 meses.
-    /// </summary>
+    /// Obtiene el hist√≥rico de ingresos y gastos de los √∫ltimos 6 meses.
+  /// </summary>
     private async Task<List<HistoricoMensualDto>> ObtenerHistoricoUltimos6MesesAsync(
         System.Data.IDbConnection connection,
         Guid usuarioId,
-        Guid? cuentaId,
+      Guid? cuentaId,
         Guid? categoriaId,
         string filtroCuenta,
-      string filtroCategoria)
+   string filtroCategoria)
     {
         var historico = new List<HistoricoMensualDto>();
-    var fechaActual = DateTime.Now;
-        for (int i = 5; i >= 0; i--)
+      var fechaActual = DateTime.Now;
+        for (int i = 0; i < 6; i++)
         {
-     var mes = fechaActual.AddMonths(-i);
+            var mes = fechaActual.AddMonths(-i);
             var primerDia = new DateTime(mes.Year, mes.Month, 1);
-       var ultimoDia = primerDia.AddMonths(1).AddDays(-1);
- var sqlIngresos = $@"
-          SELECT COALESCE(SUM(i.Importe), 0)
-  FROM ingresos i
-        INNER JOIN cuentas cta ON i.CuentaId = cta.Id
-    INNER JOIN categorias cat ON i.CategoriaId = cat.Id
- WHERE i.UsuarioId = @UsuarioId
-     AND i.Fecha >= @FechaInicio
-AND i.Fecha <= @FechaFin
-         {filtroCuenta}
-    {filtroCategoria}";
-            var sqlGastos = $@"
-       SELECT COALESCE(SUM(g.Importe), 0)
-                FROM gastos g
-             INNER JOIN cuentas cta ON g.CuentaId = cta.Id
-           INNER JOIN categorias cat ON g.CategoriaId = cat.Id
-       WHERE g.UsuarioId = @UsuarioId
-    AND g.Fecha >= @FechaInicio
-         AND g.Fecha <= @FechaFin
+    var ultimoDia = primerDia.AddMonths(1).AddDays(-1);
+            var sqlIngresos = $@"
+     SELECT COALESCE(SUM(i.importe), 0)
+ FROM ingresos i
+         INNER JOIN cuentas cta ON i.id_cuenta = cta.id
+    INNER JOIN conceptos con ON i.id_concepto = con.id
+      INNER JOIN categorias cat ON con.id_categoria = cat.id
+      WHERE i.id_usuario = @UsuarioId
+        AND i.fecha >= @FechaInicio
+        AND i.fecha <= @FechaFin
         {filtroCuenta}
-         {filtroCategoria}";
+       {filtroCategoria}";
+            var sqlGastos = $@"
+           SELECT COALESCE(SUM(g.importe), 0)
+ FROM gastos g
+       INNER JOIN cuentas cta ON g.id_cuenta = cta.id
+         INNER JOIN conceptos con ON g.id_concepto = con.id
+    INNER JOIN categorias cat ON con.id_categoria = cat.id
+     WHERE g.id_usuario = @UsuarioId
+ AND g.fecha >= @FechaInicio
+         AND g.fecha <= @FechaFin
+     {filtroCuenta}
+  {filtroCategoria}";
   var ingresos = await connection.ExecuteScalarAsync<decimal>(
-           sqlIngresos,
-    new { UsuarioId = usuarioId, FechaInicio = primerDia, FechaFin = ultimoDia, CuentaId = cuentaId, CategoriaId = categoriaId });
-            var gastos = await connection.ExecuteScalarAsync<decimal>(
-          sqlGastos,
+    sqlIngresos,
+        new { UsuarioId = usuarioId, FechaInicio = primerDia, FechaFin = ultimoDia, CuentaId = cuentaId, CategoriaId = categoriaId });
+var gastos = await connection.ExecuteScalarAsync<decimal>(
+    sqlGastos,
          new { UsuarioId = usuarioId, FechaInicio = primerDia, FechaFin = ultimoDia, CuentaId = cuentaId, CategoriaId = categoriaId });
- historico.Add(new HistoricoMensualDto
-        {
-  Anio = mes.Year,
-  Mes = mes.Month,
-   MesNombre = new CultureInfo("es-ES").DateTimeFormat.GetMonthName(mes.Month),
-     TotalIngresos = ingresos,
-                TotalGastos = gastos,
-       Balance = ingresos - gastos
-  });
- }
+      historico.Add(new HistoricoMensualDto
+          {
+   Anio = mes.Year,
+    Mes = mes.Month,
+                MesNombre = new CultureInfo("es-ES").DateTimeFormat.GetMonthName(mes.Month),
+         TotalIngresos = ingresos,
+     TotalGastos = gastos,
+ Balance = ingresos - gastos
+ });
+        }
         return historico;
-  }
+    }
 
     /// <summary>
-    /// Genera alertas inteligentes basadas en las mÈtricas del dashboard.
+    /// Genera alertas inteligentes basadas en las m√©tricas del dashboard.
     /// </summary>
     private List<AlertaDto> GenerarAlertas(
-    decimal gastosMesActual,
+     decimal gastosMesActual,
         decimal ingresosMesActual,
-    decimal gastoPromedioDiario,
+   decimal gastoPromedioDiario,
         decimal proyeccionGastosFinMes,
         decimal porcentajeCambioGastos,
-     decimal balanceTotal)
+        decimal balanceTotal)
     {
-   var alertas = new List<AlertaDto>();
-        // Alerta: ProyecciÛn de gastos supera ingresos
+        var alertas = new List<AlertaDto>();
+        // Alerta: Proyecci√≥n de gastos supera ingresos
         if (proyeccionGastosFinMes > ingresosMesActual && ingresosMesActual > 0)
         {
-  alertas.Add(new AlertaDto
-   {
-        Tipo = "warning",
-         Titulo = "ProyecciÛn de gastos alta",
-    Mensaje = $"A este ritmo, tus gastos superar·n tus ingresos en {Math.Abs(proyeccionGastosFinMes - ingresosMesActual):C2}",
- Icono = "??"
-       });
+         alertas.Add(new AlertaDto
+            {
+ Tipo = "warning",
+     Titulo = "Proyecci√≥n de gastos alta",
+     Mensaje = $"A este ritmo, tus gastos superar√°n tus ingresos en {Math.Abs(proyeccionGastosFinMes - ingresosMesActual):C2}",
+              Icono = "‚ö†Ô∏è"
+            });
         }
 
-        // Alerta: Incremento significativo en gastos
- if (porcentajeCambioGastos > 20)
-      {
-   alertas.Add(new AlertaDto
- {
-    Tipo = "danger",
-              Titulo = "Gastos aumentaron significativamente",
-             Mensaje = $"Tus gastos han aumentado un {porcentajeCambioGastos:F1}% respecto al mes anterior",
-        Icono = "??"
-});
-        }
+   // Alerta: Incremento significativo en gastos
+        if (porcentajeCambioGastos > 20)
+        {
+       alertas.Add(new AlertaDto
+  {
+         Tipo = "danger",
+     Titulo = "Gastos aumentaron significativamente",
+                Mensaje = $"Tus gastos han aumentado un {porcentajeCambioGastos:F1}% respecto al mes anterior",
+   Icono = "üî¥"
+            });
+}
 
         // Alerta: Balance negativo
         if (ingresosMesActual - gastosMesActual < 0)
-{
-            alertas.Add(new AlertaDto
-     {
-      Tipo = "danger",
-     Titulo = "Balance negativo este mes",
-       Mensaje = $"Est·s gastando m·s de lo que ingresas: {Math.Abs(ingresosMesActual - gastosMesActual):C2} en negativo",
-      Icono = "?"
-     });
-        }
+        {
+alertas.Add(new AlertaDto
+          {
+       Tipo = "danger",
+             Titulo = "Balance negativo este mes",
+    Mensaje = $"Est√°s gastando m√°s de lo que ingresas: {Math.Abs(ingresosMesActual - gastosMesActual):C2} en negativo",
+     Icono = "‚ùå"
+            });
+ }
 
         // Alerta: Balance total bajo
         if (balanceTotal < gastoPromedioDiario * 30 && balanceTotal > 0)
         {
             alertas.Add(new AlertaDto
-       {
-          Tipo = "warning",
-    Titulo = "Fondo de emergencia bajo",
-                Mensaje = "Tu balance total no cubre un mes de gastos. Considera aumentar tus ahorros",
-           Icono = "??"
-       });
-  }
-
-      // Alerta positiva: Ahorro este mes
-        if (ingresosMesActual > gastosMesActual && gastosMesActual > 0)
-        {
-            var ahorro = ingresosMesActual - gastosMesActual;
-    var porcentajeAhorro = (ahorro / ingresosMesActual) * 100;
-    alertas.Add(new AlertaDto
-      {
-   Tipo = "success",
-  Titulo = "°Excelente! Est·s ahorrando",
-       Mensaje = $"Has ahorrado {ahorro:C2} este mes ({porcentajeAhorro:F1}% de tus ingresos)",
-         Icono = "?"
-        });
- }
-
-        // Alerta: Sin movimientos
-      if (gastosMesActual == 0 && ingresosMesActual == 0)
-        {
-       alertas.Add(new AlertaDto
-    {
- Tipo = "info",
-                Titulo = "Sin movimientos registrados",
-          Mensaje = "No tienes transacciones registradas en este perÌodo",
-      Icono = "??"
-    });
+ {
+            Tipo = "warning",
+                Titulo = "Fondo de emergencia bajo",
+     Mensaje = "Tu balance total no cubre un mes de gastos. Considera aumentar tus ahorros",
+                Icono = "‚ö†Ô∏è"
+   });
         }
 
-     return alertas;
+        // Alerta positiva: Ahorro este mes
+     if (ingresosMesActual > gastosMesActual && gastosMesActual > 0)
+        {
+ var ahorro = ingresosMesActual - gastosMesActual;
+            var porcentajeAhorro = (ahorro / ingresosMesActual) * 100;
+     alertas.Add(new AlertaDto
+      {
+         Tipo = "success",
+       Titulo = "¬°Excelente! Est√°s ahorrando",
+       Mensaje = $"Has ahorrado {ahorro:C2} este mes ({porcentajeAhorro:F1}% de tus ingresos)",
+   Icono = "‚úÖ"
+            });
+        }
+
+    // Alerta: Sin movimientos
+        if (gastosMesActual == 0 && ingresosMesActual == 0)
+        {
+            alertas.Add(new AlertaDto
+            {
+      Tipo = "info",
+           Titulo = "Sin movimientos registrados",
+      Mensaje = "No tienes transacciones registradas en este per√≠odo",
+            Icono = "‚ÑπÔ∏è"
+            });
+        }
+
+        return alertas;
     }
 }

@@ -6,11 +6,48 @@ using Dapper;
 
 namespace AhorroLand.Infrastructure.Persistence.Data.Proveedores
 {
-    public class ProveedorReadRepository : AbsReadRepository<Proveedor, ProveedorDto>, IProveedorReadRepository
+  public class ProveedorReadRepository : AbsReadRepository<Proveedor, ProveedorDto>, IProveedorReadRepository
     {
-        public ProveedorReadRepository(IDbConnectionFactory dbConnectionFactory)
-            : base(dbConnectionFactory, "proveedores")
+   public ProveedorReadRepository(IDbConnectionFactory dbConnectionFactory)
+   : base(dbConnectionFactory, "proveedores")
         {
+        }
+
+        /// <summary>
+      /// 🔥 Query específico para Proveedor con todas sus columnas.
+  /// </summary>
+        protected override string BuildGetByIdQuery()
+    {
+            return @"
+       SELECT 
+          id as Id,
+         nombre as Nombre,
+       id_usuario as UsuarioId,
+       fecha_creacion as FechaCreacion
+     FROM proveedores 
+   WHERE id = @id";
+        }
+
+        /// <summary>
+     /// 🔥 Query para obtener todos los proveedores.
+        /// </summary>
+        protected override string BuildGetAllQuery()
+        {
+ return @"
+    SELECT 
+        id as Id,
+        nombre as Nombre,
+      id_usuario as UsuarioId,
+      fecha_creacion as FechaCreacion
+          FROM proveedores";
+        }
+
+   /// <summary>
+        /// 🔥 ORDER BY por nombre ascendente.
+      /// </summary>
+        protected override string GetDefaultOrderBy()
+        {
+   return "ORDER BY nombre ASC";
         }
 
         public async Task<bool> ExistsWithSameNameAsync(Nombre nombre, UsuarioId usuarioId, CancellationToken cancellationToken = default)
@@ -18,31 +55,37 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Proveedores
             using var connection = _dbConnectionFactory.CreateConnection();
 
             const string sql = @"
-    SELECT COUNT(1) 
-  FROM Proveedores 
-    WHERE Nombre = @Nombre AND UsuarioId = @UsuarioId";
+         SELECT EXISTS(
+    SELECT 1 
+            FROM proveedores 
+   WHERE nombre = @Nombre AND id_usuario = @UsuarioId
+) as Exists";
 
-            var count = await connection.ExecuteScalarAsync<int>(
-                sql,
-                new { Nombre = nombre.Value, UsuarioId = usuarioId.Value });
+   var exists = await connection.ExecuteScalarAsync<bool>(
+                new CommandDefinition(sql,
+         new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
+         cancellationToken: cancellationToken));
 
-            return count > 0;
+            return exists;
         }
 
-        public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
-        {
+  public async Task<bool> ExistsWithSameNameExceptAsync(Nombre nombre, UsuarioId usuarioId, Guid excludeId, CancellationToken cancellationToken = default)
+      {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             const string sql = @"
-     SELECT COUNT(1) 
-      FROM Proveedores 
-   WHERE Nombre = @Nombre AND UsuarioId = @UsuarioId AND Id != @ExcludeId";
+    SELECT EXISTS(
+         SELECT 1 
+      FROM proveedores 
+        WHERE nombre = @Nombre AND id_usuario = @UsuarioId AND id != @ExcludeId
+   ) as Exists";
 
-            var count = await connection.ExecuteScalarAsync<int>(
-                sql,
-                new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId });
+ var exists = await connection.ExecuteScalarAsync<bool>(
+        new CommandDefinition(sql,
+ new { Nombre = nombre.Value, UsuarioId = usuarioId.Value, ExcludeId = excludeId },
+        cancellationToken: cancellationToken));
 
-            return count > 0;
-        }
+            return exists;
+     }
     }
 }

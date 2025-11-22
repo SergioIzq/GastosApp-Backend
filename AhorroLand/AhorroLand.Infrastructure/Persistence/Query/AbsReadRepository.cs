@@ -35,78 +35,103 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         #region Query Builders - Override para personalizar SQL
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de GetById si necesitas columnas específicas.
-        /// Por defecto usa un query genérico.
+        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query de GetById.
+        /// Por defecto solo incluye columnas básicas (id, id_usuario, fecha_creacion).
+        /// DEBES SOBRESCRIBIR si tu tabla tiene más columnas (nombre, descripcion, importe, etc.).
         /// </summary>
         protected virtual string BuildGetByIdQuery()
         {
             return $@"
-                SELECT 
-                    id as Id,
-                    usuario_id as UsuarioId,
-                    nombre as Nombre,
-                    fecha_creacion as FechaCreacion
-                FROM {_tableName} 
-                WHERE id = @id";
+ SELECT 
+      id as Id,
+        id_usuario as UsuarioId,
+         fecha_creacion as FechaCreacion
+        FROM {_tableName} 
+    WHERE id = @id";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de GetAll si necesitas columnas específicas.
+        /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query de GetAll.
+        /// Por defecto solo incluye columnas básicas (id, id_usuario, fecha_creacion).
+        /// DEBES SOBRESCRIBIR si tu tabla tiene más columnas (nombre, descripcion, importe, etc.).
         /// </summary>
-        protected virtual string BuildGetAllQuery()
-        {
+     protected virtual string BuildGetAllQuery()
+    {
             return $@"
-                SELECT 
-                    id as Id,
-                    usuario_id as UsuarioId,
-                    nombre as Nombre,
-                    fecha_creacion as FechaCreacion
-                FROM {_tableName}";
+           SELECT 
+           id as Id,
+     id_usuario as UsuarioId,
+          fecha_creacion as FechaCreacion
+    FROM {_tableName}";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query base de paginación (SIN ORDER BY).
-        /// El ORDER BY se agrega dinámicamente en cada método según el contexto.
+      /// 🔥 OVERRIDE REQUERIDO EN LA MAYORÍA DE CASOS: Personaliza el query base de paginación (SIN ORDER BY).
+        /// Por defecto usa BuildGetAllQuery(), pero puedes personalizarlo.
+    /// El ORDER BY se agrega dinámicamente en cada método según el contexto.
         /// </summary>
         protected virtual string BuildGetPagedQuery()
         {
-            return BuildGetAllQuery();
+     return BuildGetAllQuery();
+      }
+
+        /// <summary>
+      /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de conteo total.
+        /// Por defecto cuenta por id_usuario (campo común).
+        /// </summary>
+      protected virtual string BuildCountQuery()
+ {
+  return $"SELECT COUNT(*) FROM {_tableName}";
+        }
+
+    /// <summary>
+        /// 🔥 NUEVO: Devuelve el alias de la tabla principal para filtros con JOINs.
+    /// Por defecto no usa alias (tablas simples sin JOINs).
+     /// DEBES SOBRESCRIBIR si usas JOINs para especificar el alias de la tabla principal.
+ /// </summary>
+        protected virtual string GetTableAlias()
+    {
+    return string.Empty; // Sin alias por defecto
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Personaliza el query de conteo total.
+        /// 🔥 NUEVO: Devuelve la columna WHERE para filtrar por usuario.
+        /// Usa el alias si existe (para queries con JOINs) o el nombre directo.
         /// </summary>
-        protected virtual string BuildCountQuery()
+        protected virtual string GetUserIdColumn()
         {
-            return $"SELECT COUNT(usuario_id) FROM {_tableName}";
+var alias = GetTableAlias();
+         return string.IsNullOrEmpty(alias) ? "id_usuario" : $"{alias}.id_usuario";
         }
 
         /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY por defecto para paginación sin filtros.
+  /// 🔥 OVERRIDE RECOMENDADO: Proporciona el ORDER BY por defecto para paginación sin filtros.
+/// Por defecto ordena por fecha_creacion DESC.
+   /// Sobrescribe si prefieres otro orden (ej: por nombre, por importe, etc.).
         /// </summary>
-        protected virtual string GetDefaultOrderBy()
+      protected virtual string GetDefaultOrderBy()
         {
-            return "ORDER BY fecha_creacion DESC";
-        }
+        return "ORDER BY fecha_creacion DESC";
+     }
 
-        /// <summary>
-        /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY para paginación filtrada por usuario.
-        /// Por defecto usa GetDefaultOrderBy(), pero puedes personalizarlo.
-        /// </summary>
+     /// <summary>
+    /// 🔥 OVERRIDE OPCIONAL: Proporciona el ORDER BY para paginación filtrada por usuario.
+  /// Por defecto usa GetDefaultOrderBy(), pero puedes personalizarlo.
+  /// </summary>
         protected virtual string GetUserFilterOrderBy()
-        {
-            return GetDefaultOrderBy();
-        }
+   {
+  return GetDefaultOrderBy();
+  }
 
         /// <summary>
-        /// 🔥 NUEVO: Permite agregar parámetros adicionales para filtros (como usuario_id)
-        /// </summary>
+        /// 🔥 NUEVO: Permite agregar parámetros adicionales para filtros (como id_usuario)
+   /// </summary>
         protected virtual void AddCustomParameters(DynamicParameters parameters)
         {
-            // Override en repositorios concretos si necesitas agregar parámetros personalizados
+ // Override en repositorios concretos si necesitas agregar parámetros personalizados
         }
 
-        #endregion
+    #endregion
 
         #region IReadRepositoryWithDto Implementation - Métodos optimizados con DTOs
 
@@ -212,44 +237,45 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// 🚀 OPTIMIZADO: Paginación filtrada por usuario (USA ÍNDICES).
         /// Reduce el tiempo de consulta de 370ms a ~50ms.
         /// </summary>
-        public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
+  public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
             Guid usuarioId,
             int page,
-            int pageSize,
+   int pageSize,
             CancellationToken cancellationToken = default)
-        {
+ {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var offset = (page - 1) * pageSize;
 
             var baseQuery = BuildGetPagedQuery();
             var countQuery = BuildCountQuery();
-            var orderBy = GetUserFilterOrderBy();
+    var orderBy = GetUserFilterOrderBy();
+         var userIdColumn = GetUserIdColumn(); // 🔥 NUEVO: Usa el alias correcto
 
             // 🚀 OPTIMIZACIÓN: Query única con múltiples resultsets (reduce roundtrips)
             var sql = $@"
-                {baseQuery}
-                WHERE usuario_id = @usuarioId
-                {orderBy}
-                LIMIT @PageSize OFFSET @Offset;
-                
-                {countQuery}
-                WHERE usuario_id = @usuarioId;";
+           {baseQuery}
+           WHERE {userIdColumn} = @usuarioId
+   {orderBy}
+ LIMIT @PageSize OFFSET @Offset;
+  
+     {countQuery}
+          WHERE {userIdColumn} = @usuarioId;";
 
-            var parameters = new DynamicParameters();
-            // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
-            parameters.Add("usuarioId", usuarioId);
-            parameters.Add("PageSize", pageSize);
+   var parameters = new DynamicParameters();
+  // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
+  parameters.Add("usuarioId", usuarioId);
+ parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);
 
             using var multi = await connection.QueryMultipleAsync(
-                new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+           new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
 
-            var items = (await multi.ReadAsync<TReadModel>()).ToList();
+         var items = (await multi.ReadAsync<TReadModel>()).ToList();
             var total = await multi.ReadFirstAsync<int>();
 
-            return new PagedList<TReadModel>(items, page, pageSize, total);
-        }
+     return new PagedList<TReadModel>(items, page, pageSize, total);
+    }
 
         #endregion
 

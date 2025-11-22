@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Persistence\Migrations\**" />
     <Compile Remove="Servicies\**" />
+    <EmbeddedResource Remove="Persistence\Migrations\**" />
     <EmbeddedResource Remove="Servicies\**" />
+    <None Remove="Persistence\Migrations\**" />
     <None Remove="Servicies\**" />
   </ItemGroup>
 
@@ -32,10 +35,6 @@
   <ItemGroup>
     <ProjectReference Include="..\AhorroLand.Shared.Application\AhorroLand.Shared.Application.csproj" />
     <ProjectReference Include="..\AhorroLand.Application\AhorroLand.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

@@ -12,14 +12,14 @@
         // Relaciones (Flattened)
         Guid ConceptoId,
         string ConceptoNombre,
-        Guid CategoriaId,
-        string CategoriaNombre,
+        Guid? CategoriaId, // 🔥 NULLABLE: CategoriaId viene del Concepto (LEFT JOIN)
+        string? CategoriaNombre, // 🔥 NULLABLE: puede ser null si no hay categoría
 
-        Guid ClienteId,
-        string ClienteNombre,
+        Guid? ClienteId, // 🔥 NULLABLE: el ingreso puede no tener cliente
+        string? ClienteNombre, // 🔥 NULLABLE
 
-        Guid PersonaId,
-        string PersonaNombre,
+        Guid? PersonaId, // 🔥 NULLABLE: el ingreso puede no tener persona
+        string? PersonaNombre, // 🔥 NULLABLE
 
         Guid CuentaId,
         string CuentaNombre,

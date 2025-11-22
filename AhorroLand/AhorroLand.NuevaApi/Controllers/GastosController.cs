@@ -1,9 +1,11 @@
+﻿using AhorroLand.Application.Features.Clientes.Queries;
 using AhorroLand.Application.Features.Gastos.Commands;
 using AhorroLand.Application.Features.Gastos.Queries;
 using AhorroLand.NuevaApi.Controllers.Base;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AhorroLand.NuevaApi.Controllers;
 
@@ -20,7 +22,21 @@ public class GastosController : AbsController
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var query = new GetGastosPagedListQuery(page, pageSize);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("userId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
+        {
+            return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
+        }
+
+        // 🚀 Pasar el UsuarioId al query para aprovechar índices de BD
+        var query = new GetGastosPagedListQuery(page, pageSize)
+        {
+            UsuarioId = usuarioId
+        };
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }
