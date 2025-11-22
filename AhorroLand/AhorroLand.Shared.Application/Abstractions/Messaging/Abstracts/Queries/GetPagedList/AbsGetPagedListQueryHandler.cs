@@ -36,7 +36,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
         /// Si no se sobrescribe, se usa paginación directa desde el repositorio.
         /// </summary>
         protected virtual Task<PagedList<TDto>> ApplyFiltersAsync(
-            TQuery query, 
+            TQuery query,
             CancellationToken cancellationToken)
         {
             // Por defecto, no aplica filtros adicionales
@@ -48,7 +48,7 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
             // 1. 🔥 CACHE: Intentar obtener del cache (reduce 370ms a ~5ms)
             string cacheKey = $"{typeof(TEntity).Name}:paged:{query.UsuarioId}:{query.Page}:{query.PageSize}";
             var cachedResult = await _cacheService.GetAsync<PagedList<TDto>>(cacheKey);
-            
+
             if (cachedResult != null)
             {
                 return Result.Success(cachedResult); // ⚡ ~5ms desde cache
@@ -56,15 +56,15 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
 
             // 2. Intentar obtener filtros personalizados del handler concreto
             var customFiltered = await ApplyFiltersAsync(query, cancellationToken);
-            
+
             if (customFiltered != null)
             {
                 // Cachear resultado filtrado
                 await _cacheService.SetAsync(
-                    cacheKey, 
-                    customFiltered, 
+                    cacheKey,
+                    customFiltered,
                     slidingExpiration: TimeSpan.FromMinutes(5));
-                
+
                 return Result.Success(customFiltered);
             }
 
@@ -72,34 +72,34 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
             // 🔧 FIX: Usar GetPagedReadModelsAsync que devuelve DTOs directamente desde SQL
             // Esto evita el mapeo problemático de Value Objects (Nombre, UsuarioId, etc.)
             PagedList<TDto> pagedDtos;
-            
+
             if (query.UsuarioId.HasValue)
             {
                 // 🚀 USA ÍNDICES: Filtrar por usuario (reduce 370ms a ~50ms)
                 pagedDtos = await _dtoRepository.GetPagedReadModelsByUserAsync(
                     query.UsuarioId.Value,
-                    query.Page, 
-                    query.PageSize, 
+                    query.Page,
+                    query.PageSize,
                     cancellationToken);
             }
             else
             {
                 // Sin filtro de usuario (menos eficiente)
                 pagedDtos = await _dtoRepository.GetPagedReadModelsAsync(
-                    query.Page, 
-                    query.PageSize, 
+                    query.Page,
+                    query.PageSize,
                     cancellationToken);
             }
 
             // 4. 🔥 CACHE: Guardar en cache para futuros requests
             await _cacheService.SetAsync(
-                cacheKey, 
-                pagedDtos, 
+                cacheKey,
+                pagedDtos,
                 slidingExpiration: TimeSpan.FromMinutes(5));
 
             // 5. 🚀 Ya tenemos DTOs listos, no necesitamos mapear nada más
             // Los DTOs vienen directamente optimizados desde la query SQL con propiedades simples
-            
+
             return Result.Success(pagedDtos);
         }
     }

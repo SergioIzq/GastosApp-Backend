@@ -1,4 +1,5 @@
-﻿using AhorroLand.Shared.Domain.Abstractions.Results;
+﻿using AhorroLand.NuevaApi.Extensions;
+using AhorroLand.Shared.Domain.Abstractions.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,5 +53,57 @@ public abstract class AbsController : ControllerBase
     private IActionResult HandleFailure(Error error)
     {
         return Ok();
+    }
+
+    // 🍪 Métodos helper para cookies
+
+    /// <summary>
+    /// Establece una cookie de forma segura.
+    /// </summary>
+    protected void SetCookie(string key, string value, int? expireMinutes = null, bool httpOnly = true)
+    {
+        Response.SetCookie(key, value, expireMinutes, httpOnly, secure: !IsDevelopment(), SameSiteMode.Strict);
+    }
+
+    /// <summary>
+    /// Obtiene el valor de una cookie.
+    /// </summary>
+    protected string? GetCookie(string key)
+    {
+        return Request.GetCookie(key);
+    }
+
+    /// <summary>
+    /// Elimina una cookie.
+    /// </summary>
+    protected void DeleteCookie(string key)
+    {
+        Response.DeleteCookie(key);
+    }
+
+    /// <summary>
+    /// Obtiene el ID del usuario autenticado desde los claims.
+    /// </summary>
+    protected Guid? GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+    }
+
+    /// <summary>
+    /// Obtiene el email del usuario autenticado desde los claims.
+    /// </summary>
+    protected string? GetCurrentUserEmail()
+    {
+        return User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    }
+
+    /// <summary>
+    /// Verifica si la aplicación está en modo desarrollo.
+    /// </summary>
+    private bool IsDevelopment()
+    {
+        return HttpContext.RequestServices
+            .GetService<IWebHostEnvironment>()?.IsDevelopment() ?? false;
     }
 }

@@ -20,7 +20,7 @@ public class AhorroLandDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.AddInterceptors(_domainEventDispatcher);
-        
+
 #if DEBUG
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
@@ -59,14 +59,14 @@ public class AhorroLandDbContext : DbContext
             {
                 entityType.RemoveProperty(domainEventsProperty);
             }
-            
+
             // Configurar índices por defecto en Id
             var idProperty = entityType.FindProperty("Id");
             if (idProperty != null)
             {
                 var existingIndex = entityType.GetIndexes()
                     .FirstOrDefault(i => i.Properties.Any(p => p.Name == "Id"));
-                    
+
                 if (existingIndex == null)
                 {
                     modelBuilder.Entity(entityType.ClrType)
@@ -83,7 +83,7 @@ public class AhorroLandDbContext : DbContext
     {
         // Optimizar detección de cambios
         ChangeTracker.AutoDetectChangesEnabled = false;
-        
+
         try
         {
             // Detectar cambios manualmente una sola vez

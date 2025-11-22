@@ -7,7 +7,7 @@ namespace AhorroLand.Shared.Domain.Interfaces.Repositories
     /// ?? Interfaz extendida para repositorios que trabajan con DTOs optimizados.
     /// Permite obtener DTOs directamente desde la base de datos sin mapeo intermedio.
     /// </summary>
-    public interface IReadRepositoryWithDto<T, TDto> : IReadRepository<T> 
+    public interface IReadRepositoryWithDto<T, TDto> : IReadRepository<T>
         where T : AbsEntity
         where TDto : class
     {

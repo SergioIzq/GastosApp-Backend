@@ -1,7 +1,6 @@
 ﻿using AhorroLand.Domain;
 using AhorroLand.Infrastructure.Persistence.Query;
 using AhorroLand.Shared.Application.Dtos;
-using AhorroLand.Shared.Domain.Results;
 using AhorroLand.Shared.Domain.ValueObjects;
 using Dapper;
 
@@ -89,7 +88,7 @@ namespace AhorroLand.Infrastructure.Persistence.Data.Clientes
 
             // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
             var exists = await connection.ExecuteScalarAsync<bool>(
-                new CommandDefinition(sql, 
+                new CommandDefinition(sql,
                     new { Nombre = nombre.Value, UsuarioId = usuarioId.Value },
                     cancellationToken: cancellationToken));
 

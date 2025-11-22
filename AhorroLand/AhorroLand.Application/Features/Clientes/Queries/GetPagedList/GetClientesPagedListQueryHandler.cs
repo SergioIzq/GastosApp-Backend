@@ -1,5 +1,4 @@
 ﻿using AhorroLand.Domain;
-using AhorroLand.Application.Features.Clientes.Queries;
 using AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
 using AhorroLand.Shared.Application.Abstractions.Servicies;
 using AhorroLand.Shared.Application.Dtos;
@@ -34,7 +33,7 @@ public sealed class GetClientesPagedListQueryHandler
     /// Junto con el cache, las requests repetidas bajan a ~5ms.
     /// </summary>
     protected override async Task<PagedList<ClienteDto>> ApplyFiltersAsync(
-        GetClientesPagedListQuery query, 
+        GetClientesPagedListQuery query,
         CancellationToken cancellationToken)
     {
         // 🔥 Si tenemos UsuarioId, usar el método optimizado con filtro

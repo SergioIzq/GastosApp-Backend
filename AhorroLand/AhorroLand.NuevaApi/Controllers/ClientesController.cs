@@ -33,7 +33,7 @@ public class ClientesController : AbsController
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
             ?? User.FindFirst("sub")?.Value
             ?? User.FindFirst("userId")?.Value;
-        
+
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
         {
             return Unauthorized(new { message = "Usuario no autenticado o token inválido" });
@@ -44,7 +44,7 @@ public class ClientesController : AbsController
         {
             UsuarioId = usuarioId
         };
-        
+
         var result = await _sender.Send(query);
         return HandleResult(result);
     }

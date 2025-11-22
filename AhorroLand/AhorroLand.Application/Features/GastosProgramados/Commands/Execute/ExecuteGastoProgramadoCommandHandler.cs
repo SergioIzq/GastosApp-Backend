@@ -40,8 +40,8 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
 
             // 1. Obtener el GastoProgramado (AsNoTracking para mejor rendimiento)
             var gastoProgramado = await _gastoProgramadoReadRepository.GetByIdAsync(
-                request.GastoProgramadoId, 
-                asNoTracking: true, 
+                request.GastoProgramadoId,
+                asNoTracking: true,
                 cancellationToken);
 
             if (gastoProgramado == null)
@@ -73,8 +73,8 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
                 FormaPagoId = gastoProgramado.FormaPagoId.Value,
                 UsuarioId = gastoProgramado.UsuarioId.Value,
                 // ?? OPTIMIZACIÓN: Evitar string interpolation si no es necesario
-                Descripcion = !string.IsNullOrEmpty(descripcion) 
-                    ? descripcion 
+                Descripcion = !string.IsNullOrEmpty(descripcion)
+                    ? descripcion
                     : $"Gasto automático desde programación {gastoProgramado.Id}"
             };
 
@@ -89,7 +89,7 @@ public sealed class ExecuteGastoProgramadoCommandHandler : ICommandHandler<Execu
             }
             else
             {
-                _logger.LogError("Error al crear Gasto desde GastoProgramado {GastoProgramadoId}: {Error}", 
+                _logger.LogError("Error al crear Gasto desde GastoProgramado {GastoProgramadoId}: {Error}",
                     request.GastoProgramadoId, result.Error);
             }
 

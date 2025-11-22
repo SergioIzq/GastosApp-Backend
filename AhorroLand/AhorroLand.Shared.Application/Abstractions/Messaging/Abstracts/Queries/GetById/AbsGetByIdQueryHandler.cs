@@ -2,7 +2,6 @@
 using AhorroLand.Shared.Domain.Abstractions;
 using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
-using AhorroLand.Shared.Domain.Results;
 using MediatR;
 
 namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries;
@@ -34,7 +33,7 @@ public abstract class GetByIdQueryHandler<TEntity, TDto, TQuery>
         // 1. Intentar obtener del cache
         string cacheKey = $"{typeof(TEntity).Name}:{query.Id}";
         var cachedDto = await _cacheService.GetAsync<TDto>(cacheKey);
-        
+
         if (cachedDto != null)
         {
             return Result.Success(cachedDto);

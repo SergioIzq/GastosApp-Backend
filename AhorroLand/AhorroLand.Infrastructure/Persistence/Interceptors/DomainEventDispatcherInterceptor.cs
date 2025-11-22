@@ -84,8 +84,8 @@ public sealed class DomainEventDispatcherInterceptor : SaveChangesInterceptor
     }
 
     private async Task PublishEventWithSemaphoreAsync(
-        IDomainEvent domainEvent, 
-        SemaphoreSlim semaphore, 
+        IDomainEvent domainEvent,
+        SemaphoreSlim semaphore,
         CancellationToken cancellationToken)
     {
         try

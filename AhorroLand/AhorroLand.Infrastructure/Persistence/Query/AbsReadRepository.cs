@@ -1,5 +1,4 @@
 ﻿using AhorroLand.Shared.Domain.Abstractions;
-using AhorroLand.Shared.Domain.Abstractions.Results;
 using AhorroLand.Shared.Domain.Interfaces.Repositories;
 using AhorroLand.Shared.Domain.Results;
 using Dapper;
@@ -15,7 +14,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
     /// </summary>
     /// <typeparam name="T">La entidad que debe heredar de AbsEntity</typeparam>
     /// <typeparam name="TReadModel">El modelo de lectura (DTO plano para Dapper)</typeparam>
-    public abstract class AbsReadRepository<T, TReadModel> : IReadRepositoryWithDto<T, TReadModel> 
+    public abstract class AbsReadRepository<T, TReadModel> : IReadRepositoryWithDto<T, TReadModel>
         where T : AbsEntity
         where TReadModel : class
     {
@@ -24,7 +23,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         private readonly IDistributedCache? _cache;
 
         protected AbsReadRepository(
-            IDbConnectionFactory dbConnectionFactory, 
+            IDbConnectionFactory dbConnectionFactory,
             string tableName,
             IDistributedCache? cache = null)
         {
@@ -121,7 +120,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
             {
                 var cacheKey = $"{_tableName}:{id}";
                 var cachedData = await _cache.GetAsync(cacheKey, cancellationToken);
-                
+
                 if (cachedData != null)
                 {
                     return JsonSerializer.Deserialize<TReadModel>(cachedData);
@@ -163,7 +162,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var sql = BuildGetAllQuery();
-            
+
             return await connection.QueryAsync<TReadModel>(
                 new CommandDefinition(sql, cancellationToken: cancellationToken)
             );
@@ -174,14 +173,14 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// Retorna DTOs directamente mapeados desde la BD.
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsAsync(
-            int page, 
-            int pageSize, 
+            int page,
+            int pageSize,
             CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var offset = (page - 1) * pageSize;
-            
+
             var baseQuery = BuildGetPagedQuery();
             var countQuery = BuildCountQuery();
             var orderBy = GetDefaultOrderBy();
@@ -192,20 +191,20 @@ namespace AhorroLand.Infrastructure.Persistence.Query
                 LIMIT @PageSize OFFSET @Offset;
                 
                 {countQuery};";
-            
+
             var parameters = new DynamicParameters();
             parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);
-            
+
             // 🔧 FIX: Permitir que repositorios concretos agreguen parámetros personalizados
             AddCustomParameters(parameters);
 
             using var multi = await connection.QueryMultipleAsync(
                 new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
-            
+
             var items = (await multi.ReadAsync<TReadModel>()).ToList();
             var total = await multi.ReadFirstAsync<int>();
-            
+
             return new PagedList<TReadModel>(items, page, pageSize, total);
         }
 
@@ -215,14 +214,14 @@ namespace AhorroLand.Infrastructure.Persistence.Query
         /// </summary>
         public virtual async Task<PagedList<TReadModel>> GetPagedReadModelsByUserAsync(
             Guid usuarioId,
-            int page, 
-            int pageSize, 
+            int page,
+            int pageSize,
             CancellationToken cancellationToken = default)
         {
             using var connection = _dbConnectionFactory.CreateConnection();
 
             var offset = (page - 1) * pageSize;
-            
+
             var baseQuery = BuildGetPagedQuery();
             var countQuery = BuildCountQuery();
             var orderBy = GetUserFilterOrderBy();
@@ -236,7 +235,7 @@ namespace AhorroLand.Infrastructure.Persistence.Query
                 
                 {countQuery}
                 WHERE usuario_id = @usuarioId;";
-            
+
             var parameters = new DynamicParameters();
             // 🔧 OPTIMIZACIÓN: Dapper maneja GUIDs nativamente
             parameters.Add("usuarioId", usuarioId);
@@ -245,10 +244,10 @@ namespace AhorroLand.Infrastructure.Persistence.Query
 
             using var multi = await connection.QueryMultipleAsync(
                 new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
-            
+
             var items = (await multi.ReadAsync<TReadModel>()).ToList();
             var total = await multi.ReadFirstAsync<int>();
-            
+
             return new PagedList<TReadModel>(items, page, pageSize, total);
         }
 

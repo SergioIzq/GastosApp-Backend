@@ -12,8 +12,8 @@ namespace AhorroLand.Shared.Application.Abstractions.Messaging.Abstracts.Queries
     /// <typeparam name="TEntity">La Entidad de Dominio base (para el repositorio).</typeparam>
     /// <typeparam name="TDto">El DTO que representará cada elemento de la lista.</typeparam>
     public abstract record AbsGetPagedListQuery<TEntity, TDto>(
-        int Page, 
-        int PageSize, 
+        int Page,
+        int PageSize,
         Guid? UsuarioId = null) : IRequest<Result<PagedList<TDto>>>
         where TEntity : AbsEntity;
 }

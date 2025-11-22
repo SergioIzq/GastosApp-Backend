@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using MySqlConnector;
 using System.Data;
 using System.Reflection;
+using ApplicationInterface = AhorroLand.Application.Interfaces;
 
 namespace AhorroLand.Infrastructure
 {
@@ -29,40 +30,40 @@ namespace AhorroLand.Infrastructure
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            // 🔥 Registro del Interceptor de Eventos de Dominio
+            // Registrar interceptor de eventos de dominio (necesario para AhorroLandDbContext)
             services.AddScoped<DomainEventDispatcherInterceptor>();
 
             // 1️⃣ DbContext con optimizaciones de rendimiento
-            services.AddDbContext<AhorroLandDbContext>((serviceProvider, options) =>
-            {
-                options.UseMySql(connectionString, serverVersion, mySqlOptions =>
-                {
-                    // 🔥 OPTIMIZACIÓN 1: Query Splitting para evitar cartesian explosion
-                    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    
-                    // 🔥 OPTIMIZACIÓN 2: Batch commands para mejor rendimiento
-                    mySqlOptions.MaxBatchSize(100);
-                    
-                    // 🔥 OPTIMIZACIÓN 3: Command timeout
-                    mySqlOptions.CommandTimeout(30);
-                    
-                    // 🔥 OPTIMIZACIÓN 4: Connection resilience (retry on failure)
-                    mySqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorNumbersToAdd: null);
-                });
-                
-                // 🔥 OPTIMIZACIÓN 5: Compiled queries caching
-                options.EnableThreadSafetyChecks(false); // Solo en producción si estás seguro
-            });
+            services.AddDbContext<AhorroLandDbContext>(options =>
+   {
+       options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+{
+    // 🔥 OPTIMIZACIÓN 1: Query Splitting para evitar cartesian explosion
+    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+
+    // 🔥 OPTIMIZACIÓN 2: Batch commands para mejor rendimiento
+    mySqlOptions.MaxBatchSize(100);
+
+    // 🔥 OPTIMIZACIÓN 3: Command timeout
+    mySqlOptions.CommandTimeout(30);
+
+    // 🔥 OPTIMIZACIÓN 4: Connection resilience (retry on failure)
+    mySqlOptions.EnableRetryOnFailure(
+      maxRetryCount: 3,
+          maxRetryDelay: TimeSpan.FromSeconds(5),
+         errorNumbersToAdd: null);
+});
+
+       // 🔥 OPTIMIZACIÓN 5: Compiled queries caching
+       options.EnableThreadSafetyChecks(false); // Solo en producción si estás seguro
+   });
 
             // 2️⃣ Cache distribuida (MemoryCache para desarrollo)
             services.AddDistributedMemoryCache();
 
             // 3️⃣ Dapper con connection pooling
             services.AddScoped<IDbConnection>(sp =>
-                    new MySqlConnection(configuration.GetConnectionString("DefaultConnection")));
+                 new MySqlConnection(configuration.GetConnectionString("DefaultConnection")));
 
             // 4️⃣ Email settings
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
@@ -79,37 +80,42 @@ namespace AhorroLand.Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasherService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
+            // 📊 Repositorio de Dashboard (registrado explícitamente para ambas interfaces)
+            services.AddScoped<DashboardRepository>();
+            services.AddScoped<ApplicationInterface.IDashboardRepository>(sp => sp.GetRequiredService<DashboardRepository>());
+            services.AddScoped<IDashboardRepository>(sp => sp.GetRequiredService<DashboardRepository>());
+
             // 👉 Registro automático de repositorios de ESCRITURA
             services.Scan(scan => scan
-                    .FromAssemblies(Assembly.GetExecutingAssembly())
-                    .AddClasses(classes => classes.AssignableTo(typeof(IWriteRepository<>)))
-               .AsImplementedInterfaces()
-                   .WithScopedLifetime()
-                  );
+           .FromAssemblies(Assembly.GetExecutingAssembly())
+                 .AddClasses(classes => classes.AssignableTo(typeof(IWriteRepository<>)))
+                .AsImplementedInterfaces()
+         .WithScopedLifetime()
+               );
 
             // 👉 🔧 FIX: Registro automático de repositorios de LECTURA
             // Registra tanto IReadRepository<T> como IReadRepositoryWithDto<T, TDto>
             services.Scan(scan => scan
-                 .FromAssemblies(Assembly.GetExecutingAssembly())
-                 .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
-                 .AsImplementedInterfaces() // Registra TODAS las interfaces implementadas
-                 .WithScopedLifetime()
-                );
+              .FromAssemblies(Assembly.GetExecutingAssembly())
+                .AddClasses(classes => classes.AssignableTo(typeof(IReadRepository<>)))
+                  .AsImplementedInterfaces() // Registra TODAS las interfaces implementadas
+          .WithScopedLifetime()
+             );
 
             services.AddScoped<IDomainValidator, DapperDomainValidator>();
 
             // 6️⃣ Registro automático de servicios con Scrutor
             services.Scan(scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
-             .AddClasses(classes => classes
-            .InNamespaces("AhorroLand.Infrastructure.Services")
-             .Where(c => !typeof(BackgroundService).IsAssignableFrom(c)
-           && c != typeof(QueuedEmailService) // Ya registrado arriba
-          && c.GetInterfaces().Length > 0)
-              )
-            .AsImplementedInterfaces()
-          .WithScopedLifetime()
-            );
+        .FromAssemblies(Assembly.GetExecutingAssembly())
+        .AddClasses(classes => classes
+        .InNamespaces("AhorroLand.Infrastructure.Services")
+              .Where(c => !typeof(BackgroundService).IsAssignableFrom(c)
+         && c != typeof(QueuedEmailService) // Ya registrado arriba
+       && c.GetInterfaces().Length > 0)
+             )
+                .AsImplementedInterfaces()
+              .WithScopedLifetime()
+              );
 
             services.AddScoped<IDbConnectionFactory, SqlDbConnectionFactory>();
 

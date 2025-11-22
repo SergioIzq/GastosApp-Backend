@@ -17,7 +17,7 @@ public abstract class AbsEntity
     public virtual DateTime FechaCreacion { get; init; }
 
     // --- Gestión de Eventos de Dominio ---
-    public IReadOnlyCollection<IDomainEvent> DomainEvents 
+    public IReadOnlyCollection<IDomainEvent> DomainEvents
         => _domainEvents?.AsReadOnly() ?? (IReadOnlyCollection<IDomainEvent>)Array.Empty<IDomainEvent>();
 
     protected void AddDomainEvent(IDomainEvent domainEvent)
